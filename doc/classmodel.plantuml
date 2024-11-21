@@ -1,0 +1,142 @@
+@startuml Gift List Manager with Social Login
+
+class User {
+  -id: String
+  -username: String
+  -email: String
+  -firstname: String
+  -lastname: String
+  -socialAccounts: List<SocialAccount>
+  +createGiftList()
+  +viewAccessibleLists()
+  +createGroup(name: String): Group
+  +requestJoinGroup(Group)
+  +respondToGroupInvite(GroupMembership, boolean)
+  +viewNotifications()
+  +markNotificationAsRead(Notification)
+  +viewGroupInvitations(): List<GroupMembership>
+  +viewGroupRequests(): List<GroupMembership>
+  +addSocialAccount(SocialAccount)
+  +removeSocialAccount(SocialAccount)
+}
+
+class SocialAccount {
+  -id: String
+  -provider: SocialProvider
+  -socialId: String
+}
+
+enum SocialProvider {
+  GOOGLE
+  FACEBOOK
+  MICROSOFT
+  APPLE
+}
+
+class Group {
+  -id: String
+  -name: String
+  -admin: User
+  +inviteUser(User)
+  +removeUser(User)
+  +changeAdmin(User)
+  +acceptJoinRequest(GroupMembership)
+  +rejectJoinRequest(GroupMembership)
+  +notifyMembers(message: String)
+  +viewPendingRequests(): List<GroupMembership>
+}
+
+class GroupMembership {
+  -id: String
+  -user: User
+  -group: Group
+  -status: MembershipStatus
+  -invitedBy: User
+  -requestedAt: DateTime
+  -lastStatusChange: DateTime
+  +updateStatus(MembershipStatus)
+}
+
+enum MembershipStatus {
+  INVITED
+  REQUESTED
+  MEMBER
+  REJECTED
+}
+
+class GiftList {
+  -id: String
+  -name: String
+  -owner: User
+  +addGift(Gift)
+  +removeGift(Gift)
+  +updateGift(Gift)
+  +shareWithGroup(Group)
+  +notifyGroupOfChanges()
+}
+
+class Gift {
+  -id: String
+  -name: String
+  -description: String
+  +addLink(Link)
+  +addImage(Image)
+}
+
+class Link {
+  -id: String
+  -url: String
+  -description: String
+}
+
+class Image {
+  -id: String
+  -url: String
+  -altText: String
+}
+
+class GroupAccess {
+  -id: String
+  -giftList: GiftList
+  -group: Group
+}
+
+class Notification {
+  -id: String
+  -recipient: User
+  -message: String
+  -type: NotificationType
+  -isRead: Boolean
+  -createdAt: DateTime
+  +markAsRead()
+}
+
+enum NotificationType {
+  GROUP_INVITE
+  GROUP_JOIN_REQUEST
+  GROUP_JOIN_ACCEPTED
+  GROUP_JOIN_REJECTED
+  GROUP_LEAVE
+  GIFT_LIST_SHARED
+  GIFT_LIST_UPDATED
+  GIFT_ADDED
+  GIFT_REMOVED
+  ADMIN_CHANGED
+}
+
+User "1" -- "0..*" GiftList : owns
+User "1" -- "0..*" GroupMembership : has
+User "1" -- "0..*" Group : administers
+User "1" -- "0..*" Notification : receives
+User "1" -- "1..*" SocialAccount : has
+Group "1" -- "0..*" GroupMembership : contains
+Group "1" -- "0..*" GroupAccess : has access to
+GiftList "1" -- "0..*" Gift : contains
+Gift "1" -- "0..*" Link : has
+Gift "1" -- "0..*" Image : has
+GiftList "1" -- "0..*" GroupAccess : is shared with
+Notification "1" -- "1" NotificationType : has
+GroupMembership "1" -- "1" MembershipStatus : has
+SocialAccount "1" -- "1" SocialProvider : uses
+
+@enduml
