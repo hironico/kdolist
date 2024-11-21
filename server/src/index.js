@@ -16,7 +16,7 @@ var corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public')); // Serve static files from the 'public' directory
+app.use(express.static(process.env.WEBUI_HOME_DIR)); // Serve static files from the 'public' directory see .env file
 
 // Set up express to use the logger
 app.use((req, res, next) => {
