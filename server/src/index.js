@@ -34,8 +34,21 @@ app.use((err, req, res, next) => {
   res.status(500).send({ message: 'Internal Server Error' });
 });
 
-// Port
-const port = 9090;
-app.listen(port, () => {
-  logger.info(`Server listening on port ${port}`);
-});
+const port = process.env.SERVER_PORT;
+
+// create HTTPS server only if enabled in the configuration
+// see dotenv-sample file for instructions about SSL and HTTPS
+if (process.env.SERVER_SSL_ENABLED === 'true') {
+  https.createServer({
+      key: fs.readFileSync(process.env.SERVER_SSL_KEY_FILE),
+      cert: fs.readFileSync(process.env.SERVER_SSL_CERT_FILE)
+  }, app).listen(port, () => {
+      // tslint:disable-next-line:no-console
+      logger.info(`Server started at https://localhost:${port}${process.env.DAV_WEB_CONTEXT}`);
+  });
+} else {
+  http.createServer(app).listen(port, () => {
+      // tslint:disable-next-line:no-console
+      logger.info(`Development server started at http://localhost:${port}${process.env.DAV_WEB_CONTEXT}`);
+  })
+}
