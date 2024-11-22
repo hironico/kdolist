@@ -26,12 +26,13 @@ const UserAvatar = () => {
       }
       
       function stringAvatar() { 
-        const {username} = appContext.loginInfo;       
+        const {username} = appContext.loginInfo;
+        let name = username ? username : '';
         return {
           sx: {
-            bgcolor: stringToColor(username),
+            bgcolor: stringToColor(name),
           },
-          children: `${username.split(' ')[0][0]}`,
+          children: `${name.split(' ')[0][0]}`,
         };
       }
 
