@@ -1,4 +1,4 @@
-  import { Avatar, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
+  import { Avatar, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material";
 import React, { useContext } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
@@ -16,14 +16,14 @@ const GifsList: React.FC<GiftsListProps> = ({ handleDelete, handleShowGiftEditor
   return (
     <List>
       {appContext.giftListContents?.map((oneGift, index) => {
-        const secondaryAction = !editable ? <></> : <IconButton edge="end" aria-label="editer" onClick={(e) => handleDelete(oneGift)}>
+        const secondaryAction = !editable ? <></> : <IconButton edge="end" aria-label="editer" onClick={(_e) => handleDelete(oneGift)}>
                                                       <DeleteIcon />
                                                     </IconButton>
         const modifDate = new Date(oneGift.updatedAt.toString());
         const secondaryText = <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
 
         return <ListItem key={`gift-${index}`} disablePadding secondaryAction={secondaryAction}>
-          <ListItemButton onClick={(evt) => handleShowGiftEditor(oneGift, editable)}>
+          <ListItemButton onClick={(_evt) => handleShowGiftEditor(oneGift, editable)}>
               <ListItemAvatar>
                 <Avatar>
                   <CardGiftcardIcon />

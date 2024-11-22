@@ -1,8 +1,6 @@
-import { Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Slide, Toolbar, Typography } from "@mui/material";
+import { Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide } from "@mui/material";
 import React from "react";
 import { TransitionProps } from "notistack";
-import { ChevronLeft } from "@mui/icons-material";
-import { Box } from "@mui/system";
 
 export interface ConfirmationDialog {
     open: boolean;

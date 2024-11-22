@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 
 import ForgotPassword from './ForgotPassword';
 import { GoogleIcon, FacebookIcon } from '../CustomIcons/CustomIcons';
-import FacebookLogin from '@greatsumini/react-facebook-login';
+import FacebookLogin, { ProfileSuccessResponse } from '@greatsumini/react-facebook-login';
 import useNotifications from '@/store/notifications';
 import { LoginContext, LoginInfoProps } from '@/LoginContext';
 import { useNavigate } from 'react-router-dom';
@@ -109,11 +109,11 @@ export default function SignInCard() {
         }
     };
 
-    const authenticateFB = (profile: any) => {
+    const authenticateFB = (profile: ProfileSuccessResponse) => {
 
         console.log(`Authenticate Facebook: ${profile}`);
 
-        let loginInfo: LoginInfoProps = {
+        const loginInfo: LoginInfoProps = {
             username: profile.name,
             email: profile.email,
             accessToken: profile.accessToken,
@@ -184,7 +184,7 @@ export default function SignInCard() {
                 variant="h4"
                 sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
             >
-                S'identifier...
+                S&apos;identifier...
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Button
@@ -210,7 +210,7 @@ export default function SignInCard() {
                         console.log('Get Profile Success!', response);
                         authenticateFB(response);
                     }}
-                    render={({ onClick, logout }) => (
+                    render={({ onClick }) => (
                         <Button
                             fullWidth
                             variant="outlined"
@@ -222,7 +222,7 @@ export default function SignInCard() {
                     )}
                 />
             </Box>
-            <Divider>ou bien à l'ancienne</Divider>
+            <Divider>ou bien à l&apos;ancienne</Divider>
             <Box
                 component="form"
                 noValidate
@@ -287,7 +287,7 @@ export default function SignInCard() {
                             sx={{ alignSelf: 'center' }}
                             onClick={() => setNoAccountOpen(true)}
                         >
-                            Je n'ai pas de compte.
+                            Je n&apos;ai pas de compte.
                         </Link>
                     </span>
                 </Typography>

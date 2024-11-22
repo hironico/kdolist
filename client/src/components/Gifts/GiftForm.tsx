@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { TextField, Button, IconButton, Box } from '@mui/material';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import { TextField, Button, Box } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import { Gift, GiftLink, LoginContext } from '@/LoginContext';
 import { FlexBox, FullSizeCenteredFlexBox } from '../styled';

@@ -1,22 +1,21 @@
 import Meta from '@/components/Meta';
-import useOrientation from '@/hooks/useOrientation';
-
-import SignInCard from '../../components/SignInCard';
 import Content from './Content';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import { useContext } from 'react';
 import { LoginContext } from '@/LoginContext';
 import { Navigate } from 'react-router-dom';
-import { Slide, Slider, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { CenteredFlexBox } from '@/components/styled';
 
 function Welcome() {
-  const isPortrait = useOrientation();
+  // const isPortrait = useOrientation();
   const loginContext = useContext(LoginContext);
 
+  /*
   const width = isPortrait ? '40%' : '30%';
   const height = isPortrait ? '30%' : '40%';
+  */
 
   const welcomePage = (
     <>

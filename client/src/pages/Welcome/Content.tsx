@@ -5,8 +5,6 @@ import AutoFixHighRoundedIcon from '@mui/icons-material/AutoFixHighRounded';
 import ThumbUpAltRoundedIcon from '@mui/icons-material/ThumbUpAltRounded';
 import QuestionAnswer from '@mui/icons-material/QuestionAnswer';
 import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
-import useTheme from '@/store/theme';
-import { Themes } from '@/theme/types';
 import Card from '@/components/Card/Card';
 import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -40,8 +38,9 @@ const items = [
 ];
 
 export default function Content() {
-  const [theme] = useTheme();
+  // const [theme] = useTheme();
   // const bgColor = theme === Themes.DARK ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.7)';
+
   const bgColor = 'rgba(255, 255, 255, 0.7)';
   const navigate = useNavigate();
 
@@ -72,7 +71,7 @@ export default function Content() {
           </Stack>
         ))}
 
-        <Button variant='contained' onClick={(evt) => onLetsGo()}>C'est parti !</Button>
+        <Button variant='contained' onClick={(_evt) => onLetsGo()}>C&aposest parti !</Button>
       </Stack>
     </Card>
   );

@@ -14,7 +14,7 @@ export type GiftLinksMenuProps = {
     editable: boolean;
 }
 
-const GiftLinksMenu: FC<GiftLinksMenuProps> = ({ links, editable, handleAddLink, handleRemoveLink }) => {
+const GiftLinksMenu: FC<GiftLinksMenuProps> = ({ links, editable, handleAddLink }) => {
     const [anchorEl, setAnchorEl] = useState<EventTarget & Element | null>(null);
     const [linkEditorOpen, setLinkEditorOpen] = useState<boolean>(false);
     const open = Boolean(anchorEl);

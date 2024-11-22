@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Button } from '@mui/material';
+import { DialogContentText, TextField, Button } from '@mui/material';
 import BottomDialog from '../BottomDialog/BottomDialog';
 import { GiftLink } from '@/LoginContext';
 
@@ -21,7 +21,7 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
         setCanPaste(true);
       } catch (err) {
         setCanPaste(false);
-        console.log('Access to clipboard not supported on this browser!');
+        console.log(`Access to clipboard not supported on this browser! ${err}`);
       }
     };
 

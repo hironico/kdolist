@@ -1,6 +1,6 @@
 import GiftListsList from '@/components/GiftLists/GiftListsList';
 import Meta from '@/components/Meta';
-import { FullSizeCenteredFlexBox, FullSizeTopCenteredFlexBox } from '@/components/styled';
+import { FullSizeTopCenteredFlexBox } from '@/components/styled';
 import ProtectedRoute from '@/routes/ProtectedRoute';
 import { useContext, useEffect, useState } from 'react';
 import { apiBaseUrl } from '@/config';
@@ -9,7 +9,6 @@ import BottomDialog from '@/components/BottomDialog/BottomDialog';
 
 import ListEditor from '@/components/GiftLists/ListEditorForm';
 import useNotifications from '@/store/notifications';
-import ConfirmDialog from '@/components/BottomDialog/ConfirmationDialog';
 import { GiftListsFAB } from '@/components/GiftLists';
 import ActionSheet, { ActionSheetEntries } from '@/components/ActionSheet/ActionSheet';
 
@@ -35,14 +34,20 @@ function MyListsPage() {
         setGiftLists(myLists);
       }
     } catch (error) {
-      console.error('Failed to fetch gift lists');
+      console.error(`Failed to fetch gift lists: ${error}`);
+      notificationsActions.push({
+        options: {
+          variant: 'error',
+        },
+        message: 'Impossible de récupérer les listes pour le moment.'
+      });
     }
   };
 
   useEffect(() => {
     fetchGiftLists();
     appContext.setGiftList(null);
-  }, []);
+  }, [appContext, fetchGiftLists]);
 
   const handleCreateGiftList = async (name: string) => {    
     const response = await fetch(`${apiBaseUrl}/giftlist`, {

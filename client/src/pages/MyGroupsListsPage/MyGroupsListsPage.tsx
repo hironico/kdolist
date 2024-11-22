@@ -1,6 +1,6 @@
 import GiftListsList from '@/components/GiftLists/GiftListsList';
 import Meta from '@/components/Meta';
-import { FullSizeCenteredFlexBox, FullSizeTopCenteredFlexBox } from '@/components/styled';
+import { FullSizeTopCenteredFlexBox } from '@/components/styled';
 import ProtectedRoute from '@/routes/ProtectedRoute';
 import { useContext, useEffect, useState } from 'react';
 import { apiBaseUrl } from '@/config';
@@ -47,7 +47,7 @@ function MyGroupsListsPage() {
   useEffect(() => {
     fetchGiftLists();
     appContext.setGiftList(null);
-  }, []);
+  }, [appContext, fetchGiftLists]);
 
   return (
     <ProtectedRoute>

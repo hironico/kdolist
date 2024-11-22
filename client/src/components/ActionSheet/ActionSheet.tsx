@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Drawer, SwipeableDrawer, Typography } from '@mui/material';
+import { Button, ButtonGroup, SwipeableDrawer } from '@mui/material';
 import React, { MouseEventHandler } from 'react';
 
 export interface ActionSheetEntries {

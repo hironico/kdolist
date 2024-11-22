@@ -30,7 +30,7 @@ export default function ForgotPassword({ open, handleClose }: ForgotPasswordProp
         sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}
       >
         <DialogContentText>
-          C'est pas de chance, mais si tu mets ton adresse email ci dessous, 
+          C&apos;est pas de chance, mais si tu mets ton adresse email ci dessous, 
           peut-être que tu recevras un lien pour choisir un nouveau mot de passe.
         </DialogContentText>
         <OutlinedInput

@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactElement, useCallback, useContext, useEffect, useState } from 'react';
+import { PropsWithChildren, useContext, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { LoginContext } from '@/LoginContext';
 
@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children }: PropsWithChildren) {
 
     useEffect(() => {
         appContext.checkToken();
-    }, []);
+    }, [appContext]);
 
     return appContext.loginInfo.jwt !== '' ? children : <Navigate to="/login" replace />
-};
+}

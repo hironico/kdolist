@@ -2,12 +2,12 @@ import { createContext, FC, PropsWithChildren, useState } from "react";
 import { apiBaseUrl } from "./config";
 
 export interface LoginInfoProps {
-  id: string;
-  username: string;
+  id: string | undefined;
+  username: string | undefined;
   firstname?: string;
   lastname?: string;
   password?: string;
-  email: string;
+  email: string | undefined;
   accessToken?: string;
   accessTokenProvider?: string;  
   jwt?: string;
@@ -75,7 +75,7 @@ const defaultListContent: Gift[] = [];
 
 const defaultAppContext: AppContext = {
   loginInfo: defaultLoginInfo,
-  setLoginInfo: (info: LoginInfoProps) => {},
+  setLoginInfo: (_loginInfo: LoginInfoProps) => {},
   checkToken: () => {
     return new Promise<boolean>((accept, ) => {
       accept(false);
@@ -83,13 +83,13 @@ const defaultAppContext: AppContext = {
   },
 
   giftList: defaultListInfo,
-  setGiftList: (list: GiftList | null) => {},
+  setGiftList: (_list: GiftList | null) => {},
 
   giftListContents: defaultListContent,  
-  setGiftListContents: (contents: Gift[]) => {}
+  setGiftListContents: (_contents: Gift[]) => {}
 }
 
-export let LoginContext = createContext<AppContext>(defaultAppContext);
+export const LoginContext = createContext<AppContext>(defaultAppContext);
 
 export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
 

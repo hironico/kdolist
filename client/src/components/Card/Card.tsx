@@ -1,7 +1,5 @@
 import { styled } from '@mui/material/styles';
 import MuiCard from '@mui/material/Card';
-import { borderRadius, style } from '@mui/system';
-import { ListItem } from '@mui/material';
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',

@@ -1,5 +1,5 @@
-import React, { PropsWithChildren, ReactNode, useState } from 'react';
-import { AppBar, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, makeStyles, Slide, Toolbar, Typography, useTheme } from '@mui/material';
+import React, { ReactNode } from 'react';
+import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Slide, Toolbar, Typography } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import { ChevronLeft } from '@mui/icons-material';
 import { Box } from '@mui/system';

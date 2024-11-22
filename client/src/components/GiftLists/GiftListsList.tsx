@@ -50,11 +50,11 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable}) => {
           <br/><Typography variant='caption'>{`Par: ${item.owner?.firstname}`}</Typography>
           </>
           return <ListItem key={item.id} sx={{ width: 'auto' }} disablePadding secondaryAction={
-            <IconButton edge="end" aria-label="details" onClick={(e) => handleNavigateList(item, editable)}>
+            <IconButton edge="end" aria-label="details" onClick={(_e) => handleNavigateList(item, editable)}>
               <ChevronRight />
             </IconButton>
           }>
-            <ListItemButton selected={item.id === appContext.giftList?.id} onClick={(e) => handleListSelection(item)} sx={{ width: '100%' }}>
+            <ListItemButton selected={item.id === appContext.giftList?.id} onClick={(_e) => handleListSelection(item)} sx={{ width: '100%' }}>
             <ListItemAvatar>
                 <Avatar>
                   <FormatListBulletedIcon />

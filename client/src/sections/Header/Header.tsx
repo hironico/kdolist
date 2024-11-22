@@ -10,8 +10,8 @@ import useSidebar from '@/store/sidebar';
 import { getRandomJoke } from './utils';
 import useTheme from '@/store/theme';
 import routes from '@/routes';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Routes } from '@/routes/types';
+import { PathRouteProps, useLocation, useNavigate } from 'react-router-dom';
+import { PathRouteCustomProps, Routes } from '@/routes/types';
 import { ReactNode, useContext} from 'react';
 import { ChevronLeft } from '@mui/icons-material';
 import { LoginContext } from '@/LoginContext';
@@ -26,14 +26,16 @@ function Header() {
   const location = useLocation();
   const loginContext = useContext(LoginContext);
   
-  function getRouteByPath(routes: Routes, path: string): any {
+  function getRouteByPath(routes: Routes, path: string): (PathRouteProps & PathRouteCustomProps) | undefined {
     return Object.values(routes).find(route => route.path === path);
   }
 
   const getTitle = (): string => {
     const route = getRouteByPath(routes, location.pathname);
+    if (!route) return 'no route';
+
     const title = route.title ? route.title : loginContext.giftList?.name;
-    return title;
+    return title ? title : 'no title';
   }
 
   function showNotification() {

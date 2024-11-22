@@ -1,11 +1,10 @@
 import ActionSheet, { ActionSheetEntries } from "@/components/ActionSheet/ActionSheet";
 import BottomDialog from "@/components/BottomDialog/BottomDialog";
-import ConfirmDialog from "@/components/BottomDialog/ConfirmationDialog";
 import GiftForm from "@/components/Gifts/GiftForm";
 import { GiftsFAB } from "@/components/Gifts/GiftsFAB";
 import GifsList from "@/components/Gifts/GiftsList";
 import Meta from "@/components/Meta";
-import { FullSizeCenteredFlexBox, FullSizeTopCenteredFlexBox } from "@/components/styled";
+import { FullSizeTopCenteredFlexBox } from "@/components/styled";
 import { apiBaseUrl } from "@/config";
 import { Gift, LoginContext } from "@/LoginContext";
 import ProtectedRoute from "@/routes/ProtectedRoute";
@@ -63,7 +62,7 @@ const ListContentsPage: React.FC = () => {
   useEffect(() => {
     fetchListContents();
     setGift(newEmptyGift());
-  }, []);
+  }, [fetchListContents]);
 
   const handleAddGift = () => {
     setGift(newEmptyGift());
