@@ -47,11 +47,11 @@ if (process.env.SERVER_SSL_ENABLED === 'true') {
       cert: fs.readFileSync(process.env.SERVER_SSL_CERT_FILE)
   }, app).listen(port, () => {
       // tslint:disable-next-line:no-console
-      logger.info(`Server started at https://localhost:${port}${process.env.DAV_WEB_CONTEXT}`);
+      logger.info(`Server started at https://localhost:${port}`);
   });
 } else {
   http.createServer(app).listen(port, () => {
       // tslint:disable-next-line:no-console
-      logger.info(`Development server started at http://localhost:${port}${process.env.DAV_WEB_CONTEXT}`);
+      logger.info(`Development server started at http://localhost:${port}`);
   })
 }
