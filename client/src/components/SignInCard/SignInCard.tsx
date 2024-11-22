@@ -197,7 +197,7 @@ export default function SignInCard() {
                 </Button>
 
                 <FacebookLogin
-                    appId="710938745585210"
+                    appId="8944125668933019"
                     onSuccess={(response) => {
                         console.log('Login Success!', response);
                     }}
