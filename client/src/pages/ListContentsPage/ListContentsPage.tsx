@@ -172,7 +172,7 @@ const ListContentsPage: React.FC = () => {
         <GiftForm gift={gift} onSave={handleSaveGift} editable={state.editable} />
       }/>
 
-      <ActionSheet open={confirmDeleteOpen} handleClose={() => setConfirmDeleteOpen(false)} entries={actions} defaultEntry={defaultAction}/>
+      <ActionSheet open={confirmDeleteOpen} handleClose={() => setConfirmDeleteOpen(false)} entries={actions} defaultEntry={defaultAction} message="Attention c'est irréversible !"/>
      
     </ProtectedRoute>
   );

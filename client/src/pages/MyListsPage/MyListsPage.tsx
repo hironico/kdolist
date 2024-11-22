@@ -142,7 +142,7 @@ function MyListsPage() {
                     contents={listEditor}
       />
 
-      <ActionSheet open={showConfirmDialog} handleClose={() => setShowConfirmDialog(false)} entries={actions} defaultEntry={defaultAction}/>
+      <ActionSheet open={showConfirmDialog} handleClose={() => setShowConfirmDialog(false)} entries={actions} defaultEntry={defaultAction} message="Attention c'est irreversible !"/>
 
     </ProtectedRoute>
   );
