@@ -1,5 +1,6 @@
-import { Button, ButtonGroup, SwipeableDrawer } from '@mui/material';
+import { Button, ButtonGroup, Divider, SwipeableDrawer, Typography } from '@mui/material';
 import React, { MouseEventHandler } from 'react';
+import { CenteredFlexBox } from '../styled';
 
 export interface ActionSheetEntries {
     label: string;
@@ -12,13 +13,14 @@ export interface ActionSheetProps {
     open: boolean;
     entries: ActionSheetEntries[];
     defaultEntry?: ActionSheetEntries;
+    message?: string;
 }
 
 const iOS =
   typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
 
-const ActionSheet: React.FC<ActionSheetProps> = ({handleClose, open, entries: actions, defaultEntry: defaultAction}) => {
+const ActionSheet: React.FC<ActionSheetProps> = ({handleClose, open, entries: actions, defaultEntry: defaultAction, message}) => {
 
     const buttonStyle = {
         backgroundColor: 'rgba(255,255,255, 0.65)',
@@ -40,8 +42,11 @@ const ActionSheet: React.FC<ActionSheetProps> = ({handleClose, open, entries: ac
               boxShadow: 'none',
             },
           }}
-      >
+      >        
         <ButtonGroup sx={buttonStyle} orientation='vertical' variant='text'>
+            {message ? <CenteredFlexBox>
+                       <Typography variant='caption'>{message}</Typography>                       
+                       </CenteredFlexBox> : <></>}
             {actions.map((actionItem, index) => {
                 return <Button key={`key-${index}-${actionItem.label}`} color={actionItem.color} onClick={actionItem.onAction}>
                     {actionItem.label}
