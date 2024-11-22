@@ -122,7 +122,7 @@ authApi.post('/v1/auth/fb', async (req, res) => {
         }
     } catch (error) {
         logger.error(`Cannot create a user and its first list. ${error}`);
-        resizeTo.status(500).send(error).end();
+        res.status(500).send(error).end();
         return;
     }
 
