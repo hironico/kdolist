@@ -8,7 +8,6 @@ import { FlexBox } from '@/components/styled';
 import useNotifications from '@/store/notifications';
 import useSidebar from '@/store/sidebar';
 import { getRandomJoke } from './utils';
-import useTheme from '@/store/theme';
 import routes from '@/routes';
 import { PathRouteProps, useLocation, useNavigate } from 'react-router-dom';
 import { PathRouteCustomProps, Routes } from '@/routes/types';
@@ -20,7 +19,6 @@ import UserAvatar from '@/components/UserAvatar/UserAvatar';
 
 function Header() {
   const [, sidebarActions] = useSidebar();
-  const [theme,] = useTheme();
   const [, notificationsActions] = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
@@ -102,7 +100,7 @@ function Header() {
   }
 
   return (
-    <Box sx={{ flexGrow: 1 }} data-pw={`theme-${theme}`}>
+    <Box sx={{ flexGrow: 1 }}>
       <AppBar  position="static">
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <FlexBox sx={{ alignItems: 'center' }}>

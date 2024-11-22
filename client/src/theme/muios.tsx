@@ -34,6 +34,15 @@ const baseTheme = createTheme({
         },
     },
     components: {
+        MuiAppBar: {
+            styleOverrides: {
+                root: {
+                    boxShadow: 'none',
+                    borderBottom: '1px solid',
+                    borderBottomColor: grey[300],
+                }
+            }
+        },
         MuiBackdrop: {            
             styleOverrides: {
                 root: {
@@ -150,19 +159,17 @@ const baseTheme = createTheme({
                 root: {
                     width: 'auto',
                     gap: 0,  
-                    /*
                     borderBottom: `1px solid`,
                     borderBottomColor: grey[300],
-                    */
                     backgroundColor: 'white',     
-                    padding: '5px'              
+                    padding: '0px'              
                 },
             }
         },
         MuiListItemText: {
             styleOverrides: {
                 primary: {
-                    fontSize: 16,
+                    fontSize: 14,
                 },
             }
         },
@@ -262,8 +269,7 @@ const baseTheme = createTheme({
         MuiToolbar: {
             styleOverrides: {
                 root: {
-                    backgroundColor: 'white',
-                    borderBottom: '1px solid lightgrey',
+                    backgroundColor: 'white',                    
                     justifyContent: 'space-between',
                 },
             }
