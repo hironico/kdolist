@@ -62,7 +62,7 @@ const ListContentsPage: React.FC = () => {
   useEffect(() => {
     fetchListContents();
     setGift(newEmptyGift());
-  }, [fetchListContents]);
+  }, []);
 
   const handleAddGift = () => {
     setGift(newEmptyGift());

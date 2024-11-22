@@ -47,7 +47,7 @@ function MyListsPage() {
   useEffect(() => {
     fetchGiftLists();
     appContext.setGiftList(null);
-  }, [appContext, fetchGiftLists]);
+  }, []);
 
   const handleCreateGiftList = async (name: string) => {    
     const response = await fetch(`${apiBaseUrl}/giftlist`, {

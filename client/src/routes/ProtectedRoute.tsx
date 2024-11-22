@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children }: PropsWithChildren) {
 
     useEffect(() => {
         appContext.checkToken();
-    }, [appContext]);
+    }, []);
 
     return appContext.loginInfo.jwt !== '' ? children : <Navigate to="/login" replace />
 }

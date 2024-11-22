@@ -47,7 +47,7 @@ function MyGroupsListsPage() {
   useEffect(() => {
     fetchGiftLists();
     appContext.setGiftList(null);
-  }, [appContext, fetchGiftLists]);
+  }, []);
 
   return (
     <ProtectedRoute>
