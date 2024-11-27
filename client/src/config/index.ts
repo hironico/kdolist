@@ -52,7 +52,8 @@ const defaultMetaTags = {
 };
 const giphy404 = 'https://giphy.com/embed/xTiN0L7EW5trfOvEk0';
 
-const apiBaseUrl = 'http://localhost:9090/api/v1';
+const url = new URL(window.location.href);
+const apiBaseUrl = url.host === 'localhost' ? `${url.protocol}://${url.host}:9090/api/v1` : `${url.protocol}://${url.host}/api/v1`;
 
 export {
   loader,
