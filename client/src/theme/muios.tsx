@@ -1,6 +1,6 @@
 import { CheckCircle, RadioButtonUnchecked } from "@mui/icons-material";
 import { grey, red } from "@mui/material/colors";
-import { createTheme } from "@mui/material/styles";
+import { createTheme, responsiveFontSizes } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
 
 const iOSBoxShadow =
@@ -25,13 +25,19 @@ const baseTheme = createTheme({
         borderRadius: 12,
     },
     typography: {
-        fontFamily: 'Open Sans',
-        h6: {
-            fontSize: 16,
-        },
-        h5: {
-            fontSize: 18,
-        },
+        fontFamily: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
+        fontSize: 16
     },
     components: {
         MuiAppBar: {
@@ -43,7 +49,7 @@ const baseTheme = createTheme({
                 }
             }
         },
-        MuiBackdrop: {            
+        MuiBackdrop: {
             styleOverrides: {
                 root: {
                     backgroundColor: 'rgba(0, 0, 0, 0.4)',
@@ -74,7 +80,7 @@ const baseTheme = createTheme({
             defaultProps: {
                 PaperProps: {
                     elevation: 0,
-                  },
+                },
             },
             styleOverrides: {
                 paper: {
@@ -117,7 +123,7 @@ const baseTheme = createTheme({
             defaultProps: {
                 PaperProps: {
                     elevation: 0,
-                  },
+                },
             }
         },
         MuiFormControl: {
@@ -158,11 +164,11 @@ const baseTheme = createTheme({
             styleOverrides: {
                 root: {
                     width: 'auto',
-                    gap: 0,  
+                    gap: 0,
                     borderBottom: `1px solid`,
                     borderBottomColor: grey[300],
-                    backgroundColor: 'white',     
-                    padding: '0px'              
+                    backgroundColor: 'white',
+                    padding: '0px'
                 },
             }
         },
@@ -269,7 +275,7 @@ const baseTheme = createTheme({
         MuiToolbar: {
             styleOverrides: {
                 root: {
-                    backgroundColor: 'white',                    
+                    backgroundColor: 'white',
                     justifyContent: 'space-between',
                 },
             }
