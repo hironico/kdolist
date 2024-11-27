@@ -71,7 +71,7 @@ export default function Content() {
           </Stack>
         ))}
 
-        <Button variant='contained' onClick={(_evt) => onLetsGo()}>C&aposest parti !</Button>
+        <Button variant='contained' onClick={(_evt) => onLetsGo()}>C&apos;est parti !</Button>
       </Stack>
     </Card>
   );
