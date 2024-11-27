@@ -18,6 +18,7 @@ import Card from '../Card/Card';
 
 import { apiBaseUrl } from '@/config';
 import NoAccount from './NoAccount';
+import { useGoogleLogin } from '@react-oauth/google';
 
 export default function SignInCard() {
     const [emailError, setEmailError] = React.useState(false);
@@ -109,22 +110,22 @@ export default function SignInCard() {
         }
     };
 
-    const authenticateFB = (profile: ProfileSuccessResponse) => {
+    const authenticate = (profile: ProfileSuccessResponse, authProvider: 'GOOGLE' | 'FACEBOOK') => {
 
-        console.log(`Authenticate Facebook: ${profile}`);
+        console.log(`Authenticate ${authProvider}: ${profile}`);
 
         const loginInfo: LoginInfoProps = {
             username: profile.name,
             email: profile.email,
             accessToken: profile.accessToken,
-            accessTokenProvider: 'FACEBOOK',
+            accessTokenProvider: authProvider,
             id: profile.id,
             jwt: ''
         };        
 
         // loginContext.setLoginInfo(profile);
 
-        const apiUrl = `${apiBaseUrl}/auth/fb`;
+        const apiUrl = 'FACEBOOK' === authProvider ? `${apiBaseUrl}/auth/fb` : `${apiBaseUrl}/auth/google`;
         
         fetch(apiUrl, {
           method: 'POST',
@@ -145,6 +146,33 @@ export default function SignInCard() {
             console.error('Error:', error)
             showNotificationLoginError(error);
         });
+    }
+
+    const fetchGoogleProfile = (accessToken: string) => {
+        fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`)
+        .then(response => {
+            if (response.ok) {
+                response.json()
+                .then(profileData => {
+
+                    const profile: ProfileSuccessResponse = {
+                        id: profileData.sub,
+                        email: profileData.email,
+                        name: profileData.given_name,
+                        accessToken: accessToken
+                    }
+
+                    authenticate(profile, 'GOOGLE');
+                });
+            } else {
+                console.log('Cannot fetch google profile. Error code is: ' + response.status);
+                showNotificationLoginError('Impossible de récupérer le profil Google!');
+            }
+        })
+        .catch(error => {
+            console.log(`Canot fetch google profile: ${error}`);
+            showNotificationLoginError('Impossible de récupérer le profil Google!');
+        })
     }
 
     const showNotificationLoginSuccess = (profile: LoginInfoProps) => {
@@ -177,6 +205,10 @@ export default function SignInCard() {
         });
     }
 
+    const googleLogin = useGoogleLogin({
+        onSuccess: tokenResponse => fetchGoogleProfile(tokenResponse.access_token),
+      });
+
     return (
         <Card variant="outlined">
             <Typography
@@ -190,7 +222,7 @@ export default function SignInCard() {
                 <Button
                     fullWidth
                     variant="outlined"
-                    onClick={() => showNotificationLoginError('L\'authentification Google arrive bientôt. Patience.')}
+                    onClick={() => googleLogin()}
                     startIcon={<GoogleIcon />}
                 >
                     <Typography sx={{ color: 'text.primary' }}>Google</Typography>
@@ -208,7 +240,7 @@ export default function SignInCard() {
                     }}
                     onProfileSuccess={(response) => {
                         console.log('Get Profile Success!', response);
-                        authenticateFB(response);
+                        authenticate(response, 'FACEBOOK');
                     }}
                     render={({ onClick }) => (
                         <Button

@@ -38,6 +38,70 @@ const generateRefreshToken = (user) => {
     return refreshToken;
 }
 
+/**
+ * This function will find the corresponding user for the social account this user is logged into. 
+ * If the user is already present (same email) but with qnother social network, then this function fails
+ * and return null. 
+ * @param {*} profile the profile from the social network 
+ * @param {*} provider type of social network : FACEBOOK, GOOGLE ... 
+ * @returns the user isntance associated to that account or null in case of problem
+ */
+const loginSocialUser = async (profile, provider) => {
+    logger.info(`${provider} user is logging in:\n${JSON.stringify(profile, null, 2)}`);
+    const email = profile.email;
+    if (!email) {
+        logger.error('Must provide at least an email!');
+        return null;
+    }
+
+    const firstLastNames = profile.username.split(' ');
+    if (firstLastNames.length < 2) {
+        firstLastNames.push('');
+    }
+
+    const socialAccount = await SocialAccount.findOne({
+        where: { socialId: profile.id, provider: provider }
+    });
+
+    let user = null;
+    try {
+        if (!socialAccount) {
+
+            // check if the user already exsits with a different social account
+            const existingUser = await User.findOne({
+                where: {
+                    email: email
+                }
+            });
+
+            if (existingUser) {
+                logger.error('A user attempting to login with a social account but already exsits with another.');
+                return null;
+            }
+
+            user = await usercontroller.createUser(profile.username, firstLastNames[0], firstLastNames[1], email);
+            await usercontroller.addSocialAccount(user.id, provider, profile.id);
+            const giftList = await usercontroller.createGiftList(user.id, 'Ma première liste');
+
+            const gift = {
+                giftListId: giftList.id,
+                name: 'Un exemple de cadeau',
+                description: 'C\'est un super cadeau qui me ferait très plaisir.'
+            }
+
+            await giftlistcontroller.addGift(gift);
+        } else {
+            user = await User.findByPk(socialAccount.userId);
+        }
+    } catch (error) {
+        logger.error(`Cannot create a user and its first list. ${error}`);        
+        return null;
+    }
+
+    logger.debug(JSON.stringify(user, null, 2));
+    return user;
+}
+
 const authApi = express.Router();
 
 authApi.get('/v1/auth/whoami', authenticateJWT, (req, res) => {
@@ -87,47 +151,13 @@ authApi.post('/v1/auth/login', async (req, res) => {
 authApi.post('/v1/auth/fb', async (req, res) => {
     // TODO verify access token from FB
 
-    logger.info(`Facebook user is logging in:\n${JSON.stringify(req.body, null, 2)}`);
-    const email = req.body.email;
-    if (!email) {
-        logger.error('Must provide at least an email!');
-        return res.sendStatus(403).end();
-    }
+    const user = loginSocialUser(req.body, 'FACEBOOK');
 
-    const firstLastNames = req.body.username.split(' ');
-    if (firstLastNames.length < 2) {
-        firstLastNames.push('');
-    }
-
-    const socialAccount = await SocialAccount.findOne({
-        where: { socialId: req.body.id, provider: 'FACEBOOK' }
-    });
-
-    let user = null;
-    try {
-        if (!socialAccount) {
-            user = await usercontroller.createUser(req.body.username, firstLastNames[0], firstLastNames[1], email);
-            await usercontroller.addSocialAccount(user.id, 'FACEBOOK', req.body.id);
-            const giftList = await usercontroller.createGiftList(user.id, 'Ma première liste');
-
-            const gift = {
-                giftListId: giftList.id,
-                name: 'Un exemple de cadeau',
-                description: 'C\'est un super cadeau qui me ferait tres plaisir.'
-            }
-
-            await giftlistcontroller.addGift(gift);
-        } else {
-            user = await User.findByPk(socialAccount.userId);
-        }
-    } catch (error) {
-        logger.error(`Cannot create a user and its first list. ${error}`);
-        res.status(500).send(error).end();
+    if (user === null) {
+        res.status(500).send('Cannot create or logina user with FACEBOOK').end();
         return;
     }
-
-    logger.debug(JSON.stringify(user, null, 2));
-
+    
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -135,7 +165,26 @@ authApi.post('/v1/auth/fb', async (req, res) => {
         accessToken: accessToken,
         refreshToken: refreshToken
     });
-})
+});
+
+authApi.post('/v1/auth/google', async (req, res) => {
+    // TODO verify access token from Google
+
+    const user = await loginSocialUser(req.body, 'GOOGLE');
+
+    if (user === null) {
+        res.status(500).send('Cannot create or logina user with GOOGLE').end();
+        return;
+    }
+    
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    res.json({
+        accessToken: accessToken,
+        refreshToken: refreshToken
+    });
+});
 
 authApi.post('/v1/auth/refresh', authenticateJWT, (req, res) => {
     const { token } = req.body;

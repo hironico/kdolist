@@ -1,5 +1,6 @@
 import { createContext, FC, PropsWithChildren, useState } from "react";
 import { apiBaseUrl } from "./config";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export interface LoginInfoProps {
   id: string | undefined;
@@ -114,6 +115,8 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
   }
 
   return <LoginContext.Provider value={{loginInfo, setLoginInfo, checkToken, giftList, setGiftList, giftListContents, setGiftListContents}}>
-    {props.children}
+    <GoogleOAuthProvider clientId="104748889285-m7ndus5lktf9ngdjmprkc8hdfgvejp1r.apps.googleusercontent.com">
+      {props.children}
+    </GoogleOAuthProvider>    
   </LoginContext.Provider>
 }

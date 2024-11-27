@@ -20,7 +20,7 @@ function LoginPage() {
                     component="main"
                     sx={[
                         {
-                            justifyContent: 'space-between',
+                            justifyContent: 'center',
                             height: { xs: 'auto', md: '100%' },
                         },
                     ]}
