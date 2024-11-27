@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DialogContentText, TextField, Button } from '@mui/material';
+import { DialogContentText, TextField, Button, Stack } from '@mui/material';
 import BottomDialog from '../BottomDialog/BottomDialog';
 import { GiftLink } from '@/LoginContext';
 
@@ -56,16 +56,16 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
   };
 
   const getActions = () => {
-    return <>
+    return <Stack sx={{width: '100%'}}>
       {canPaste && (
           <Button onClick={handlePaste} variant="contained" color="primary">
             Coller
           </Button>
         )}
-        <Button onClick={handleSubmit} variant="contained" color="primary" autoFocus>
+        <Button onClick={handleSubmit} variant="contained" color="primary" sx={{width: '100%', marginTop: '15px', marginBottom: '15px'}}>
           Ajouter
         </Button>
-    </>
+    </Stack>
   }
 
   const getContents = () => {

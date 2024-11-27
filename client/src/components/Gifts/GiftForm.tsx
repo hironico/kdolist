@@ -5,6 +5,7 @@ import { Gift, GiftLink, LoginContext } from '@/LoginContext';
 import { FlexBox, FullSizeCenteredFlexBox } from '../styled';
 import GiftLinksMenu from './GiftLinksMenu';
 import { apiBaseUrl } from '@/config';
+import { Stack } from '@mui/system';
 
 interface GiftFormProps {
   gift: Gift;
@@ -107,7 +108,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, onSave, editable }) => {
         <Carousel sx={{width: '100%'}}>
           {images.map((oneImg, index) => {
             return <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>              
-              <Box sx={{background: `url(${oneImg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', width: '350px', height: '350px' }} key={`gift-img-key-${index}`} />
+              <Box sx={{background: `url(${oneImg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', width: '250px', height: '250px' }} key={`gift-img-key-${index}`} />
             </FullSizeCenteredFlexBox>            
           })
           }
@@ -130,17 +131,16 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, onSave, editable }) => {
         margin="normal"
         fullWidth
         multiline
-        rows={4}
+        rows={3}
         disabled={!editable}
       />
 
-      <FlexBox sx={{ width: '100%' }}>
-        <Button disabled={!editable} variant="contained" color="primary" onClick={() => onSave(updatedGift)}>
-          Enregistrer
-        </Button>
-        <div style={{ flex: '2 1 50%' }} />
+      <Stack sx={{ width: '100%' }}>               
         <GiftLinksMenu links={links} handleAddLink={handleAddLink} handleRemoveLink={handleRemoveLink} editable={editable}/>
-      </FlexBox>
+        <Button disabled={!editable} variant="contained" color="primary" onClick={() => onSave(updatedGift)} sx={{ marginTop: '10px' }}>
+          Enregistrer
+        </Button> 
+      </Stack>
 
     </form>
   );
