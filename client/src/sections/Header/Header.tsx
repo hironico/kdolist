@@ -89,6 +89,7 @@ function Header() {
       case '/login':
       case '/mylists':
       case '/mygroupslists':
+      case '/privacy':
         home = true;
         break;
 

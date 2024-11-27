@@ -26,7 +26,7 @@ function Sidebar() {
       swipeAreaWidth={30}
       data-pw="sidebar"
     >
-      <List sx={{ width: 250 }}>
+      <List sx={{ width: '250px' }}>
         {Object.values(routes)
           .filter((route) => route.inSideBar)
           .map(({ path, title, icon: Icon }) => (
@@ -38,8 +38,7 @@ function Sidebar() {
             </ListItem>
           ))}
       </List>
-
-      <Divider orientation="horizontal" flexItem />
+     
     </SwipeableDrawer>
   );
 }

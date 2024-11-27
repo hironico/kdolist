@@ -2,6 +2,7 @@ import Diversity1Icon from '@mui/icons-material/Diversity1';
 import HomeIcon from '@mui/icons-material/Home';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import asyncComponentLoader from '@/utils/loader';
 
 import { Pages, Routes } from './types';
@@ -39,6 +40,13 @@ const routes: Routes = {
     path: '/mygroupslists',
     title: 'Listes partagées',
     icon: Diversity1Icon,
+    inSideBar: true
+  },
+  [Pages.PrivacyPage]: {
+    component: asyncComponentLoader(() => import('@/pages/PrivacyPage')),
+    path: '/privacy',
+    title: 'Confidentialité',
+    icon: PrivacyTipIcon,
     inSideBar: true
   },
   [Pages.NotFound]: {

@@ -9,6 +9,7 @@ enum Pages {
   MyLists,
   ListContentsPage,
   MyGroupsListsPage,
+  PrivacyPage,
   NotFound,
 }
 
