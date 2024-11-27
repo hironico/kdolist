@@ -1,5 +1,4 @@
 import Meta from "@/components/Meta";
-import { FullSizeCenteredFlexBox } from "@/components/styled";
 import PrivacyPolicy from "./PrivacyPolicy";
 import { Box } from "@mui/system";
 import { Button, Stack } from "@mui/material";

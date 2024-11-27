@@ -1,5 +1,4 @@
-import React from 'react';
-import { Typography, List, ListItem, Box } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 
 const PrivacyPolicy = () => {
     return (
@@ -22,7 +21,7 @@ const PrivacyPolicy = () => {
                 Utilisation des informations
             </Typography>
             <Typography variant="body1" gutterBottom>
-                Ces informations sont utilisées uniquement pour identifier les utilisateurs et leur permettre d'accéder aux fonctionnalités du site web.
+                Ces informations sont utilisées uniquement pour identifier les utilisateurs et leur permettre d&apos;accéder aux fonctionnalités du site web.
             </Typography>
 
             <Typography variant="h5" sx={{fontWeight: 600}} gutterBottom>
@@ -30,7 +29,7 @@ const PrivacyPolicy = () => {
             </Typography>
 
             <Typography variant="body1" gutterBottom>
-                Les informations personnelles collectées sont sauvegardées dans une base de données sécurisée qui n'est accessible qu'à un nombre limité de personnes autorisées. Nous prenons toutes les mesures nécessaires pour protéger vos données contre toute perte, utilisation abusive ou accès non autorisé.
+                Les informations personnelles collectées sont sauvegardées dans une base de données sécurisée qui n&apos;est accessible qu&apos;à un nombre limité de personnes autorisées. Nous prenons toutes les mesures nécessaires pour protéger vos données contre toute perte, utilisation abusive ou accès non autorisé.
             </Typography>
 
             <Typography variant="h5" sx={{fontWeight: 600}} gutterBottom>
@@ -38,7 +37,7 @@ const PrivacyPolicy = () => {
             </Typography>
 
             <Typography variant="body1" gutterBottom>
-                Vous pouvez accéder à vos informations personnelles à tout moment et les modifier si nécessaire. Veuillez contacter notre équipe support pour toute demande d'accès, de modification ou de suppression de vos données.
+                Vous pouvez accéder à vos informations personnelles à tout moment et les modifier si nécessaire. Veuillez contacter notre équipe support pour toute demande d&apos;accès, de modification ou de suppression de vos données.
             </Typography>
 
             <Typography variant="h5" sx={{fontWeight: 600}} gutterBottom>
@@ -50,12 +49,12 @@ const PrivacyPolicy = () => {
             </Typography>
 
             <Typography variant="h5" sx={{fontWeight: 600}} gutterBottom>
-                Liens vers d'autres sites
+                Liens vers d&apos;autres sites
             </Typography>
 
 
             <Typography variant="body1" gutterBottom>
-                Ce site web peut contenir des liens vers d'autres sites web. Nous ne sommes pas responsables de la politique de confidentialité de ces sites web. Nous vous encourageons à consulter la déclaration de confidentialité de chaque site web que vous visitez.
+                Ce site web peut contenir des liens vers d&apos;autres sites web. Nous ne sommes pas responsables de la politique de confidentialité de ces sites web. Nous vous encourageons à consulter la déclaration de confidentialité de chaque site web que vous visitez.
             </Typography>
 
             <Typography variant="h5" sx={{fontWeight: 600}} gutterBottom>
@@ -71,7 +70,7 @@ const PrivacyPolicy = () => {
             </Typography>
 
             <Typography variant="body1" gutterBottom>
-                Si vous avez des questions concernant cette déclaration de confidentialité, veuillez nous contacter à l'adresse suivante : [adresse email].
+                Si vous avez des questions concernant cette déclaration de confidentialité, veuillez nous contacter à l&apos;adresse suivante : [adresse email].
             </Typography>
         </Box>
     );

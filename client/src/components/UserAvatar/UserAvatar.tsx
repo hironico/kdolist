@@ -27,7 +27,7 @@ const UserAvatar = () => {
       
       function stringAvatar() { 
         const {username} = appContext.loginInfo;
-        let name = username ? username : '';
+        const name = username ? username : '';
         return {
           sx: {
             bgcolor: stringToColor(name),

@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Divider, SwipeableDrawer, Typography } from '@mui/material';
+import { Button, ButtonGroup, SwipeableDrawer, Typography } from '@mui/material';
 import React, { MouseEventHandler } from 'react';
 import { CenteredFlexBox } from '../styled';
 
