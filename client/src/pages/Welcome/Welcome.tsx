@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import { useContext } from 'react';
 import { LoginContext } from '@/LoginContext';
 import { Navigate } from 'react-router-dom';
-import { Typography } from '@mui/material';
+import { Link, Typography } from '@mui/material';
 import { CenteredFlexBox } from '@/components/styled';
 
 function Welcome() {
@@ -49,7 +49,10 @@ function Welcome() {
             <CenteredFlexBox>
               <Typography variant='h2' color="lightgray">K.DO-List</Typography>
             </CenteredFlexBox>            
-            <Content />            
+            <Content />
+            <CenteredFlexBox>
+              <a href='https://kdolist.hironico.net/legal/privacy' target='_blank'>Politique de confidentialite</a> 
+            </CenteredFlexBox>            
           </Stack>
         </Stack>
       </Box>
