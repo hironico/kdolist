@@ -61,7 +61,7 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable}) => {
                 </Avatar>
               </ListItemAvatar>
               <ListItemText primary={`${item.name}`} secondary={secondaryText}/>
-              <Divider variant="inset" component="li" /> 
+              <Divider variant="inset" component="div" /> 
               </ListItemButton>
           </ListItem>
         })}
