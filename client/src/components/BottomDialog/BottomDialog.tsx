@@ -28,7 +28,6 @@ const BottomDialog: React.FC<BottomDialogProps> = ({open, handleClose, title, co
         open={open}
         onClose={handleClose}
         fullWidth={true}
-        maxWidth="xl"
         TransitionComponent={Transition}
         sx={{ top: 'auto', bottom: 0, width: '100hw', marginLeft: '-45px', marginRight: '-45px', marginBottom: '-45px' }}
       >
@@ -36,7 +35,7 @@ const BottomDialog: React.FC<BottomDialogProps> = ({open, handleClose, title, co
             <IconButton color="inherit" aria-label="open drawer" onClick={() => handleClose()}>
               <ChevronLeft />
             </IconButton>
-            <Typography>{title}</Typography>
+            <Typography sx={{fontSize: 16}}>{title}</Typography>
             <Box sx={{ flexGrow: 1 }} />
         </Toolbar>
         <DialogTitle></DialogTitle>
