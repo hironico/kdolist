@@ -37,9 +37,30 @@ const baseTheme = createTheme({
             '"Segoe UI Emoji"',
             '"Segoe UI Symbol"',
         ].join(','),
-        fontSize: 16
+        fontSize: 18
     },
     components: {
+        MuiInputBase: {
+            styleOverrides: {
+                root: {
+                    fontSize: 18
+                }
+            }
+        },        
+        MuiTextField: {
+            styleOverrides: {
+                root: {
+                    fontSize: 18
+                }
+            }
+        },
+        MuiDialogContentText: {
+            styleOverrides: {
+                root: {
+                    fontSize: 18
+                }
+            }
+        },
         MuiAppBar: {
             styleOverrides: {
                 root: {
@@ -152,7 +173,7 @@ const baseTheme = createTheme({
         MuiListSubheader: {
             styleOverrides: {
                 root: {
-                    fontSize: 16,
+                    fontSize: 14,
                     textTransform: 'uppercase',
                     lineHeight: '2em',
                     backgroundColor: '#F2F1F3',
@@ -175,7 +196,7 @@ const baseTheme = createTheme({
         MuiListItemText: {
             styleOverrides: {
                 primary: {
-                    fontSize: 14,
+                    fontSize: 16,
                 },
             }
         },

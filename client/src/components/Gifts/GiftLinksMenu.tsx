@@ -6,6 +6,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import AddLinkIcon from '@mui/icons-material/AddLink';
 import { FC, useState } from "react";
 import GiftLinkEditorModal from "./GiftLinkEditorModal";
+import Fade from '@mui/material/Fade';
 
 export type GiftLinksMenuProps = {
     links: GiftLink[];
@@ -47,9 +48,10 @@ const GiftLinksMenu: FC<GiftLinksMenuProps> = ({ links, editable, handleAddLink 
           aria-controls="menu-appbar"
           aria-haspopup="true"
           onClick={handleClick}
-          variant="contained" 
+          variant="outlined" 
           startIcon={<LinkIcon />}
-          endIcon={<KeyboardArrowUpIcon/>}>            
+          endIcon={<KeyboardArrowUpIcon/>}
+          sx={{ width: '100%' }}>            
             Liens
           </Button>
         <Menu
@@ -60,6 +62,7 @@ const GiftLinksMenu: FC<GiftLinksMenuProps> = ({ links, editable, handleAddLink 
           MenuListProps={{
             'aria-labelledby': 'basic-button',
           }}
+          TransitionComponent={Fade}
         >
           {links?.map((link) => (
             <Tooltip title={link.url} key={link.id}>
