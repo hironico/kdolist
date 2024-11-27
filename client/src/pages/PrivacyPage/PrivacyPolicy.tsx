@@ -70,7 +70,7 @@ const PrivacyPolicy = () => {
             </Typography>
 
             <Typography variant="body1" gutterBottom>
-                Si vous avez des questions concernant cette déclaration de confidentialité, veuillez nous contacter à l&apos;adresse suivante : [adresse email].
+                Si vous avez des questions concernant cette déclaration de confidentialité, veuillez nous contacter à l&apos;adresse suivante : [contact@hironico.net].
             </Typography>
         </Box>
     );
