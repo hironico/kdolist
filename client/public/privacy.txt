@@ -1,0 +1,28 @@
+Déclaration de Confidentialité
+
+Informations que nous collectons
+-    Adresse email
+-    Nom
+-    Prénom
+
+Utilisation des informations
+Ces informations sont utilisées uniquement pour identifier les utilisateurs et leur permettre d'accéder aux fonctionnalités du site web.
+
+Protection des informations
+Les informations personnelles collectées sont sauvegardées dans une base de données sécurisée qui n'est accessible qu'à un nombre limité de personnes autorisées. Nous prenons toutes les mesures nécessaires pour protéger vos données contre toute perte, utilisation abusive ou accès non autorisé.
+
+Accès et modification des informations
+Vous pouvez accéder à vos informations personnelles à tout moment et les modifier si nécessaire. Veuillez contacter notre équipe support pour toute demande d'accès, de modification ou de suppression de vos données.
+
+Cookies
+Ce site web utilise des cookies pour améliorer votre expérience utilisateur. Les cookies sont de petits fichiers texte qui sont stockés sur votre ordinateur. Ils nous permettent de vous reconnaître lorsque vous revenez sur notre site web et de personnaliser votre expérience. Vous pouvez désactiver les cookies dans les paramètres de votre navigateur, mais cela peut affecter certaines fonctionnalités du site web.
+
+Liens vers d'autres sites
+Ce site web peut contenir des liens vers d'autres sites web. Nous ne sommes pas responsables de la politique de confidentialité de ces sites web. Nous vous encourageons à consulter la déclaration de confidentialité de chaque site web que vous visitez.
+
+Modifications de la déclaration de confidentialité
+Nous nous réservons le droit de modifier cette déclaration de confidentialité à tout moment. Les modifications seront publiées sur ce site web. Nous vous encourageons à consulter régulièrement cette page pour vous tenir au courant de nos pratiques en matière de confidentialité.
+
+Contactez-nous
+Si vous avez des questions concernant cette déclaration de confidentialité, veuillez nous contacter à l'adresse suivante : [adresse email].
+

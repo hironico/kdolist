@@ -27,9 +27,9 @@ app.use((req, res, next) => {
     next();
   });
 
-// Route prefixing
-const apiPrefix = '/api';
-app.use(`${apiPrefix}`, require('./routes/api')); // Load API routes from a separate file
+// Route loading
+app.use('/api', require('./routes/api/')); 
+app.use('/legal', require('./routes/legal/')); 
 
 // Error handling
 app.use((err, req, res, next) => {

@@ -2,9 +2,9 @@ const express = require('express');
 
 const { authenticateJWT } = require('./auth');
 
-const { GiftList, Link, Gift } = require('../model/model');
-const logger = require('../logger');
-const giftlistcontroller = require('../controller/giftlistcontroller');
+const { GiftList, Link, Gift } = require('../../model/model');
+const logger = require('../../logger');
+const giftlistcontroller = require('../../controller/giftlistcontroller');
 
 const giftApi = express.Router();
 

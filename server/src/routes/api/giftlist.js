@@ -3,9 +3,9 @@ const {Op} = require('sequelize');
 
 const { authenticateJWT } = require('./auth');
 
-const { GiftList, Gift, User } = require('../model/model');
-const logger = require('../logger');
-const giftlistcontroller = require('../controller/giftlistcontroller');
+const { GiftList, Gift, User } = require('../../model/model');
+const logger = require('../../logger');
+const giftlistcontroller = require('../../controller/giftlistcontroller');
 
 const giftListApi = express.Router();
 

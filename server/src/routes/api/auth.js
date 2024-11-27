@@ -1,10 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const logger = require('../logger');
-const { User, SocialAccount } = require('../model/model');
-const usercontroller = require('../controller/usercontroller');
-const giftlistcontroller = require('../controller/giftlistcontroller');
+const logger = require('../../logger');
+const { User, SocialAccount } = require('../../model/model');
+const usercontroller = require('../../controller/usercontroller');
+const giftlistcontroller = require('../../controller/giftlistcontroller');
 
 const refreshTokens = [];
 
