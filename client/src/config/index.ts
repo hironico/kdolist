@@ -6,7 +6,7 @@ const title = 'KDO list';
 
 const email = 'hironico@hironico.net';
 
-const repository = 'https://github.com/suren-atoyan/react-pwa';
+const repository = 'https://github.com/hironico/kdolist';
 
 const messages = {
   app: {
@@ -48,7 +48,7 @@ const loader = {
 
 const defaultMetaTags = {
   image: '/cover.png',
-  description: 'Starter kit for modern web applications',
+  description: 'Hironico\'s KDO List is a gift list management app',
 };
 const giphy404 = 'https://giphy.com/embed/xTiN0L7EW5trfOvEk0';
 
