@@ -6,12 +6,13 @@ import ThumbUpAltRoundedIcon from '@mui/icons-material/ThumbUpAltRounded';
 import QuestionAnswer from '@mui/icons-material/QuestionAnswer';
 import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
 import Card from '@/components/Card/Card';
-import { Button } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { CenteredFlexBox, FlexBox } from '@/components/styled';
 
 const items = [
   {
-    icon: <QuestionAnswer sx={{ color: 'text.secondary' }} />,
+    icon: <QuestionAnswer fontSize="small" sx={{ color: 'text.secondary' }} />,
     title: 'Bienvenue!',
     description:
       'L\'application K.DO-LIST permet de partager ses listes de cadeaux, pour soi-même ou quelqu\'un d\'autre.',
@@ -20,8 +21,8 @@ const items = [
     icon: <PsychologyAltIcon sx={{ color: 'text.secondary' }} />,
     title: 'Comment ça marche?',
     description:
-      'Utilises un réseau social pour te faire connaitre, puis crées ta premiere liste et cherches un groupe avec qui la partager. Tu n\'est pas sur les réseaux? \
-      Comme tu es quelqu\'un de très spécial on va te créer un compte avec un mot de passe. Fais-le nous savoir et on s\'en occuppe.'
+      'Utilises un réseau social pour te faire connaitre, puis crées ta premiere liste. Tu n\'es pas sur les réseaux? \
+      Fais-le nous savoir et on s\'occuppe de tout.'
   },
   {
     icon: <ThumbUpAltRoundedIcon sx={{ color: 'text.secondary' }} />,
@@ -42,37 +43,29 @@ export default function Content() {
   // const bgColor = theme === Themes.DARK ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.7)';
 
   const bgColor = 'rgba(255, 255, 255, 0.7)';
-  const navigate = useNavigate();
-
-  const onLetsGo = () => {
-    navigate('/login', { replace: true});
-  }
+  
 
   return (
-    <Card variant="outlined" sx={{
-      backgroundColor: bgColor, // White background with 20% opacity
-      backdropFilter: 'blur(10px)', // Blur effect
-      padding: '20px', // Add some padding
-    }}>
-      <Stack
-        sx={{ flexDirection: 'column', alignSelf: 'center', gap: 4, maxWidth: 450 }}
-      >
-        {items.map((item, index) => (
-          <Stack key={index} direction="row" sx={{ gap: 2 }}>
-            {item.icon}
-            <div>
-              <Typography gutterBottom sx={{ fontWeight: 'medium' }}>
-                {item.title}
-              </Typography>
-              <Typography sx={{ color: 'text.primary' }}>
-                {item.description}
-              </Typography>
-            </div>
-          </Stack>
-        ))}
+    <Stack sx={{ flexDirection: {xs: 'column', sm: 'row'}, alignSelf: 'center', gap: 4, maxWidth: 1150 }}>
+      {items.map((item, index) => (
+          <Card variant="outlined" key={`contentcard-${index}`}
+          sx={{
+            backgroundColor: bgColor, // White background with 20% opacity
+            backdropFilter: 'blur(10px)', // Blur effect
+            padding: '20px', // Add some padding
+            height: '250px',
+            width: '250px',
+          }}>
 
-        <Button variant='contained' onClick={(_evt) => onLetsGo()}>C&apos;est parti !</Button>
-      </Stack>
-    </Card>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={2}>{item.icon}</Grid>
+              <Grid item xs={8}>{item.title}</Grid>
+            </Grid>
+            <Typography fontSize="medium" sx={{ color: 'text.primary' }}>
+            {item.description}
+            </Typography>
+          </Card>
+      ))}      
+    </Stack>
   );
 }
