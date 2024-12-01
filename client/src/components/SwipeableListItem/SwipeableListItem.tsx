@@ -10,8 +10,6 @@ import {
   Avatar,
 } from '@mui/material';
 import {
-  Info as InfoIcon,
-  Delete as DeleteIcon,
   MoreVert as MoreVertIcon,
   FormatListBulleted as FormatListBulletedIcon
 } from '@mui/icons-material';
