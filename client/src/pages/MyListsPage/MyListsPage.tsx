@@ -10,12 +10,10 @@ import BottomDialog from '@/components/BottomDialog/BottomDialog';
 import ListEditor from '@/components/GiftLists/ListEditorForm';
 import useNotifications from '@/store/notifications';
 import { GiftListsFAB } from '@/components/GiftLists';
-import ActionSheet, { ActionSheetEntries } from '@/components/ActionSheet/ActionSheet';
 
 function MyListsPage() {
   const [giftLists, setGiftLists] = useState<GiftList[]>([]);
   const [createListFormOpen, setCreateListFormOpen] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
@@ -75,35 +73,6 @@ function MyListsPage() {
     setCreateListFormOpen(false);
   };
 
-  const handleDeleteGiftList = async () => {
-    if (!appContext.giftList) {
-      console.warn('The handleDeleteGiftList should have not been called without a selected list in the context');
-      return;
-    }
-
-    setShowConfirmDialog(false);
-
-    const response = await fetch(`${apiBaseUrl}/giftlist/${appContext.giftList?.id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-      },
-    });
-
-    if (!response.ok) {
-      notificationsActions.push({
-        options: {
-          variant: 'error',
-        },
-        message: 'Impossible de SUPPRIMER cette liste pour le moment.'
-      });
-    } else {
-      fetchGiftLists();
-      appContext.setGiftList(null);
-    }
-  }
-
   const showCreateListForm = () => {
     setCreateListFormOpen(true);
   }
@@ -114,26 +83,12 @@ function MyListsPage() {
 
   const listEditor = <ListEditor onCreateList={handleCreateGiftList}/>
 
-  const actions:ActionSheetEntries[] = [
-    {
-      label: 'Oui, effacer la liste',
-      color: 'secondary',
-      onAction: () => handleDeleteGiftList()
-    }
-  ];
-
-  const defaultAction: ActionSheetEntries = {
-    label: 'Non, laisse tomber',
-    color: 'primary',
-    onAction: () => setShowConfirmDialog(false)
-  }
-
   return (
     <ProtectedRoute>
       <Meta title="Mes listes" />
       <FullSizeTopCenteredFlexBox>
-        <GiftListsList giftLists={giftLists} editable={true} />
-        <GiftListsFAB handleAdd={showCreateListForm} handleDelete={() => setShowConfirmDialog(true)}/>
+        <GiftListsList giftLists={giftLists} editable={true} handleFetch={fetchGiftLists} />
+        <GiftListsFAB handleAdd={showCreateListForm} />
       </FullSizeTopCenteredFlexBox>
 
       <BottomDialog title="Nouvelle liste" 
@@ -141,8 +96,6 @@ function MyListsPage() {
                     handleClose={closeCreateListForm}
                     contents={listEditor}
       />
-
-      <ActionSheet open={showConfirmDialog} handleClose={() => setShowConfirmDialog(false)} entries={actions} defaultEntry={defaultAction} message="Attention c'est irreversible !"/>
 
     </ProtectedRoute>
   );
