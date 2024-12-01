@@ -14,7 +14,7 @@ function MyGroupsListsPage() {
   const [, notificationsActions] = useNotifications();
 
   const fetchGiftLists = async () => {
-    console.log('Fetching my gift lists...');
+    console.log('Fetching SHARED gift lists...');
     try {
       const response = await fetch(`${apiBaseUrl}/giftlist/shared`, {
         method: 'GET',
@@ -53,7 +53,7 @@ function MyGroupsListsPage() {
     <ProtectedRoute>
       <Meta title="Listes partagées" />
       <FullSizeTopCenteredFlexBox>
-        <GiftListsList giftLists={giftLists} editable={false}/>
+        <GiftListsList giftLists={giftLists} editable={false} handleFetch={fetchGiftLists}/>
       </FullSizeTopCenteredFlexBox>
     </ProtectedRoute>
   );

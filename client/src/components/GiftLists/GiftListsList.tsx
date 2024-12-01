@@ -99,7 +99,7 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable, handleFetc
             onAction: () => handleSelectAndConfirmDelete(item)
           }
 
-          return <SwipeableListItem onClick={() => handleNavigateList(item, editable)} action1={deleteAction} primaryText={item.name} secondaryText={secondaryText} key={`index-${index}`} />
+          return <SwipeableListItem onClick={() => handleNavigateList(item, editable)} action1={editable ? deleteAction : undefined} primaryText={item.name} secondaryText={secondaryText} key={`index-${index}`} />
         })}
       </List>
 
