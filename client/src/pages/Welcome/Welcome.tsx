@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import { useContext } from 'react';
 import { LoginContext } from '@/LoginContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Button, Card, Link, Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import { CenteredFlexBox } from '@/components/styled';
 
 function Welcome() {
@@ -37,7 +37,7 @@ function Welcome() {
           component="main"
           sx={[
             {
-              justifyContent: 'space-between',
+              justifyContent: 'flex-start',
               height: { xs: 'auto', md: '100%' },
             },
           ]}
@@ -46,18 +46,12 @@ function Welcome() {
             <Typography variant='h2' color="lightgray">K.DO-List</Typography>
           </CenteredFlexBox>
           <Content />
-          <Button variant='contained' onClick={(_evt) => onLetsGo()} sx={{marginLeft: '15px', marginRight: '15px', padding: '15px'}}>C&apos;est parti !</Button>
-
-          <Card sx={{
-            backgroundColor: 'rgba(255, 255, 255, 0.7)', // White background with 20% opacity
-            backdropFilter: 'blur(10px)', // Blur effect
-            marginLeft: '15px',
-            marginRight: '15px'
-          }}>
-            <CenteredFlexBox sx={{padding: '15px'}}>
-              <a href='https://kdolist.hironico.net/legal/privacy' target='_blank'>Politique de confidentialite</a>
-            </CenteredFlexBox>
-          </Card>
+          <CenteredFlexBox sx={{marginTop: '15px'}} alignItems={"center"}>
+            <Button variant='contained' onClick={(_evt) => onLetsGo()} sx={{margin: '5px', padding: '5px', width: '100%', maxWidth: '850px'}}>C&apos;est parti !</Button>
+          </CenteredFlexBox>
+          <CenteredFlexBox alignItems={"center"}>
+          <Button variant='contained' color="success" href="https://kdolist.hironico.net/legal/privacy" sx={{margin: '5px', padding: '5px', width: '100%', maxWidth: '850px'}}>Politique de confidentialité</Button>
+          </CenteredFlexBox>
         </Stack>
       </Box>
     </>

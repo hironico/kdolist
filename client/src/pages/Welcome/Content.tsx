@@ -6,14 +6,12 @@ import ThumbUpAltRoundedIcon from '@mui/icons-material/ThumbUpAltRounded';
 import QuestionAnswer from '@mui/icons-material/QuestionAnswer';
 import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
 import Card from '@/components/Card/Card';
-import { Button, Grid } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { CenteredFlexBox, FlexBox } from '@/components/styled';
+import { Grid } from '@mui/material';
 
 const items = [
   {
     icon: <QuestionAnswer fontSize="small" sx={{ color: 'text.secondary' }} />,
-    title: 'Bienvenue!',
+    title: 'C\'est quoi?',
     description:
       'L\'application K.DO-LIST permet de partager ses listes de cadeaux, pour soi-même ou quelqu\'un d\'autre.',
   },
@@ -46,15 +44,16 @@ export default function Content() {
   
 
   return (
-    <Stack sx={{ flexDirection: {xs: 'column', sm: 'row'}, alignSelf: 'center', gap: 4, maxWidth: 1150 }}>
+    <Stack sx={{ flexDirection: {xs: 'column', sm: 'row'}, width: '100%', alignSelf: 'center', gap: {xs: 1, sm: 4}, rowGap: 1, maxWidth: 1150 }}>
       {items.map((item, index) => (
           <Card variant="outlined" key={`contentcard-${index}`}
           sx={{
             backgroundColor: bgColor, // White background with 20% opacity
             backdropFilter: 'blur(10px)', // Blur effect
-            padding: '20px', // Add some padding
-            height: '250px',
-            width: '250px',
+            padding: '10px', // Add some padding
+            height: {sm: '250px', xs: 'auto'},
+            width: {sm: '250px', xs: '90%'},
+            margin: {sm: '0px', xs: '10px'}
           }}>
 
             <Grid container spacing={2} alignItems="center">
