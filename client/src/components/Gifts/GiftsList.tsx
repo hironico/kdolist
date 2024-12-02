@@ -1,7 +1,6 @@
-  import { Avatar, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material";
+import { List, Typography } from "@mui/material";
 import React, { useContext } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import { Gift, LoginContext } from "@/LoginContext";
 import SwipeableListItem, { SwipeableListItemAction } from "../SwipeableListItem/SwipeableListItem";
 

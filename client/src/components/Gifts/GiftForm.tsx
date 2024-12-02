@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { TextField, Button, Box } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import { Gift, GiftLink, LoginContext } from '@/LoginContext';
-import { FlexBox, FullSizeCenteredFlexBox } from '../styled';
+import { FullSizeCenteredFlexBox } from '../styled';
 import GiftLinksMenu from './GiftLinksMenu';
 import { apiBaseUrl } from '@/config';
 import { Stack } from '@mui/system';

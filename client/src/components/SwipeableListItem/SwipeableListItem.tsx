@@ -188,7 +188,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
             </IconButton>
            )}
       >
-            <ListItemButton sx={{ width: '100%', pr: isTouchDevice ? 0 : 6 }} onClick={(e) =>  {
+            <ListItemButton sx={{ width: '100%', pr: isTouchDevice ? 0 : 6 }} onClick={(_e) =>  {
                 if(onClick) onClick();
             }}>
                 <ListItemAvatar>
