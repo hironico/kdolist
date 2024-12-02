@@ -1,6 +1,6 @@
 import { CheckCircle, RadioButtonUnchecked } from "@mui/icons-material";
 import { grey, red } from "@mui/material/colors";
-import { createTheme, responsiveFontSizes } from "@mui/material/styles";
+import { createTheme } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
 
 const iOSBoxShadow =

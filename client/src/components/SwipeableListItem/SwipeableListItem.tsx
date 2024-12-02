@@ -8,6 +8,8 @@ import {
   ListItem,
   ListItemAvatar,
   Avatar,
+  Theme,
+  useTheme,
 } from '@mui/material';
 import {
   MoreVert as MoreVertIcon,
@@ -19,14 +21,14 @@ const SwipeableCard = styled(Box)(({ theme }) => ({
   position: 'relative',
   overflow: 'hidden',
   width: '100%',
-  backgroundColor: 'white',
+  backgroundColor: theme.palette.background.paper,
 }));
 
-const CardWrapper = styled(ListItem)<{ transform: string }>(({ transform }) => ({
+const CardWrapper = styled(ListItem)<{ transform: string, theme: Theme }>(({ transform, theme }) => ({
   display: 'flex',
   transform,
   transition: 'transform 0.3s ease-out',
-  backgroundColor: 'white',
+  backgroundColor: theme.palette.background.paper,
   padding: '0px',
   margin: '0px'
 }));
@@ -66,6 +68,8 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   const [swiping, setSwiping] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(true);
+
+  const theme = useTheme();
 
   // Detect touch device
   useEffect(() => {
@@ -171,6 +175,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
       </ActionsWrapper>      
       <CardWrapper
         transform={getTransform()}
+        theme={theme}
         {...(isTouchDevice ? {
           onTouchStart,
           onTouchMove,
