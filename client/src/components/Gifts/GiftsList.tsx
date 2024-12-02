@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import { Gift, LoginContext } from "@/LoginContext";
+import SwipeableListItem, { SwipeableListItemAction } from "../SwipeableListItem/SwipeableListItem";
 
 type GiftsListProps = {
   handleDelete: (gift: Gift) => void;
@@ -16,24 +17,24 @@ const GifsList: React.FC<GiftsListProps> = ({ handleDelete, handleShowGiftEditor
   return (
     <List>
       {appContext.giftListContents?.map((oneGift, index) => {
-        const secondaryAction = !editable ? <></> : <IconButton edge="end" aria-label="editer" onClick={(_e) => handleDelete(oneGift)}>
-                                                      <DeleteIcon />
-                                                    </IconButton>
         const modifDate = new Date(oneGift.updatedAt.toString());
-        const secondaryText = <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
+        const secondaryText = <Typography variant="caption">
+          {`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}
+        </Typography>
 
-        return <ListItem key={`gift-${index}`} disablePadding secondaryAction={secondaryAction}>
-          <ListItemButton onClick={(_evt) => handleShowGiftEditor(oneGift, editable)}>
-              <ListItemAvatar>
-                <Avatar>
-                  <CardGiftcardIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={oneGift.name} secondary={secondaryText} />
-              <Divider variant="inset"/>                        
-          </ListItemButton>
-          </ListItem>
-      })}
+        const deleteAction : SwipeableListItemAction = {
+          icon: <DeleteIcon/>,
+          color: 'error',
+          onAction: () => handleDelete(oneGift)
+        };
+
+        return <SwipeableListItem key={`kdo-${index}`}
+                    onClick={() => handleShowGiftEditor(oneGift, editable)}
+                    primaryText={oneGift.name}
+                    secondaryText={secondaryText}
+                    action1={editable ? deleteAction : undefined} />        
+      })
+      }
     </List>
   )
 }
