@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { List,  Typography } from '@mui/material';
+import { List,  Typography, useTheme } from '@mui/material';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import { GiftList, LoginContext } from '@/LoginContext';
 import ActionSheet, { ActionSheetEntries } from '../ActionSheet/ActionSheet';
@@ -7,6 +7,7 @@ import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { FormatListBulleted } from '@mui/icons-material';
 
 export type GiftListProps = {
   giftLists: GiftList[],
@@ -19,6 +20,7 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable, handleFetc
   const navigate = useNavigate();
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
+  const theme = useTheme();
 
   /**
    * Navigates to the list contents editor. Sets the selecte dlist in the list editor context.
@@ -99,7 +101,16 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable, handleFetc
             onAction: () => handleSelectAndConfirmDelete(item)
           }
 
-          return <SwipeableListItem onClick={() => handleNavigateList(item, editable)} action1={editable ? deleteAction : undefined} primaryText={item.name} secondaryText={secondaryText} key={`index-${index}`} />
+          const icon = <FormatListBulleted />
+
+          return <SwipeableListItem 
+                      onClick={() => handleNavigateList(item, editable)} 
+                      action1={editable ? deleteAction : undefined} 
+                      primaryText={item.name} 
+                      secondaryText={secondaryText} 
+                      icon={icon}
+                      key={`index-${index}`} 
+                    />
         })}
       </List>
 

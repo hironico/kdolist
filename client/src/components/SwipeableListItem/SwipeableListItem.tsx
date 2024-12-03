@@ -11,10 +11,7 @@ import {
   Theme,
   useTheme,
 } from '@mui/material';
-import {
-  MoreVert as MoreVertIcon,
-  FormatListBulleted as FormatListBulletedIcon
-} from '@mui/icons-material';
+import { MoreVert as MoreVertIcon } from '@mui/icons-material';
 
 // Styled components
 const SwipeableCard = styled(Box)(({ theme }) => ({
@@ -55,6 +52,7 @@ export interface SwipeableListItemProps {
   action2?: SwipeableListItemAction;
   action3?: SwipeableListItemAction;
   onClick?: () => void;
+  icon?: ReactElement;
 }
 
 const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
@@ -62,6 +60,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   secondaryText,
   action1, action2, action3,
   onClick,
+  icon,
 }) => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -191,11 +190,12 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
             <ListItemButton sx={{ width: '100%', pr: isTouchDevice ? 0 : 6 }} onClick={(_e) =>  {
                 if(onClick) onClick();
             }}>
-                <ListItemAvatar>
-                <Avatar>
-                  <FormatListBulletedIcon />
-                </Avatar>
-              </ListItemAvatar>
+                {icon && <ListItemAvatar>
+                    <Avatar variant='rounded' sx={{bgcolor: theme.palette.primary.light}}>
+                      {icon}
+                    </Avatar>
+                  </ListItemAvatar>
+                }
                 <ListItemText primary={primaryText} secondary={secondaryText} />
             </ListItemButton>
       </CardWrapper>

@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Gift, LoginContext } from "@/LoginContext";
 import SwipeableListItem, { SwipeableListItemAction } from "../SwipeableListItem/SwipeableListItem";
+import { Redeem } from "@mui/icons-material";
 
 type GiftsListProps = {
   handleDelete: (gift: Gift) => void;
@@ -27,11 +28,15 @@ const GifsList: React.FC<GiftsListProps> = ({ handleDelete, handleShowGiftEditor
           onAction: () => handleDelete(oneGift)
         };
 
+        const icon = <Redeem />
+
         return <SwipeableListItem key={`kdo-${index}`}
                     onClick={() => handleShowGiftEditor(oneGift, editable)}
                     primaryText={oneGift.name}
                     secondaryText={secondaryText}
-                    action1={editable ? deleteAction : undefined} />        
+                    action1={editable ? deleteAction : undefined} 
+                    icon={icon}
+                  />        
       })
       }
     </List>
