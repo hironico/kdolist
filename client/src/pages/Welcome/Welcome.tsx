@@ -50,7 +50,7 @@ function Welcome() {
             <Button variant='contained' onClick={(_evt) => onLetsGo()} sx={{margin: '5px', padding: '5px', width: '100%', maxWidth: '850px'}}>C&apos;est parti !</Button>
           </CenteredFlexBox>
           <CenteredFlexBox alignItems={"center"}>
-          <Button variant='contained' color="success" href="https://kdolist.hironico.net/legal/privacy" sx={{margin: '5px', padding: '5px', width: '100%', maxWidth: '850px'}}>Politique de confidentialité</Button>
+          <Button variant='contained' color="secondary" href="https://kdolist.hironico.net/legal/privacy" sx={{margin: '5px', padding: '5px', width: '100%', maxWidth: '850px'}}>Politique de confidentialité</Button>
           </CenteredFlexBox>
         </Stack>
       </Box>
