@@ -74,7 +74,7 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable, handleFetc
   const actions:ActionSheetEntries[] = [
     {
       label: 'Oui, effacer la liste',
-      color: 'secondary',
+      color: 'error',
       onAction: () => handleDeleteGiftList()
     }
   ];

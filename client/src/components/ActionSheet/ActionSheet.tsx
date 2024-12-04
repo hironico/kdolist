@@ -4,7 +4,7 @@ import { CenteredFlexBox } from '../styled';
 
 export interface ActionSheetEntries {
     label: string;
-    color: 'primary' | 'secondary'
+    color: 'primary' | 'secondary' | 'error' | 'info'
     onAction: MouseEventHandler<HTMLButtonElement> | undefined;
 }
 

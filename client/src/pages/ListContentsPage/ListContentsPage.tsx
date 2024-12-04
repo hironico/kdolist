@@ -147,7 +147,7 @@ const ListContentsPage: React.FC = () => {
   const actions: ActionSheetEntries[] = [
     {
       label: "Oui, effacer ce cadeau de la liste",
-      color: "secondary",
+      color: "error",
       onAction: handleDeleteGift
     }
   ]
