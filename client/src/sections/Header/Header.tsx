@@ -15,6 +15,7 @@ import { ReactNode, useContext} from 'react';
 import { ChevronLeft } from '@mui/icons-material';
 import { LoginContext } from '@/LoginContext';
 import UserAvatar from '@/components/UserAvatar/UserAvatar';
+import { Link, Typography } from '@mui/material';
 
 
 function Header() {
@@ -106,7 +107,7 @@ function Header() {
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <FlexBox sx={{ alignItems: 'center' }}>
             {renderIconButton()}
-            <Button onClick={showNotification} color="info">
+            <Button size='large' onClick={showNotification}>
               {getTitle()}
             </Button>
           </FlexBox>
