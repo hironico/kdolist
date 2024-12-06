@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, SwipeableDrawer, Typography } from '@mui/material';
+import { Button, ButtonGroup, Divider, SwipeableDrawer, Typography } from '@mui/material';
 import React, { MouseEventHandler } from 'react';
 import { CenteredFlexBox } from '../styled';
 
@@ -26,7 +26,9 @@ const ActionSheet: React.FC<ActionSheetProps> = ({handleClose, open, entries: ac
         backgroundColor: 'rgba(255,255,255, 0.65)',
         boxShadow: 'none',
         backdropFilter: 'blur(10px)',
-        margin: '8px',
+        marginLeft: '8px',
+        marginRight: '8px',
+        marginBottom: '10px',
         borderRadius: '16px'
       }
 
@@ -45,15 +47,16 @@ const ActionSheet: React.FC<ActionSheetProps> = ({handleClose, open, entries: ac
       >        
         <ButtonGroup sx={buttonStyle} orientation='vertical' variant='text'>
             {message ? <CenteredFlexBox>
-                       <Typography variant='caption'>{message}</Typography>                       
+                       <Typography variant='body2' align="center" sx={{width: '100%', padding: '5px'}}>{message}
+                       <Divider orientation='horizontal' sx={{marginTop: '5px'}}/>   
+                       </Typography>                                     
                        </CenteredFlexBox> : <></>}
             {actions.map((actionItem, index) => {
                 return <Button key={`key-${index}-${actionItem.label}`} color={actionItem.color} onClick={actionItem.onAction}>
                     {actionItem.label}
               </Button>
             })}
-        </ButtonGroup>
-          
+        </ButtonGroup> 
         {defaultAction ? 
         <ButtonGroup sx={buttonStyle} orientation='vertical' variant='text'>
             <Button color={defaultAction.color} onClick={defaultAction.onAction}>
