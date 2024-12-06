@@ -41,24 +41,13 @@ const baseTheme = createTheme({
             fontSize: 18
         },
         body2: {
+            fontSize: 14
+        },
+        caption: {
             fontSize: 12
         }
     },
     components: {
-        MuiInputBase: {
-            styleOverrides: {
-                root: {
-                    fontSize: 18
-                }
-            }
-        },        
-        MuiTextField: {
-            styleOverrides: {
-                root: {
-                    fontSize: 18
-                }
-            }
-        },
         MuiDialogContentText: {
             styleOverrides: {
                 root: {
@@ -85,13 +74,16 @@ const baseTheme = createTheme({
         MuiButtonBase: {
             defaultProps: {
                 disableRipple: true,
-            }
+            },
         },
         MuiButton: {
             styleOverrides: {
                 root: {
                     textTransform: 'none',
                     fontWeight: '400',
+                    paddingTop: '10px',
+                    paddingBottom: '10px',
+                    fontSize: 18
                 },
             }
         },
@@ -157,6 +149,13 @@ const baseTheme = createTheme({
                 root: {
                     width: '100%',
                 },
+            }
+        },
+        MuiInputBase: {
+            styleOverrides: {
+                root: {
+                    fontSize: 18,
+                }
             }
         },
         MuiList: {
@@ -296,6 +295,13 @@ const baseTheme = createTheme({
                     backgroundColor: grey[200],
                     opacity: 1,
                 },
+            }
+        },
+        MuiTextField: {
+            styleOverrides: {
+                root: {
+                    fontSize: 18
+                }
             }
         },
         MuiToolbar: {
