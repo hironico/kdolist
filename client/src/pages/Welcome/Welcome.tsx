@@ -30,15 +30,19 @@ function Welcome() {
         backgroundImage: 'url(./background/kdolist-1.jpeg)', // Set the background image
         backgroundSize: 'cover', // Set the background image size to cover the entire component
         backgroundPosition: 'center',
-        height: { xs: '100%', md: '100%' }
+        height: { xs: '100%', md: '100%'},
+        overflowY: 'scroll'
       }}>
         <Stack
           direction="column"
           component="main"
+          gap={2}
           sx={[
             {
               justifyContent: 'flex-start',
               height: { xs: 'auto', md: '100%' },
+              marginLeft: {xs: '0px', md: '10px'},
+              marginRight: {xs: '0px', md: '10px'}
             },
           ]}
         >
@@ -47,10 +51,10 @@ function Welcome() {
           </CenteredFlexBox>
           <Content />
           <CenteredFlexBox sx={{marginTop: '15px'}} alignItems={"center"}>
-            <Button variant='contained' onClick={(_evt) => onLetsGo()} sx={{margin: '5px', padding: '5px', width: '100%', maxWidth: '850px'}}>C&apos;est parti !</Button>
+            <Button variant='contained' onClick={(_evt) => onLetsGo()} sx={{padding: '10px', margin: '5px', width: '100%', maxWidth: '850px'}}>C&apos;est parti !</Button>
           </CenteredFlexBox>
-          <CenteredFlexBox alignItems={"center"}>
-          <Button variant='contained' color="secondary" href="https://kdolist.hironico.net/legal/privacy" sx={{margin: '5px', padding: '5px', width: '100%', maxWidth: '850px'}}>Politique de confidentialité</Button>
+          <CenteredFlexBox alignItems={"center"} sx={{marginBottom: '30px', marginTop: '10px'}}>
+          <Button variant='contained' color="secondary" href="https://kdolist.hironico.net/legal/privacy" sx={{margin: '5px', padding: '10px', width: '100%', maxWidth: '850px'}}>Politique de confidentialité</Button>
           </CenteredFlexBox>
         </Stack>
       </Box>

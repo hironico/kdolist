@@ -13,7 +13,7 @@ const items = [
     icon: <QuestionAnswer fontSize="small" sx={{ color: 'text.secondary' }} />,
     title: 'C\'est quoi?',
     description:
-      'L\'application K.DO-LIST permet de partager ses listes de cadeaux, pour soi-même ou quelqu\'un d\'autre.',
+      'K.DO-LIST gère tes listes de cadeaux. Partages les avec ta famille ou tes amis.',
   },
   {
     icon: <PsychologyAltIcon sx={{ color: 'text.secondary' }} />,
