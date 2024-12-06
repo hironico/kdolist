@@ -10,6 +10,7 @@ import BottomDialog from '@/components/BottomDialog/BottomDialog';
 import ListEditor from '@/components/GiftLists/ListEditorForm';
 import useNotifications from '@/store/notifications';
 import { GiftListsFAB } from '@/components/GiftLists';
+import { Slide } from '@mui/material';
 
 function MyListsPage() {
   const [giftLists, setGiftLists] = useState<GiftList[]>([]);
@@ -86,10 +87,12 @@ function MyListsPage() {
   return (
     <ProtectedRoute>
       <Meta title="Mes listes" />
-      <FullSizeTopCenteredFlexBox>
-        <GiftListsList giftLists={giftLists} editable={true} handleFetch={fetchGiftLists} />
-        <GiftListsFAB handleAdd={showCreateListForm} />
-      </FullSizeTopCenteredFlexBox>
+      <Slide direction='right' in={true} timeout={500}>
+        <FullSizeTopCenteredFlexBox>
+          <GiftListsList giftLists={giftLists} editable={true} handleFetch={fetchGiftLists} />
+          <GiftListsFAB handleAdd={showCreateListForm} />
+        </FullSizeTopCenteredFlexBox>
+      </Slide>
 
       <BottomDialog title="Nouvelle liste" 
                     open={createListFormOpen} 

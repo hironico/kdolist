@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import { apiBaseUrl } from '@/config';
 import { GiftList, LoginContext } from '@/LoginContext';
 import useNotifications from '@/store/notifications';
+import { Slide } from '@mui/material';
 
 function MyGroupsListsPage() {
   const [giftLists, setGiftLists] = useState<GiftList[]>([]);
@@ -52,9 +53,11 @@ function MyGroupsListsPage() {
   return (
     <ProtectedRoute>
       <Meta title="Listes partagées" />
+      <Slide direction='right' in={true} timeout={500}>
       <FullSizeTopCenteredFlexBox>
         <GiftListsList giftLists={giftLists} editable={false} handleFetch={fetchGiftLists}/>
       </FullSizeTopCenteredFlexBox>
+      </Slide>
     </ProtectedRoute>
   );
 }
