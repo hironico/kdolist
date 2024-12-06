@@ -248,6 +248,7 @@ export default function SignInCard() {
                             variant="outlined"
                             onClick={onClick}
                             startIcon={<FacebookIcon />}
+                            sx={{display: 'none'}}
                         >
                             <Typography sx={{ color: 'text.primary' }}>Facebook</Typography>
                         </Button>
