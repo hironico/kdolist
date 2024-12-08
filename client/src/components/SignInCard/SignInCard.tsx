@@ -112,7 +112,7 @@ export default function SignInCard() {
 
     const authenticate = (profile: ProfileSuccessResponse, authProvider: 'GOOGLE' | 'FACEBOOK') => {
 
-        console.log(`Authenticate ${authProvider}: ${profile}`);
+        console.log(`Authenticate ${authProvider}: ${JSON.stringify(profile, null,2)}`);
 
         const loginInfo: LoginInfoProps = {
             username: profile.name,
@@ -223,6 +223,7 @@ export default function SignInCard() {
                     fullWidth
                     variant="outlined"
                     onClick={() => googleLogin()}
+                    autoFocus
                     startIcon={<GoogleIcon />}
                 >
                     <Typography sx={{ color: 'text.primary' }}>Google</Typography>
@@ -270,8 +271,7 @@ export default function SignInCard() {
                         type="email"
                         name="email"
                         placeholder="mon@email.com"
-                        autoComplete="email"
-                        autoFocus
+                        autoComplete="email"                        
                         required
                         fullWidth
                         variant="outlined"
@@ -299,8 +299,7 @@ export default function SignInCard() {
                         placeholder="••••••"
                         type="password"
                         id="password"
-                        autoComplete="current-password"
-                        autoFocus
+                        autoComplete="current-password"                        
                         required
                         fullWidth
                         variant="outlined"
