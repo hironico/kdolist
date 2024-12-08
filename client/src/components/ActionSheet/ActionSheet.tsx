@@ -2,7 +2,7 @@ import { Button, ButtonGroup, Divider, SwipeableDrawer, Typography } from '@mui/
 import React, { MouseEventHandler } from 'react';
 import { CenteredFlexBox } from '../styled';
 
-export interface ActionSheetEntries {
+export interface ActionSheetEntry {
     label: string;
     color: 'primary' | 'secondary' | 'error' | 'info'
     onAction: MouseEventHandler<HTMLButtonElement> | undefined;
@@ -11,29 +11,38 @@ export interface ActionSheetEntries {
 export interface ActionSheetProps {
     handleClose:() => void;
     open: boolean;
-    entries: ActionSheetEntries[];
-    defaultEntry?: ActionSheetEntries;
+    entries: ActionSheetEntry[];
+    defaultEntry?: ActionSheetEntry;
     message?: string;
 }
 
 const iOS =
   typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
+  const mainActionStyle = {
+    backgroundColor: 'rgba(255,255,255, 0.65)',
+    boxShadow: 'none',
+    backdropFilter: 'blur(10px)',
+    marginLeft: '8px',
+    marginRight: '8px',
+    marginBottom: '10px',
+    borderRadius: '16px'
+  }
+
+  const defaultActionStyle = {
+    backgroundColor: 'rgba(255,255,255, 0.85)',
+    boxShadow: 'none',
+    backdropFilter: 'blur(10px)',
+    marginLeft: '8px',
+    marginRight: '8px',
+    marginBottom: '10px',
+    borderRadius: '16px'
+  }
 
 const ActionSheet: React.FC<ActionSheetProps> = ({handleClose, open, entries: actions, defaultEntry: defaultAction, message}) => {
 
-    const buttonStyle = {
-        backgroundColor: 'rgba(255,255,255, 0.65)',
-        boxShadow: 'none',
-        backdropFilter: 'blur(10px)',
-        marginLeft: '8px',
-        marginRight: '8px',
-        marginBottom: '10px',
-        borderRadius: '16px'
-      }
-
   return (    
-    <SwipeableDrawer disableBackdropTransition={!iOS} disableDiscovery={iOS}  onOpen={() => console.log('On open')} 
+    <SwipeableDrawer disableBackdropTransition={!iOS} disableDiscovery={iOS} onOpen={() => console.log('On open')}
         anchor="bottom"
         open={open}
         onClose={handleClose}
@@ -45,11 +54,11 @@ const ActionSheet: React.FC<ActionSheetProps> = ({handleClose, open, entries: ac
             },
           }}
       >        
-        <ButtonGroup sx={buttonStyle} orientation='vertical' variant='text'>
-            {message ? <CenteredFlexBox>
-                       <Typography variant='body2' align="center" sx={{width: '100%', padding: '5px'}}>{message}
-                       <Divider orientation='horizontal' sx={{marginTop: '5px'}}/>   
-                       </Typography>                                     
+        <ButtonGroup sx={mainActionStyle} orientation='vertical' variant='text'>
+            {message ? <CenteredFlexBox flexDirection={'column'} sx={{borderBottom: '1px solid', borderColor: 'divider'}}>
+                       <Typography variant='body2' align="center" sx={{width: '100%', padding: '5px'}}>
+                          {message}
+                       </Typography> 
                        </CenteredFlexBox> : <></>}
             {actions.map((actionItem, index) => {
                 return <Button key={`key-${index}-${actionItem.label}`} color={actionItem.color} onClick={actionItem.onAction}>
@@ -58,7 +67,7 @@ const ActionSheet: React.FC<ActionSheetProps> = ({handleClose, open, entries: ac
             })}
         </ButtonGroup> 
         {defaultAction ? 
-        <ButtonGroup sx={buttonStyle} orientation='vertical' variant='text'>
+        <ButtonGroup sx={defaultActionStyle} orientation='vertical' variant='text'>
             <Button color={defaultAction.color} onClick={defaultAction.onAction}>
                     {defaultAction.label}
               </Button>
