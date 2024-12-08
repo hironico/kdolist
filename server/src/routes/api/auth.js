@@ -54,7 +54,13 @@ const loginSocialUser = async (profile, provider) => {
         return null;
     }
 
-    const firstLastNames = profile.username.split(' ');
+    const username = profile.username;
+    if (!username) {
+        logger.error('Must provide at least an email!');
+        return null;
+    }
+
+    const firstLastNames = username.split(' ');
     if (firstLastNames.length < 2) {
         firstLastNames.push('');
     }
