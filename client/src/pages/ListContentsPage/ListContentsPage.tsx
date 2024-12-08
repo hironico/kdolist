@@ -1,4 +1,4 @@
-import ActionSheet, { ActionSheetEntries } from "@/components/ActionSheet/ActionSheet";
+import ActionSheet, { ActionSheetEntry } from "@/components/ActionSheet/ActionSheet";
 import BottomDialog from "@/components/BottomDialog/BottomDialog";
 import GiftForm from "@/components/Gifts/GiftForm";
 import { GiftsFAB } from "@/components/Gifts/GiftsFAB";
@@ -144,7 +144,7 @@ const ListContentsPage: React.FC = () => {
       });
   }
 
-  const actions: ActionSheetEntries[] = [
+  const actions: ActionSheetEntry[] = [
     {
       label: "Oui, effacer ce cadeau de la liste",
       color: "error",
@@ -152,7 +152,7 @@ const ListContentsPage: React.FC = () => {
     }
   ]
 
-  const defaultAction: ActionSheetEntries = {
+  const defaultAction: ActionSheetEntry = {
     label: 'Non, laisse tomber',
     color: 'primary',
     onAction: () => setConfirmDeleteOpen(false)

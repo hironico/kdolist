@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { List,  Typography, useTheme } from '@mui/material';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import { GiftList, LoginContext } from '@/LoginContext';
-import ActionSheet, { ActionSheetEntries } from '../ActionSheet/ActionSheet';
+import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
@@ -71,7 +71,7 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable, handleFetc
     }
   }
 
-  const actions:ActionSheetEntries[] = [
+  const actions:ActionSheetEntry[] = [
     {
       label: 'Oui, effacer la liste',
       color: 'error',
@@ -79,7 +79,7 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable, handleFetc
     }
   ];
 
-  const defaultAction: ActionSheetEntries = {
+  const defaultAction: ActionSheetEntry = {
     label: 'Non, laisse tomber',
     color: 'primary',
     onAction: () => setShowConfirmDialog(false)
@@ -104,7 +104,7 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable, handleFetc
           const icon = <FormatListBulleted />
 
           return <SwipeableListItem 
-                      onClick={() => handleNavigateList(item, editable)} 
+                      onClickMain={() => handleNavigateList(item, editable)} 
                       action1={editable ? deleteAction : undefined} 
                       primaryText={item.name} 
                       secondaryText={secondaryText} 
