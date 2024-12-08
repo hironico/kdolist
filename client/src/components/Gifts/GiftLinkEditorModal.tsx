@@ -15,17 +15,21 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
   const [canPaste, setCanPaste] = useState(false);
 
   useEffect(() => {
-    const testClipboard = async () => {
+    // Vérifier si l'API Clipboard est disponible
+    const checkClipboardPermission = async () => {
       try {
-        await navigator.clipboard.readText();
-        setCanPaste(true);
-      } catch (err) {
+        // Vérifier si l'API est supportée
+        if (!navigator.clipboard) {
+          setCanPaste(false);
+          return;
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification de l\'accès au Clipboard:', error);
         setCanPaste(false);
-        console.log(`Access to clipboard not supported on this browser! ${err}`);
       }
     };
 
-    testClipboard();
+    checkClipboardPermission();
   }, []);
 
   const handleNomChange = (event: React.ChangeEvent<HTMLInputElement>) => {
