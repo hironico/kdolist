@@ -1,4 +1,3 @@
 import BottomDialog from "./BottomDialog";
-import ConfirmDialog from "./ConfirmationDialog";
 
-export { BottomDialog, ConfirmDialog };
+export { BottomDialog };
