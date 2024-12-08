@@ -31,7 +31,7 @@ const GifsList: React.FC<GiftsListProps> = ({ handleDelete, handleShowGiftEditor
         const icon = <Redeem />
 
         return <SwipeableListItem key={`kdo-${index}`}
-                    onClick={() => handleShowGiftEditor(oneGift, editable)}
+                    onClickMain={() => handleShowGiftEditor(oneGift, editable)}
                     primaryText={oneGift.name}
                     secondaryText={secondaryText}
                     action1={editable ? deleteAction : undefined} 
