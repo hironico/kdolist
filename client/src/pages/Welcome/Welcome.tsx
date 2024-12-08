@@ -120,6 +120,10 @@ const Welcome: React.FC = () => {
         navigate('/login', { replace: true });
     }
 
+    const onLetsGoPrivacy = () => {
+        navigate('/privacy', {replace: true});
+    }
+
     return (
         <>
             <Meta title="Welcome" />
@@ -181,9 +185,17 @@ const Welcome: React.FC = () => {
                     color="primary"
                     size="medium"
                     onClick={(_e) => onLetsGo()}
-                    sx={{ mt: 4, width: '100%' }}                    
+                    sx={{ mt: 4, width: '100%' }}
                 >
                     C'est parti !
+                </Button>
+
+                <Button variant="contained"
+                    color="secondary"
+                    size="medium"
+                    sx={{ mt: 4, width: '100%' }}
+                    onClick={(_e) => onLetsGoPrivacy()}>
+                    Politique de confidentialité
                 </Button>
             </Container>
         </>
