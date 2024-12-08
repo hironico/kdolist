@@ -10,6 +10,7 @@ import {
   Avatar,
   Theme,
   useTheme,
+  Typography,
 } from '@mui/material';
 import { MoreVert as MoreVertIcon } from '@mui/icons-material';
 
@@ -51,7 +52,7 @@ export interface SwipeableListItemProps {
   action1?: SwipeableListItemAction;
   action2?: SwipeableListItemAction;
   action3?: SwipeableListItemAction;
-  onClick?: () => void;
+  onClickMain?: () => void;
   icon?: ReactElement;
 }
 
@@ -59,7 +60,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   primaryText,
   secondaryText,
   action1, action2, action3,
-  onClick,
+  onClickMain,
   icon,
 }) => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -172,7 +173,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
           </IconButton>
         )}
       </ActionsWrapper>      
-      <CardWrapper
+      <CardWrapper        
         transform={getTransform()}
         theme={theme}
         {...(isTouchDevice ? {
@@ -187,8 +188,8 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
             </IconButton>
            )}
       >
-            <ListItemButton sx={{ width: '100%', pr: isTouchDevice ? 0 : 6 }} onClick={(_e) =>  {
-                if(onClick) onClick();
+            <ListItemButton autoFocus={false} sx={{ width: '100%', pr: isTouchDevice ? 0 : 6 }} onClick={(_e) => {
+                if(onClickMain) onClickMain();
             }}>
                 {icon && <ListItemAvatar>
                     <Avatar variant='rounded' sx={{bgcolor: theme.palette.primary.light}}>
