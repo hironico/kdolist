@@ -19,10 +19,7 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
     const checkClipboardPermission = async () => {
       try {
         // Vérifier si l'API est supportée
-        if (!navigator.clipboard) {
-          setCanPaste(false);
-          return;
-        }
+        setCanPaste(typeof navigator.clipboard !== 'undefined');
       } catch (error) {
         console.error('Erreur lors de la vérification de l\'accès au Clipboard:', error);
         setCanPaste(false);
@@ -62,11 +59,11 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
   const getActions = () => {
     return <Stack sx={{width: '100%'}}>
       {canPaste && (
-          <Button onClick={handlePaste} variant="contained" color="primary">
+          <Button onClick={handlePaste} variant="contained" color="secondary" sx={{ml: '15px', mr: '15px'}}>
             Coller
           </Button>
         )}
-        <Button onClick={handleSubmit} variant="contained" color="primary" sx={{width: '100%', marginTop: '15px', marginBottom: '15px'}}>
+        <Button onClick={handleSubmit} variant="contained" color="primary" sx={{margin: '15px'}}>
           Ajouter
         </Button>
     </Stack>
