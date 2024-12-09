@@ -20,7 +20,6 @@ const GiftListsList: React.FC<GiftListProps> = ({giftLists, editable, handleFetc
   const navigate = useNavigate();
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
-  const theme = useTheme();
 
   /**
    * Navigates to the list contents editor. Sets the selecte dlist in the list editor context.

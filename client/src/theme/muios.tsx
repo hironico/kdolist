@@ -6,7 +6,7 @@ import { deepmerge } from "@mui/utils";
 const iOSBoxShadow =
     '0 2px 1px rgba(0,0,0,0.03),0 4px 8px rgba(0,0,0,0.13),0 0 0 1px rgba(0,0,0,0.02)';
 
-const baseTheme = createTheme({
+const baseTheme = createTheme({ 
     palette: {
         primary: {
             main: '#007AFF',

@@ -15,7 +15,6 @@ import { ReactNode, useContext} from 'react';
 import { ChevronLeft } from '@mui/icons-material';
 import { LoginContext } from '@/LoginContext';
 import UserAvatar from '@/components/UserAvatar/UserAvatar';
-import { Link, Typography } from '@mui/material';
 
 
 function Header() {

@@ -111,7 +111,7 @@ class GiftListController {
   async viewGiftListContents(giftListId) {
     const giftList = await GiftList.findByPk(giftListId, {
       include: [{
-        model: Gift
+        model: Gift, include: [{model: Link}, {model: Image}]
       }]
     });
   

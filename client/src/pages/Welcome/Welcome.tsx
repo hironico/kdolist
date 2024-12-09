@@ -22,7 +22,7 @@ interface FeatureCard {
     description: string;
 }
 
-const CarouselContainer = styled(Box)(({ theme }) => ({
+const CarouselContainer = styled(Box)(() => ({
     position: 'relative',
     backgroundColor: 'transparent',
     minHeight: '55vh',
@@ -51,7 +51,7 @@ const CarouselSlide = styled(Paper)(({ theme }) => ({
     },
 }));
 
-const SlideContent = styled(Box)(({ theme }) => ({
+const SlideContent = styled(Box)(() => ({
     position: 'relative',
     zIndex: 2,
     textAlign: 'center',
@@ -187,7 +187,7 @@ const Welcome: React.FC = () => {
                     onClick={(_e) => onLetsGo()}
                     sx={{ mt: 4, width: '100%' }}
                 >
-                    C'est parti !
+                    C&apos;est parti !
                 </Button>
 
                 <Button variant="contained"

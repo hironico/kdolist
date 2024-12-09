@@ -1,83 +1,40 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {useState } from 'react';
 import { TextField, Button, Box } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
-import { Gift, GiftLink, LoginContext } from '@/LoginContext';
+import { Gift, GiftLink } from '@/LoginContext';
 import { FullSizeCenteredFlexBox } from '../styled';
 import GiftLinksMenu from './GiftLinksMenu';
-import { apiBaseUrl } from '@/config';
 import { Stack } from '@mui/system';
 
 interface GiftFormProps {
   gift: Gift;
-  onSave: (updatedGift: Gift) => void;
+  handleSave: (updatedGift: Gift) => void;
   editable: boolean;
 }
 
-const GiftForm: React.FC<GiftFormProps> = ({ gift, onSave, editable }) => {
+const GiftForm: React.FC<GiftFormProps> = ({ gift, handleSave, editable }) => {
   const [updatedGift, setUpdatedGift] = useState(gift);
-  const [links, setLinks] = useState<GiftLink[]>([]);
-
-  const appContext = useContext(LoginContext);
-
-  const postLinks = (links: GiftLink[]) => {
-    console.debug('Posting links for gift : ' + gift.id + '\n' + JSON.stringify(links));
-
-    fetch(`${apiBaseUrl}/gift/links/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${appContext.loginInfo.jwt}`
-      },
-      body: JSON.stringify(links)
-    }).then(response => {
-        if (!response.ok) {
-          console.error('Could not save the gift links. Status code: ', response.status);
-        }
-    }).catch(error => {
-      console.error('Cannot save the links for gift ', gift.id, error);
-    });
-  };
-
-  const fetchLinks = () => {
-    console.debug('Fetching links for gift : ' + gift.id);
-    if (!gift.id) {
-      return;
-    }
-
-    fetch(`${apiBaseUrl}/gift/links/${gift.id}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${appContext.loginInfo.jwt}`
-      }
-    }).then(response => {
-        if (!response.ok) {
-          console.error('Could not fetch the gift links. Status code: ', response.status);
-          setLinks([]);
-        } else {
-          return response.json();
-        }
-    }).then(linksData => {
-      setLinks(linksData);
-    }).catch(error => {
-      console.error('Cannot fetch links for gift ', gift.id, error);
-      setLinks([]);
-    });
-  };
-
-  useEffect(() => {
-    fetchLinks();
-  }, []);
 
   const handleAddLink = (link: GiftLink) => { 
     link.giftId = updatedGift.id;   
-    links.push(link);
-    setLinks(links);
-    postLinks(links);
+    if (updatedGift.links) {
+      updatedGift.links.push(link);
+    } else {
+      const newLinks: GiftLink[] = [];
+      newLinks.push(link);
+      updatedGift.links = newLinks;
+    }
+    setUpdatedGift(updatedGift);
   }
 
   const handleRemoveLink = (link: GiftLink) => {
-    const newLinks = links.filter(l => l.id !== link.id);
-    setLinks(newLinks);
+    if (!updatedGift.links) {
+      return;
+    }
+
+    const newLinks = updatedGift.links.filter(l => l.id !== link.id);
+    updatedGift.links = newLinks;
+    setUpdatedGift(updatedGift);
   }
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,8 +93,8 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, onSave, editable }) => {
       />
 
       <Stack sx={{ width: '100%' }}>               
-        <GiftLinksMenu links={links} handleAddLink={handleAddLink} handleRemoveLink={handleRemoveLink} editable={editable}/>
-        <Button disabled={!editable} variant="contained" color="primary" onClick={() => onSave(updatedGift)} sx={{ marginTop: '10px' }}>
+        <GiftLinksMenu links={updatedGift.links} handleAddLink={handleAddLink} handleRemoveLink={handleRemoveLink} editable={editable}/>
+        <Button disabled={!editable} variant="contained" color="primary" onClick={() => handleSave(updatedGift)} sx={{ marginTop: '10px' }}>
           Enregistrer
         </Button> 
       </Stack>

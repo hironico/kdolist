@@ -33,12 +33,23 @@ export interface Gift {
   createdAt: Date;
   updatedAt: Date;
   giftListId?: string;
+
+  links: GiftLink[];
+  images?: GiftImage[];
 }
 
 export interface GiftLink {
   id: string;
   url: string;
   description: string;
+  createdAt: Date;
+  updatedAt: Date;
+  giftId: string;
+}
+
+export interface GiftImage {
+  id: string;
+  data: string;
   createdAt: Date;
   updatedAt: Date;
   giftId: string;

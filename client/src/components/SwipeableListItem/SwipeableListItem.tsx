@@ -10,7 +10,6 @@ import {
   Avatar,
   Theme,
   useTheme,
-  Typography,
 } from '@mui/material';
 import { MoreVert as MoreVertIcon } from '@mui/icons-material';
 

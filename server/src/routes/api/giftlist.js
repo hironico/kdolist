@@ -39,6 +39,9 @@ giftListApi.get('/v1/giftlist/shared', authenticateJWT, async (req, res) => {
     res.json(allMyLists);
 });
 
+/**
+ * Get the list contents whose ID is given as path parameter :id
+ */
 giftListApi.get('/v1/giftlist/contents/:id', authenticateJWT, async (req, res) => {
     const listId = req.params.id;
     if (!listId) {
@@ -48,7 +51,7 @@ giftListApi.get('/v1/giftlist/contents/:id', authenticateJWT, async (req, res) =
 
     try {
         const listContents = await giftlistcontroller.viewGiftListContents(listId);
-        logger.debug(`Found gifts: ${JSON.stringify(listContents)}`);
+        logger.debug(`Found gifts: ${JSON.stringify(listContents, null, 2)}`);
         res.status(200).json(listContents);
     } catch (error) {
         res.status(500).send(error).end()
