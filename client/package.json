@@ -1,12 +1,12 @@
 {
   "name": "kdolist",
-  "version": "2.3.0",
+  "version": "0.12.10",
   "type": "module",
   "description": "Share your gift lists to friends and family.",
   "homepage": "https://kdolist.hironico.net/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hironico"
+    "url": "https://github.com/hironico/kdolist.git"
   },
   "bugs": {
     "url": "https://github.com/hironico/kdolist/issues",
