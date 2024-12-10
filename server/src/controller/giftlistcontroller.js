@@ -1,9 +1,9 @@
 const { DataTypes } = require('sequelize');
-const { GiftList, Gift, GroupAccess, Notification, Link, Image } = require('../model/model');
+const { GiftList, Gift, GroupAccess, Notification, Link, Image, sequelize } = require('../model/model');
 const logger = require('../logger');
 
 class GiftListController {
-  async addGift({giftListId, name, description, isHidden, selectedAt, selectedById}) {
+  async addGift({ giftListId, name, description, isHidden, selectedAt, selectedById }) {
     const giftList = await GiftList.findByPk(giftListId);
     if (!giftList) throw new Error(`Cannot add Gift to list. List not found ${giftListId}`);
 
@@ -43,7 +43,7 @@ class GiftListController {
 
     logger.debug(`Found gift for update: ${JSON.stringify(gift, null, 2)}`);
 
-    await gift.update(updates);
+    const newGift = await gift.update(updates);
 
     await Notification.create({
       recipientId: gift.giftList.ownerId,
@@ -52,7 +52,42 @@ class GiftListController {
       createdAt: new Date()
     });
 
-    return gift;
+    return newGift;
+  }
+
+  async addGiftLink({url, description, giftId}) {
+      logger.debug(`Adding link: ${url} to gift id ${giftId}`);
+      return Link.create({url, description, giftId});
+  }
+
+  async removeGiftLink(giftLinkId) {
+    const link = await Link.findByPk(giftLinkId);
+    if (!link) throw Error(`Cannot find link id ${giftLinkId}`);
+
+    return link.destroy();
+  }
+
+  async removeAllGiftLinks(giftId) {
+    return Link.destroy({
+      where: {
+        giftId: giftId
+      }
+    }).then(() => {
+      logger.debug(`Delete all links for gif id: ${giftId}. Success.`);
+    });
+  }
+
+  async addAllGiftLinks(links) {
+    const allPromises = [];
+
+    logger.debug(`links are:\n${JSON.stringify(links, null, 2)}`);
+
+    for (const link of links) {
+      const prom = this.addGiftLink(link)
+      allPromises.push(prom);
+    }
+
+    return Promise.all(allPromises);
   }
 
   async shareWithGroup(giftListId, groupId) {
@@ -80,7 +115,7 @@ class GiftListController {
     const giftList = await GiftList.findByPk(giftListId, { include: [{ model: GroupAccess, include: ['Group'] }] });
     if (!giftList) throw new Error('Gift List not found');
 
-    const notifications = await Promise.all(giftList.GroupAccesses.flatMap(access => 
+    const notifications = await Promise.all(giftList.GroupAccesses.flatMap(access =>
       access.Group.GroupMemberships.map(membership =>
         Notification.create({
           recipientId: membership.userId,
@@ -111,12 +146,12 @@ class GiftListController {
   async viewGiftListContents(giftListId) {
     const giftList = await GiftList.findByPk(giftListId, {
       include: [{
-        model: Gift, include: [{model: Link}, {model: Image}]
+        model: Gift, include: [{ model: Link }, { model: Image }]
       }]
     });
-  
+
     if (!giftList) throw new Error('Gift List not found');
-  
+
     return giftList.gifts;
   }
 }
