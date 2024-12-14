@@ -48,12 +48,15 @@ const loader = {
 
 const defaultMetaTags = {
   image: '/cover.png',
-  description: 'Hironico\'s KDO List is a gift list management app',
+  description: "Hironico's KDO List is a gift list management app",
 };
 const giphy404 = 'https://giphy.com/embed/xTiN0L7EW5trfOvEk0';
 
 const url = new URL(window.location.href);
-const apiBaseUrl = url.hostname === 'localhost' ? `http://${url.hostname}:9090/api/v1` : `${url.protocol}//${url.hostname}/api/v1`;
+const apiBaseUrl =
+  url.hostname === 'localhost'
+    ? `http://${url.hostname}:9090/api/v1`
+    : `${url.protocol}//${url.hostname}/api/v1`;
 
 export {
   loader,
@@ -65,5 +68,5 @@ export {
   title,
   defaultMetaTags,
   giphy404,
-  apiBaseUrl
+  apiBaseUrl,
 };

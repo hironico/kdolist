@@ -35,4 +35,11 @@ const StyledFab = styled(Fab)({
   margin: '0 auto',
 });
 
-export { FlexBox, CenteredFlexBox, FullSizeCenteredFlexBox, TopCenteredFlexBox, FullSizeTopCenteredFlexBox, StyledFab };
+export {
+  FlexBox,
+  CenteredFlexBox,
+  FullSizeCenteredFlexBox,
+  TopCenteredFlexBox,
+  FullSizeTopCenteredFlexBox,
+  StyledFab,
+};

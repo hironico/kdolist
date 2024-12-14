@@ -3,11 +3,11 @@ import { Navigate } from 'react-router-dom';
 import { LoginContext } from '@/LoginContext';
 
 export default function ProtectedRoute({ children }: PropsWithChildren) {
-    const appContext = useContext(LoginContext);
+  const appContext = useContext(LoginContext);
 
-    useEffect(() => {
-        appContext.checkToken();
-    }, []);
+  useEffect(() => {
+    appContext.checkToken();
+  }, []);
 
-    return appContext.loginInfo.jwt !== '' ? children : <Navigate to="/login" replace />
+  return appContext.loginInfo.jwt !== '' ? children : <Navigate to="/login" replace />;
 }

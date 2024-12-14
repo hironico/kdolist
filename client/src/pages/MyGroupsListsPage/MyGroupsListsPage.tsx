@@ -20,8 +20,8 @@ function MyGroupsListsPage() {
       const response = await fetch(`${apiBaseUrl}/giftlist/shared`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${appContext.loginInfo.jwt}`
-        }
+          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
+        },
       });
       if (response.ok) {
         const myLists = await response.json();
@@ -31,7 +31,7 @@ function MyGroupsListsPage() {
           options: {
             variant: 'error',
           },
-          message: 'Impossible de récupérer les listes partagées.'
+          message: 'Impossible de récupérer les listes partagées.',
         });
       }
     } catch (error) {
@@ -40,7 +40,7 @@ function MyGroupsListsPage() {
         options: {
           variant: 'error',
         },
-        message: 'Impossible de récupérer les listes partagées.'
+        message: 'Impossible de récupérer les listes partagées.',
       });
     }
   };
@@ -53,14 +53,13 @@ function MyGroupsListsPage() {
   return (
     <ProtectedRoute>
       <Meta title="Listes partagées" />
-      <Slide direction='right' in={true} timeout={500}>
-      <FullSizeTopCenteredFlexBox>
-        <GiftListsList giftLists={giftLists} editable={false} handleFetch={fetchGiftLists}/>
-      </FullSizeTopCenteredFlexBox>
+      <Slide direction="right" in={true} timeout={500}>
+        <FullSizeTopCenteredFlexBox>
+          <GiftListsList giftLists={giftLists} editable={false} handleFetch={fetchGiftLists} />
+        </FullSizeTopCenteredFlexBox>
       </Slide>
     </ProtectedRoute>
   );
 }
 
 export default MyGroupsListsPage;
-

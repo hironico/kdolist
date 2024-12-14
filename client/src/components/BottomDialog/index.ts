@@ -1,3 +1,3 @@
-import BottomDialog from "./BottomDialog";
+import BottomDialog from './BottomDialog';
 
 export { BottomDialog };

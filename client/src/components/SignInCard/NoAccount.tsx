@@ -25,16 +25,16 @@ export default function NoAccount({ open, handleClose }: NoAccountProps) {
       }}
     >
       <DialogTitle>Tu n&apos;as pas de compte...</DialogTitle>
-      <DialogContent
-        sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}
-      >
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
         <DialogContentText>
           Si tu n&apos;as pas de compte, alors utilises un réseau social pour t&apos;identifier.
           Seules les personnes vraiment spéciales ont un compte &quot;à l&apos;ancienne&quot;...
         </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ pb: 3, px: 3 }}>
-        <Button variant="contained" onClick={handleClose}>Continuer</Button>
+        <Button variant="contained" onClick={handleClose}>
+          Continuer
+        </Button>
       </DialogActions>
     </Dialog>
   );

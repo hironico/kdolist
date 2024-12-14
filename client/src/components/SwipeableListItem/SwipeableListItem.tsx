@@ -21,14 +21,16 @@ const SwipeableCard = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
 }));
 
-const CardWrapper = styled(ListItem)<{ transform: string, theme: Theme }>(({ transform, theme }) => ({
-  display: 'flex',
-  transform,
-  transition: 'transform 0.3s ease-out',
-  backgroundColor: theme.palette.background.paper,
-  padding: '0px',
-  margin: '0px'
-}));
+const CardWrapper = styled(ListItem)<{ transform: string; theme: Theme }>(
+  ({ transform, theme }) => ({
+    display: 'flex',
+    transform,
+    transition: 'transform 0.3s ease-out',
+    backgroundColor: theme.palette.background.paper,
+    padding: '0px',
+    margin: '0px',
+  }),
+);
 
 const ActionsWrapper = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -41,7 +43,7 @@ const ActionsWrapper = styled(Box)(({ theme }) => ({
 
 export interface SwipeableListItemAction {
   icon: ReactElement;
-  color: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning";
+  color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
   onAction: () => void;
 }
 
@@ -58,7 +60,9 @@ export interface SwipeableListItemProps {
 const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   primaryText,
   secondaryText,
-  action1, action2, action3,
+  action1,
+  action2,
+  action3,
   onClickMain,
   icon,
 }) => {
@@ -73,9 +77,11 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   // Detect touch device
   useEffect(() => {
     const detectTouch = () => {
-      setIsTouchDevice(('ontouchstart' in window) ||
-        (navigator.maxTouchPoints > 0) ||
-        ((navigator as any).msMaxTouchPoints > 0));
+      setIsTouchDevice(
+        'ontouchstart' in window ||
+          navigator.maxTouchPoints > 0 ||
+          (navigator as any).msMaxTouchPoints > 0,
+      );
     };
 
     detectTouch();
@@ -101,14 +107,14 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     if (distance > minSwipeDistance) {
       setIsOpen(true);
     } else if (distance < -minSwipeDistance) {
       setIsOpen(false);
     }
-    
+
     setSwiping(false);
     setTouchStart(null);
     setTouchEnd(null);
@@ -123,11 +129,11 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
     if (isOpen) {
       return `translateX(-${totalSwipeDistance}px)`;
     }
-    
+
     if (!swiping) {
       return 'translateX(0)';
     }
-    
+
     const distance = Math.min(Math.max(getSwipeDistance(), 0), totalSwipeDistance);
     return `translateX(-${distance}px)`;
   };
@@ -152,7 +158,6 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
     };
   }, [primaryText]);
 
-
   return (
     <SwipeableCard id={`card-${primaryText}`}>
       <ActionsWrapper>
@@ -171,33 +176,41 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
             {action3.icon}
           </IconButton>
         )}
-      </ActionsWrapper>      
-      <CardWrapper        
+      </ActionsWrapper>
+      <CardWrapper
         transform={getTransform()}
         theme={theme}
-        {...(isTouchDevice ? {
-          onTouchStart,
-          onTouchMove,
-          onTouchEnd,
-        } : {})}
-
-        secondaryAction={!isTouchDevice && (
+        {...(isTouchDevice
+          ? {
+              onTouchStart,
+              onTouchMove,
+              onTouchEnd,
+            }
+          : {})}
+        secondaryAction={
+          !isTouchDevice && (
             <IconButton onClick={toggleOpen}>
               <MoreVertIcon />
             </IconButton>
-           )}
+          )
+        }
       >
-            <ListItemButton autoFocus={false} sx={{ width: '100%', pr: isTouchDevice ? 0 : 6 }} onClick={(_e) => {
-                if(onClickMain) onClickMain();
-            }}>
-                {icon && <ListItemAvatar>
-                    <Avatar variant='rounded' sx={{bgcolor: theme.palette.primary.light}}>
-                      {icon}
-                    </Avatar>
-                  </ListItemAvatar>
-                }
-                <ListItemText primary={primaryText} secondary={secondaryText} />
-            </ListItemButton>
+        <ListItemButton
+          autoFocus={false}
+          sx={{ width: '100%', pr: isTouchDevice ? 0 : 6 }}
+          onClick={(_e) => {
+            if (onClickMain) onClickMain();
+          }}
+        >
+          {icon && (
+            <ListItemAvatar>
+              <Avatar variant="rounded" sx={{ bgcolor: theme.palette.primary.light }}>
+                {icon}
+              </Avatar>
+            </ListItemAvatar>
+          )}
+          <ListItemText primary={primaryText} secondary={secondaryText} />
+        </ListItemButton>
       </CardWrapper>
     </SwipeableCard>
   );

@@ -14,7 +14,7 @@ function render(App: ComponentType) {
       <RecoilRoot>
         <HelmetProvider>
           <ThemeProvider>
-              <App />
+            <App />
           </ThemeProvider>
         </HelmetProvider>
       </RecoilRoot>

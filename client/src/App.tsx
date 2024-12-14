@@ -16,15 +16,15 @@ function App() {
   return (
     <>
       <LoginContextProvider>
-          <CssBaseline />
-          <Notifications />
-          <HotKeys />
-          <SW />
-          <BrowserRouter>
-            <Header />
-            <Sidebar />
-            <Pages />
-          </BrowserRouter>
+        <CssBaseline />
+        <Notifications />
+        <HotKeys />
+        <SW />
+        <BrowserRouter>
+          <Header />
+          <Sidebar />
+          <Pages />
+        </BrowserRouter>
       </LoginContextProvider>
     </>
   );

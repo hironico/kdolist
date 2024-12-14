@@ -20,34 +20,34 @@ const routes: Routes = {
     path: '/login',
     title: 'Qui es-tu?',
     icon: VpnKeyIcon,
-    inSideBar: false
+    inSideBar: false,
   },
   [Pages.MyLists]: {
     component: asyncComponentLoader(() => import('@/pages/MyListsPage')),
     path: '/mylists',
     title: 'Mes listes',
     icon: CardGiftcardIcon,
-    inSideBar: true
+    inSideBar: true,
   },
   [Pages.ListContentsPage]: {
     component: asyncComponentLoader(() => import('@/pages/ListContentsPage')),
     path: '/listcontents',
     icon: CardGiftcardIcon,
-    inSideBar: false
+    inSideBar: false,
   },
   [Pages.MyGroupsListsPage]: {
     component: asyncComponentLoader(() => import('@/pages/MyGroupsListsPage')),
     path: '/mygroupslists',
     title: 'Listes partagées',
     icon: Diversity1Icon,
-    inSideBar: true
+    inSideBar: true,
   },
   [Pages.PrivacyPage]: {
     component: asyncComponentLoader(() => import('@/pages/PrivacyPage')),
     path: '/privacy',
     title: 'Confidentialité',
     icon: PrivacyTipIcon,
-    inSideBar: true
+    inSideBar: true,
   },
   [Pages.NotFound]: {
     component: asyncComponentLoader(() => import('@/pages/NotFound')),

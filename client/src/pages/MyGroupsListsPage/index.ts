@@ -1,3 +1,3 @@
-import MyGroupsListsPage from "./MyGroupsListsPage";
+import MyGroupsListsPage from './MyGroupsListsPage';
 
 export default MyGroupsListsPage;

@@ -1,4 +1,4 @@
-import React, {useState } from 'react';
+import React, { useState } from 'react';
 import { TextField, Button, Box } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import { Gift, GiftLink } from '@/LoginContext';
@@ -15,8 +15,8 @@ interface GiftFormProps {
 const GiftForm: React.FC<GiftFormProps> = ({ gift, handleSave, editable }) => {
   const [updatedGift, setUpdatedGift] = useState(gift);
 
-  const handleAddLink = (link: GiftLink) => { 
-    link.giftId = updatedGift.id;   
+  const handleAddLink = (link: GiftLink) => {
+    link.giftId = updatedGift.id;
     if (updatedGift.links) {
       updatedGift.links.push(link);
     } else {
@@ -25,17 +25,17 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, handleSave, editable }) => {
       updatedGift.links = newLinks;
     }
     setUpdatedGift(updatedGift);
-  }
+  };
 
   const handleRemoveLink = (link: GiftLink) => {
     if (!updatedGift.links) {
       return;
     }
 
-    const newLinks = updatedGift.links.filter(l => l.id !== link.id);
+    const newLinks = updatedGift.links.filter((l) => l.id !== link.id);
     updatedGift.links = newLinks;
     setUpdatedGift(updatedGift);
-  }
+  };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUpdatedGift({ ...updatedGift, [event.target.name]: event.target.value });
@@ -62,14 +62,24 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, handleSave, editable }) => {
   return (
     <form>
       {/* Carousel for Images */}
-        <Carousel sx={{width: '100%'}}>
-          {images.map((oneImg, index) => {
-            return <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>              
-              <Box sx={{background: `url(${oneImg.src})`, backgroundSize: 'cover', backgroundPosition: 'center', width: '250px', height: '250px' }} key={`gift-img-key-${index}`} />
-            </FullSizeCenteredFlexBox>            
-          })
-          }
-        </Carousel>
+      <Carousel sx={{ width: '100%' }}>
+        {images.map((oneImg, index) => {
+          return (
+            <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>
+              <Box
+                sx={{
+                  background: `url(${oneImg.src})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  width: '250px',
+                  height: '250px',
+                }}
+                key={`gift-img-key-${index}`}
+              />
+            </FullSizeCenteredFlexBox>
+          );
+        })}
+      </Carousel>
 
       <TextField
         label="Nom"
@@ -92,13 +102,23 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, handleSave, editable }) => {
         disabled={!editable}
       />
 
-      <Stack sx={{ width: '100%' }}>               
-        <GiftLinksMenu links={updatedGift.links} handleAddLink={handleAddLink} handleRemoveLink={handleRemoveLink} editable={editable}/>
-        <Button disabled={!editable} variant="contained" color="primary" onClick={() => handleSave(updatedGift)} sx={{ marginTop: '10px' }}>
+      <Stack sx={{ width: '100%' }}>
+        <GiftLinksMenu
+          links={updatedGift.links}
+          handleAddLink={handleAddLink}
+          handleRemoveLink={handleRemoveLink}
+          editable={editable}
+        />
+        <Button
+          disabled={!editable}
+          variant="contained"
+          color="primary"
+          onClick={() => handleSave(updatedGift)}
+          sx={{ marginTop: '10px' }}
+        >
           Enregistrer
-        </Button> 
+        </Button>
       </Stack>
-
     </form>
   );
 };

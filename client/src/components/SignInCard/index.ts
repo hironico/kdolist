@@ -1,3 +1,3 @@
-import SignInCard from "./SignInCard";
+import SignInCard from './SignInCard';
 
 export default SignInCard;

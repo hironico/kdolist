@@ -26,8 +26,8 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({ onCreateList }) => {
   const onListNameChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setListNameError(false);
     setListNameErrorMessage('');
-    setListName(event.target.value)
-  }
+    setListName(event.target.value);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -40,7 +40,7 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({ onCreateList }) => {
           helperText={listNameErrorMessage}
         />
       </FormControl>
-      <Button type="submit" variant="contained" color="primary" sx={{width: '100%'}}>
+      <Button type="submit" variant="contained" color="primary" sx={{ width: '100%' }}>
         Créer
       </Button>
     </form>
@@ -48,5 +48,3 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({ onCreateList }) => {
 };
 
 export default ListEditorForm;
-
-

@@ -25,8 +25,8 @@ function MyListsPage() {
       const response = await fetch(`${apiBaseUrl}/giftlist/`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${appContext.loginInfo.jwt}`
-        }
+          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
+        },
       });
       if (response.ok) {
         const myLists = await response.json();
@@ -38,7 +38,7 @@ function MyListsPage() {
         options: {
           variant: 'error',
         },
-        message: 'Impossible de récupérer les listes pour le moment.'
+        message: 'Impossible de récupérer les listes pour le moment.',
       });
     }
   };
@@ -48,7 +48,7 @@ function MyListsPage() {
     appContext.setGiftList(null);
   }, []);
 
-  const handleCreateGiftList = async (name: string) => {    
+  const handleCreateGiftList = async (name: string) => {
     const response = await fetch(`${apiBaseUrl}/giftlist`, {
       method: 'POST',
       headers: {
@@ -56,7 +56,7 @@ function MyListsPage() {
         Authorization: `Bearer ${appContext.loginInfo.jwt}`,
       },
       body: JSON.stringify({
-        name: name
+        name: name,
       }),
     });
 
@@ -65,7 +65,7 @@ function MyListsPage() {
         options: {
           variant: 'error',
         },
-        message: 'Impossible de créer cette liste pour le moment.'
+        message: 'Impossible de créer cette liste pour le moment.',
       });
     } else {
       fetchGiftLists();
@@ -76,33 +76,32 @@ function MyListsPage() {
 
   const showCreateListForm = () => {
     setCreateListFormOpen(true);
-  }
+  };
 
   const closeCreateListForm = () => {
     setCreateListFormOpen(false);
-  }
+  };
 
-  const listEditor = <ListEditor onCreateList={handleCreateGiftList}/>
+  const listEditor = <ListEditor onCreateList={handleCreateGiftList} />;
 
   return (
     <ProtectedRoute>
       <Meta title="Mes listes" />
-      <Slide direction='right' in={true} timeout={500}>
+      <Slide direction="right" in={true} timeout={500}>
         <FullSizeTopCenteredFlexBox>
           <GiftListsList giftLists={giftLists} editable={true} handleFetch={fetchGiftLists} />
           <GiftListsFAB handleAdd={showCreateListForm} />
         </FullSizeTopCenteredFlexBox>
       </Slide>
 
-      <BottomDialog title="Nouvelle liste" 
-                    open={createListFormOpen} 
-                    handleClose={closeCreateListForm}
-                    contents={listEditor}
+      <BottomDialog
+        title="Nouvelle liste"
+        open={createListFormOpen}
+        handleClose={closeCreateListForm}
+        contents={listEditor}
       />
-
     </ProtectedRoute>
   );
 }
 
 export default MyListsPage;
-

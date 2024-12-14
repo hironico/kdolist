@@ -1,3 +1,3 @@
-import ListContentsPage from "./ListContentsPage";
+import ListContentsPage from './ListContentsPage';
 
 export default ListContentsPage;

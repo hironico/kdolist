@@ -26,12 +26,10 @@ export default function ForgotPassword({ open, handleClose }: ForgotPasswordProp
       }}
     >
       <DialogTitle>Mot de passe oublié...</DialogTitle>
-      <DialogContent
-        sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}
-      >
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
         <DialogContentText>
-          C&apos;est pas de chance, mais si tu mets ton adresse email ci dessous, 
-          peut-être que tu recevras un lien pour choisir un nouveau mot de passe.
+          C&apos;est pas de chance, mais si tu mets ton adresse email ci dessous, peut-être que tu
+          recevras un lien pour choisir un nouveau mot de passe.
         </DialogContentText>
         <OutlinedInput
           autoFocus
@@ -46,7 +44,9 @@ export default function ForgotPassword({ open, handleClose }: ForgotPasswordProp
         />
       </DialogContent>
       <DialogActions sx={{ pb: 3, px: 3 }}>
-        <Button variant="text" onClick={handleClose}>Annuler</Button>
+        <Button variant="text" onClick={handleClose}>
+          Annuler
+        </Button>
         <Button variant="contained" type="submit">
           Continuer
         </Button>

@@ -6,7 +6,7 @@ import { GiftLink } from '@/LoginContext';
 interface ModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (link: GiftLink) => void; 
+  onSave: (link: GiftLink) => void;
 }
 
 const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) => {
@@ -21,7 +21,7 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
         // Vérifier si l'API est supportée
         setCanPaste(typeof navigator.clipboard !== 'undefined');
       } catch (error) {
-        console.error('Erreur lors de la vérification de l\'accès au Clipboard:', error);
+        console.error("Erreur lors de la vérification de l'accès au Clipboard:", error);
         setCanPaste(false);
       }
     };
@@ -38,7 +38,7 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
   };
 
   const handlePaste = () => {
-    navigator.clipboard.readText().then(text => {
+    navigator.clipboard.readText().then((text) => {
       setLien(text);
     });
   };
@@ -50,53 +50,68 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
       description: nom,
       createdAt: new Date(),
       updatedAt: new Date(),
-      giftId: ''
-    }
+      giftId: '',
+    };
     onSave(link);
-    onClose(); 
+    onClose();
   };
 
   const getActions = () => {
-    return <Stack sx={{width: '100%'}}>
-      {canPaste && (
-          <Button onClick={handlePaste} variant="contained" color="secondary" sx={{ml: '15px', mr: '15px'}}>
+    return (
+      <Stack sx={{ width: '100%' }}>
+        {canPaste && (
+          <Button
+            onClick={handlePaste}
+            variant="contained"
+            color="secondary"
+            sx={{ ml: '15px', mr: '15px' }}
+          >
             Coller
           </Button>
         )}
-        <Button onClick={handleSubmit} variant="contained" color="primary" sx={{margin: '15px'}}>
+        <Button onClick={handleSubmit} variant="contained" color="primary" sx={{ margin: '15px' }}>
           Ajouter
         </Button>
-    </Stack>
-  }
+      </Stack>
+    );
+  };
 
   const getContents = () => {
-    return <>
-    <DialogContentText>Renseigner le nouveau lien:</DialogContentText>
-    <TextField
-      autoFocus
-      margin="dense"
-      id="nom"
-      label="Nom"
-      type="text"
-      fullWidth
-      value={nom}
-      onChange={handleNomChange}
-    />
-    <TextField
-      margin="dense"
-      id="lien"
-      label="Addresse du lien:"
-      type="url"
-      placeholder='https://...'
-      fullWidth
-      value={lien}
-      onChange={handleLienChange}
-    />
-  </>
-  }
+    return (
+      <>
+        <DialogContentText>Renseigner le nouveau lien:</DialogContentText>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="nom"
+          label="Nom"
+          type="text"
+          fullWidth
+          value={nom}
+          onChange={handleNomChange}
+        />
+        <TextField
+          margin="dense"
+          id="lien"
+          label="Addresse du lien:"
+          type="url"
+          placeholder="https://..."
+          fullWidth
+          value={lien}
+          onChange={handleLienChange}
+        />
+      </>
+    );
+  };
 
   return (
-    <BottomDialog open={open} handleClose={onClose} title="Ajouter un lien" contents={getContents()} actions={getActions()} />
+    <BottomDialog
+      open={open}
+      handleClose={onClose}
+      title="Ajouter un lien"
+      contents={getContents()}
+      actions={getActions()}
+    />
   );
 };
 

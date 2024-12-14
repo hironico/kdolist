@@ -1,6 +1,6 @@
-import { createContext, FC, PropsWithChildren, useState } from "react";
-import { apiBaseUrl } from "./config";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import { createContext, FC, PropsWithChildren, useState } from 'react';
+import { apiBaseUrl } from './config';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export interface LoginInfoProps {
   id: string | undefined;
@@ -10,7 +10,7 @@ export interface LoginInfoProps {
   password?: string;
   email: string | undefined;
   accessToken?: string;
-  accessTokenProvider?: string;  
+  accessTokenProvider?: string;
   jwt?: string;
 }
 
@@ -57,13 +57,13 @@ export interface GiftImage {
 
 export interface AppContext {
   loginInfo: LoginInfoProps;
-  setLoginInfo: (info: LoginInfoProps) => void,
+  setLoginInfo: (info: LoginInfoProps) => void;
   checkToken: () => Promise<boolean>;
 
   giftList: GiftList | null;
   setGiftList: (list: GiftList | null) => void;
 
-  giftListContents: Gift[];  
+  giftListContents: Gift[];
   setGiftListContents: (contents: Gift[]) => void;
 }
 
@@ -73,23 +73,23 @@ const defaultLoginInfo: LoginInfoProps = {
   accessToken: '',
   accessTokenProvider: '',
   id: '',
-  jwt: ''
-}
+  jwt: '',
+};
 
 const defaultListInfo: GiftList = {
   id: '-1',
   name: '',
   createdAt: new Date(),
   updatedAt: new Date(),
-  ownerId: ''
-}
+  ownerId: '',
+};
 const defaultListContent: Gift[] = [];
 
 const defaultAppContext: AppContext = {
   loginInfo: defaultLoginInfo,
   setLoginInfo: (_loginInfo: LoginInfoProps) => {},
   checkToken: () => {
-    return new Promise<boolean>((accept, ) => {
+    return new Promise<boolean>((accept) => {
       accept(false);
     });
   },
@@ -97,14 +97,13 @@ const defaultAppContext: AppContext = {
   giftList: defaultListInfo,
   setGiftList: (_list: GiftList | null) => {},
 
-  giftListContents: defaultListContent,  
-  setGiftListContents: (_contents: Gift[]) => {}
-}
+  giftListContents: defaultListContent,
+  setGiftListContents: (_contents: Gift[]) => {},
+};
 
 export const LoginContext = createContext<AppContext>(defaultAppContext);
 
 export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
-
   const [loginInfo, setLoginInfo] = useState<AppContext['loginInfo']>(defaultLoginInfo);
   const [giftList, setGiftList] = useState<AppContext['giftList']>(defaultListInfo);
   const [giftListContents, setGiftListContents] = useState<AppContext['giftListContents']>([]);
@@ -113,8 +112,8 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
     const response = await fetch(`${apiBaseUrl}/auth/whoami`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${loginInfo.jwt}`
-      }
+        Authorization: `Bearer ${loginInfo.jwt}`,
+      },
     });
 
     if (!response.ok) {
@@ -122,12 +121,24 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
       setLoginInfo(loginInfo);
     }
 
-    return (!response.ok);
-  }
+    return !response.ok;
+  };
 
-  return <LoginContext.Provider value={{loginInfo, setLoginInfo, checkToken, giftList, setGiftList, giftListContents, setGiftListContents}}>
-    <GoogleOAuthProvider clientId="104748889285-m7ndus5lktf9ngdjmprkc8hdfgvejp1r.apps.googleusercontent.com">
-      {props.children}
-    </GoogleOAuthProvider>    
-  </LoginContext.Provider>
-}
+  return (
+    <LoginContext.Provider
+      value={{
+        loginInfo,
+        setLoginInfo,
+        checkToken,
+        giftList,
+        setGiftList,
+        giftListContents,
+        setGiftListContents,
+      }}
+    >
+      <GoogleOAuthProvider clientId="104748889285-m7ndus5lktf9ngdjmprkc8hdfgvejp1r.apps.googleusercontent.com">
+        {props.children}
+      </GoogleOAuthProvider>
+    </LoginContext.Provider>
+  );
+};

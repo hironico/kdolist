@@ -11,11 +11,10 @@ import { getRandomJoke } from './utils';
 import routes from '@/routes';
 import { PathRouteProps, useLocation, useNavigate } from 'react-router-dom';
 import { PathRouteCustomProps, Routes } from '@/routes/types';
-import { ReactNode, useContext} from 'react';
+import { ReactNode, useContext } from 'react';
 import { ChevronLeft } from '@mui/icons-material';
 import { LoginContext } from '@/LoginContext';
 import UserAvatar from '@/components/UserAvatar/UserAvatar';
-
 
 function Header() {
   const [, sidebarActions] = useSidebar();
@@ -23,9 +22,12 @@ function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const loginContext = useContext(LoginContext);
-  
-  function getRouteByPath(routes: Routes, path: string): (PathRouteProps & PathRouteCustomProps) | undefined {
-    return Object.values(routes).find(route => route.path === path);
+
+  function getRouteByPath(
+    routes: Routes,
+    path: string,
+  ): (PathRouteProps & PathRouteCustomProps) | undefined {
+    return Object.values(routes).find((route) => route.path === path);
   }
 
   const getTitle = (): string => {
@@ -34,7 +36,7 @@ function Header() {
 
     const title = route.title ? route.title : loginContext.giftList?.name;
     return title ? title : 'no title';
-  }
+  };
 
   function showNotification() {
     notificationsActions.push({
@@ -45,47 +47,50 @@ function Header() {
         // `message` accepts string as well as ReactNode
         // If you want to show a fully customized notification, you can define
         // your own `variant`s, see @/sections/Notifications/Notifications.tsx
-        variant: 'customNotification',  
-        autoHideDuration: 3000,      
+        variant: 'customNotification',
+        autoHideDuration: 3000,
       },
       message: getRandomJoke(),
     });
   }
 
   const renderMenuIconButton = (): ReactNode => {
-    return <IconButton
-      onClick={sidebarActions.toggle}
-      size="large"
-      edge="start"
-      color="info"
-      aria-label="menu"
-      sx={{ mr: 1 }}
-    >
-      <MenuIcon />
-    </IconButton>
-  }
+    return (
+      <IconButton
+        onClick={sidebarActions.toggle}
+        size="large"
+        edge="start"
+        color="info"
+        aria-label="menu"
+        sx={{ mr: 1 }}
+      >
+        <MenuIcon />
+      </IconButton>
+    );
+  };
 
   const renderBackNavigateIconButton = (): ReactNode => {
-
     const { state } = location;
 
     const target = state?.editable ? '/mylists' : '/mygroupslists';
-    return <IconButton
-              onClick={()=> navigate(target)}
-              size="large"
-              edge="start"
-              color="info"
-              aria-label="backward"
-              sx={{ mr: 1 }}
-            >
+    return (
+      <IconButton
+        onClick={() => navigate(target)}
+        size="large"
+        edge="start"
+        color="info"
+        aria-label="backward"
+        sx={{ mr: 1 }}
+      >
         <ChevronLeft />
-    </IconButton>
-  }
+      </IconButton>
+    );
+  };
 
   const renderIconButton = (): ReactNode => {
     let home = false;
-    switch(location.pathname) {
-      case '/':      
+    switch (location.pathname) {
+      case '/':
       case '/login':
       case '/mylists':
       case '/mygroupslists':
@@ -94,23 +99,23 @@ function Header() {
         break;
 
       default:
-        home=false;
+        home = false;
         break;
     }
     return home ? renderMenuIconButton() : renderBackNavigateIconButton();
-  }
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar  position="static">
+      <AppBar position="static">
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <FlexBox sx={{ alignItems: 'center' }}>
             {renderIconButton()}
-            <Button size='large' onClick={showNotification}>
+            <Button size="large" onClick={showNotification}>
               {getTitle()}
             </Button>
           </FlexBox>
-          
+
           <IconButton>
             <UserAvatar />
           </IconButton>
