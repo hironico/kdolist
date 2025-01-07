@@ -174,6 +174,7 @@ const GiftListsList: React.FC<GiftListProps> = ({ editable }) => {
               primaryText={item.name}
               secondaryText={secondaryText}
               icon={icon}
+              keyId={`index-${index}`}
               key={`index-${index}`}
             />
           );

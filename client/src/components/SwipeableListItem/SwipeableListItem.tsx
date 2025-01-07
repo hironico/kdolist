@@ -55,7 +55,7 @@ export interface SwipeableListItemProps {
   action3?: SwipeableListItemAction;
   onClickMain?: () => void;
   icon?: ReactElement;
-  key: string;
+  keyId: string;
 }
 
 const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
@@ -66,7 +66,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   action3,
   onClickMain,
   icon,
-  key,
+  keyId,
 }) => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -170,7 +170,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   }, [primaryText]);
 
   return (
-    <SwipeableCard id={`card-${key}`}>
+    <SwipeableCard id={`card-${keyId}`}>
       <ActionsWrapper>
         {action1 && (
           <IconButton onClick={(_evt) => onActionClick(action1.onAction)} color={action1.color}>
