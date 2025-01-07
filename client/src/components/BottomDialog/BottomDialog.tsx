@@ -56,7 +56,7 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
         <IconButton color="inherit" aria-label="open drawer" onClick={() => handleClose()}>
           <ChevronLeft />
         </IconButton>
-        <Typography sx={{ fontSize: 16 }}>{title}</Typography>
+        <Typography fontSize={16}>{title}</Typography>
         <Box sx={{ flexGrow: 1 }} />
       </Toolbar>
       <DialogTitle></DialogTitle>
