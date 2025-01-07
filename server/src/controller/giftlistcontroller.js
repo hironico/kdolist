@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, where } = require('sequelize');
 const { GiftList, Gift, GroupAccess, Notification, Link, Image, sequelize } = require('../model/model');
 const logger = require('../logger');
 
@@ -153,6 +153,26 @@ class GiftListController {
     if (!giftList) throw new Error('Gift List not found');
 
     return giftList.gifts;
+  }
+
+  async addOrUpdateGiftList(giftList, ownerId) {
+    if (giftList.id && giftList.id !== '') {
+      const list = await GiftList.findByPk(giftList.id)
+      if (list === null || list?.ownerId !== ownerId) {
+        logger.error(`Cannot update list with id: ${giftList.id}. Not found or not owned by current user.`);
+        return null;
+      }
+
+      await list.update({ name: giftList.name});
+
+      return list;      
+    } else {
+      const newGiftList = await GiftList.create({
+        name: giftList.name,
+        ownerId: ownerId
+      });
+      return newGiftList;
+    }
   }
 }
 

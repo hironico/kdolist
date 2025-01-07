@@ -59,15 +59,12 @@ giftListApi.get('/v1/giftlist/contents/:id', authenticateJWT, async (req, res) =
 });
 
 /**
- * Create a new list for the current loggedin user.
+ * Create or update a new list for the current loggedin user.
  * Returns the newly create dlist json to client.
  */
 giftListApi.post('/v1/giftlist', authenticateJWT, async (req, res) => {
     try {
-        const newGiftList = await GiftList.create({
-            name: req.body.name,
-            ownerId: req.user.id
-        });
+        const newGiftList = await giftlistcontroller.addOrUpdateGiftList(req.body, req.user.id);
 
         res.status(200).json(newGiftList);
     } catch (error) {
