@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { List, Typography, useTheme } from '@mui/material';
+import React, { useContext, useEffect, useState } from 'react';
+import { List, Typography } from '@mui/material';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import { GiftList, LoginContext } from '@/LoginContext';
 import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
@@ -7,19 +7,55 @@ import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { FormatListBulleted } from '@mui/icons-material';
+import { BottomDialog } from '../BottomDialog';
+import ListEditor from '@/components/GiftLists/ListEditorForm';
+import GiftListsFAB from './GiftListsFAB';
 
 export type GiftListProps = {
-  giftLists: GiftList[];
   editable: boolean;
-  handleFetch: () => Promise<void>;
 };
 
-const GiftListsList: React.FC<GiftListProps> = ({ giftLists, editable, handleFetch }) => {
+const GiftListsList: React.FC<GiftListProps> = ({ editable }) => {
+  const [giftLists, setGiftLists] = useState<GiftList[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [giftListEditorVisible, setGiftListEditorVisible] = useState(false);
   const navigate = useNavigate();
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
+
+  const fetchGiftLists = async () => {
+    console.log(`Fetching gift lists... Editable is ${editable}.`);
+    
+    const url = editable ? `${apiBaseUrl}/giftlist/` : `${apiBaseUrl}/giftlist/shared`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
+        },
+      });
+      if (response.ok) {
+        const myLists = await response.json();
+        setGiftLists(myLists);
+      }
+    } catch (error) {
+      console.error(`Failed to fetch gift lists: ${error}`);
+      notificationsActions.push({
+        options: {
+          variant: 'error',
+        },
+        message: 'Impossible de récupérer les listes pour le moment.',
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchGiftLists();
+    appContext.setGiftList(null);
+  }, []);
 
   /**
    * Navigates to the list contents editor. Sets the selecte dlist in the list editor context.
@@ -40,6 +76,16 @@ const GiftListsList: React.FC<GiftListProps> = ({ giftLists, editable, handleFet
     appContext.setGiftList(giftList);
     setShowConfirmDialog(true);
   };
+
+  const handleEditGiftList = (giftList: GiftList) => {
+    appContext.setGiftList(giftList);
+    setGiftListEditorVisible(true);
+  }
+
+  const handleAddGiftList = () => {
+    appContext.setGiftList(null);
+    setGiftListEditorVisible(true);
+  }
 
   const handleDeleteGiftList = async () => {
     if (!appContext.giftList) {
@@ -67,10 +113,15 @@ const GiftListsList: React.FC<GiftListProps> = ({ giftLists, editable, handleFet
         message: 'Impossible de SUPPRIMER cette liste pour le moment.',
       });
     } else {
-      handleFetch();
+      fetchGiftLists();
       appContext.setGiftList(null);
     }
   };
+
+  const handleListSaved = (giftList: GiftList) => {
+    setGiftListEditorVisible(false);
+    fetchGiftLists();
+  }
 
   const actions: ActionSheetEntry[] = [
     {
@@ -85,6 +136,8 @@ const GiftListsList: React.FC<GiftListProps> = ({ giftLists, editable, handleFet
     color: 'primary',
     onAction: () => setShowConfirmDialog(false),
   };
+
+  const listEditor = <ListEditor onListSaved={handleListSaved} />;
 
   return (
     <>
@@ -105,12 +158,19 @@ const GiftListsList: React.FC<GiftListProps> = ({ giftLists, editable, handleFet
             onAction: () => handleSelectAndConfirmDelete(item),
           };
 
+          const editListAction: SwipeableListItemAction = {
+            icon: <EditIcon />,
+            color: 'default',
+            onAction: () => handleEditGiftList(item),
+          };
+
           const icon = <FormatListBulleted />;
 
           return (
             <SwipeableListItem
               onClickMain={() => handleNavigateList(item, editable)}
               action1={editable ? deleteAction : undefined}
+              action2={editable ? editListAction: undefined}
               primaryText={item.name}
               secondaryText={secondaryText}
               icon={icon}
@@ -120,6 +180,13 @@ const GiftListsList: React.FC<GiftListProps> = ({ giftLists, editable, handleFet
         })}
       </List>
 
+      <BottomDialog
+              title="Nouvelle liste"
+              open={giftListEditorVisible}
+              handleClose={() => setGiftListEditorVisible(false)}
+              contents={listEditor}
+            />
+
       <ActionSheet
         open={showConfirmDialog}
         handleClose={() => setShowConfirmDialog(false)}
@@ -127,6 +194,8 @@ const GiftListsList: React.FC<GiftListProps> = ({ giftLists, editable, handleFet
         defaultEntry={defaultAction}
         message="Attention c'est irreversible !"
       />
+
+      <GiftListsFAB handleAdd={() => handleAddGiftList()} />
     </>
   );
 };
