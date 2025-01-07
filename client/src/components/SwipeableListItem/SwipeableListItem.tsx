@@ -55,6 +55,7 @@ export interface SwipeableListItemProps {
   action3?: SwipeableListItemAction;
   onClickMain?: () => void;
   icon?: ReactElement;
+  key: string;
 }
 
 const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
@@ -65,6 +66,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   action3,
   onClickMain,
   icon,
+  key,
 }) => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -120,6 +122,15 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
     setTouchEnd(null);
   };
 
+  /**
+   * Triggers the action and ensure swipe is closed on this swipeable list item 
+   * @param action the action to execute
+   */
+  const onActionClick = (action: () => void) => {
+    setIsOpen(false);
+    action();
+  }
+
   const getSwipeDistance = () => {
     if (!touchStart || !touchEnd) return 0;
     return touchStart - touchEnd;
@@ -159,20 +170,20 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   }, [primaryText]);
 
   return (
-    <SwipeableCard id={`card-${primaryText}`}>
+    <SwipeableCard id={`card-${key}`}>
       <ActionsWrapper>
         {action1 && (
-          <IconButton onClick={action1.onAction} color={action1.color}>
+          <IconButton onClick={(_evt) => onActionClick(action1.onAction)} color={action1.color}>
             {action1.icon}
           </IconButton>
         )}
         {action2 && (
-          <IconButton onClick={action2.onAction} color={action2.color}>
+          <IconButton onClick={(_evt) => onActionClick(action2.onAction)} color={action2.color}>
             {action2.icon}
           </IconButton>
         )}
         {action3 && (
-          <IconButton onClick={action3.onAction} color={action3.color}>
+          <IconButton onClick={(_evt) => onActionClick(action3.onAction)} color={action3.color}>
             {action3.icon}
           </IconButton>
         )}
