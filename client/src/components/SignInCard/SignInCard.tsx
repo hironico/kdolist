@@ -48,7 +48,7 @@ export default function SignInCard() {
     const email = document.getElementById('email') as HTMLInputElement;
     const password = document.getElementById('password') as HTMLInputElement;
 
-    const loginInfo = {
+    const loginFormData = {
       email: email.value,
       password: password.value,
     };
@@ -60,14 +60,24 @@ export default function SignInCard() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(loginInfo),
+      body: JSON.stringify(loginFormData),
     })
       .then((response) => {
         if (!response.ok) {
           showNotificationLoginError('Mauvaise combinaison identifiant, et mot de passe');
         } else {
-          response.json().then((loginInfo) => {
-            console.log(`Received token: ${JSON.stringify(loginInfo)}`);
+          response.json().then((data) => {
+            const loginInfo: LoginInfoProps = {
+              username: data.profile.username,
+              email: data.profile.email,
+              accessToken: 'NA',
+              accessTokenProvider: 'FORM',
+              id: data.profile.id,
+              jwt: data.jwt,
+              profile: data.profile,
+            };
+
+            console.log(`Received token: ${JSON.stringify(data)}`);
             loginContext.setLoginInfo(loginInfo);
             navigate('/mylists', { replace: true });
             showNotificationLoginSuccess(loginInfo);
@@ -119,6 +129,7 @@ export default function SignInCard() {
       accessTokenProvider: authProvider,
       id: profile.id,
       jwt: '',
+      profile: null,
     };
 
     // loginContext.setLoginInfo(profile);
@@ -137,6 +148,7 @@ export default function SignInCard() {
       .then((data) => {
         console.log(`Received token: ${JSON.stringify(data)}`);
         loginInfo.jwt = data.accessToken;
+        loginInfo.profile = data.profile;
         loginContext.setLoginInfo(loginInfo);
         navigate('/mylists', { replace: true });
         showNotificationLoginSuccess(loginInfo);

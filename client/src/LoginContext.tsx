@@ -2,6 +2,13 @@ import { createContext, FC, PropsWithChildren, useState } from 'react';
 import { apiBaseUrl } from './config';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+export interface LoginProfile {
+  id: string;
+  username: string;
+  firstname: string;
+  lastname: string;
+}
+
 export interface LoginInfoProps {
   id: string | undefined;
   username: string | undefined;
@@ -12,6 +19,7 @@ export interface LoginInfoProps {
   accessToken?: string;
   accessTokenProvider?: string;
   jwt?: string;
+  profile?: LoginProfile | null;
 }
 
 export interface GiftList {
@@ -28,8 +36,8 @@ export interface Gift {
   name: string;
   description?: string;
   isHidden?: boolean;
-  selectedAt?: Date;
-  selectedBy?: string;
+  selectedAt?: Date | null;
+  selectedById?: string | null;
   createdAt: Date;
   updatedAt: Date;
   giftListId?: string;
