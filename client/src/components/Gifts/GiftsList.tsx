@@ -1,6 +1,7 @@
-import { List, Typography } from '@mui/material';
+import { Box, List, Typography } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CheckIcon from '@mui/icons-material/Check';
 import { Gift, LoginContext } from '@/LoginContext';
 import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
 import { Redeem } from '@mui/icons-material';
@@ -10,6 +11,7 @@ import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
 import { BottomDialog } from '../BottomDialog';
 import GiftForm from './GiftForm';
 import { GiftsFAB } from './GiftsFAB';
+import { EmptyStateCard } from '../EmptyStateCard';
 
 const newEmptyGift = (): Gift => {
   return {
@@ -19,6 +21,8 @@ const newEmptyGift = (): Gift => {
     updatedAt: new Date(),
     links: [],
     images: [],
+    selectedAt: null,
+    selectedById: null,
   };
 };
 
@@ -74,6 +78,30 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
             variant: 'error',
           },
           message: `Impossible de supprimer l'entrée dans la liste.`,
+        });
+      } else {
+        fetchListContents();
+        setGift(newEmptyGift);
+      }
+    });
+  };
+
+  const toggleSelectGift = (gift: Gift) => {
+    const url = gift.selectedById !== null ? `${apiBaseUrl}/gift/untake/${gift.id}` : `${apiBaseUrl}/gift/take/${gift.id}`;
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${appContext.loginInfo.jwt}`,
+      },
+    }).then((response) => {
+      if (!response.ok) {
+        console.error(JSON.stringify(response));
+        notificationsActions.push({
+          options: {
+            variant: 'error',
+          },
+          message: `Impossible de marquer ce cadeau comme étant offert.`,
         });
       } else {
         fetchListContents();
@@ -150,9 +178,17 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   };
 
   return (
-    <>
+    <Box display="grid" gridTemplateColumns="auto" m={2} p={0} width="100%">
+    {appContext.giftListContents.length > 0 ? (
       <List>
         {appContext.giftListContents?.map((oneGift, index) => {
+
+          const isTaken = oneGift.selectedById !== null;
+          const decoration = isTaken ? 'line-through' : 'none';
+          const primaryText = (
+            <Typography sx={{textDecoration: decoration}}>{`${oneGift.name}`}</Typography>
+          );
+
           const modifDate = new Date(oneGift.updatedAt.toString());
           const secondaryText = (
             <Typography variant="caption">
@@ -169,20 +205,31 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
             },
           };
 
-          const icon = <Redeem />;
+          const takeAction : SwipeableListItemAction = {
+            icon: <CheckIcon />,
+            color: isTaken ? 'success' : 'default',
+            onAction: () => {
+              toggleSelectGift(oneGift);
+            }
+          }
 
           return (
             <SwipeableListItem
               key={`kdo-${index}`}
+              keyId={`kdo-${index}`}
               onClickMain={() => handleEditGift(oneGift)}
-              primaryText={oneGift.name}
+              primaryText={primaryText}
               secondaryText={secondaryText}
               action1={editable ? deleteAction : undefined}
-              icon={icon}
+              action2={takeAction}
+              icon={<Redeem />}
             />
           );
         })}
       </List>
+    ) : (
+      <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'."/>
+    )}
 
       <BottomDialog
         open={giftEditorOpen}
@@ -200,7 +247,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
       />
 
       {editable ? <GiftsFAB handleAdd={handleAddGift} /> : <></>}
-    </>
+    </Box>
   );
 };
 

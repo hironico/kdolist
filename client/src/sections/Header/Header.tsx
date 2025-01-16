@@ -71,11 +71,10 @@ function Header() {
 
   const renderBackNavigateIconButton = (): ReactNode => {
     const { state } = location;
-
-    const target = state?.editable ? '/mylists' : '/mygroupslists';
+    
     return (
       <IconButton
-        onClick={() => navigate(target)}
+        onClick={() => navigate('/mylists')}
         size="large"
         edge="start"
         color="info"

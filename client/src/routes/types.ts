@@ -8,7 +8,6 @@ enum Pages {
   LoginPage,
   MyLists,
   ListContentsPage,
-  MyGroupsListsPage,
   PrivacyPage,
   NotFound,
 }

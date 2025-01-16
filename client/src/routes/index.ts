@@ -25,7 +25,7 @@ const routes: Routes = {
   [Pages.MyLists]: {
     component: asyncComponentLoader(() => import('@/pages/MyListsPage')),
     path: '/mylists',
-    title: 'Mes listes',
+    title: 'K.DO-List',
     icon: CardGiftcardIcon,
     inSideBar: true,
   },
@@ -34,13 +34,6 @@ const routes: Routes = {
     path: '/listcontents',
     icon: CardGiftcardIcon,
     inSideBar: false,
-  },
-  [Pages.MyGroupsListsPage]: {
-    component: asyncComponentLoader(() => import('@/pages/MyGroupsListsPage')),
-    path: '/mygroupslists',
-    title: 'Listes partagées',
-    icon: Diversity1Icon,
-    inSideBar: true,
   },
   [Pages.PrivacyPage]: {
     component: asyncComponentLoader(() => import('@/pages/PrivacyPage')),
