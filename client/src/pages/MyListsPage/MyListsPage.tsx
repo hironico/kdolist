@@ -7,10 +7,10 @@ import { Slide } from '@mui/material';
 function MyListsPage() { 
   return (
     <ProtectedRoute>
-      <Meta title="Mes listes" />
+      <Meta title="Listes de cadeaux" />
       <Slide direction="right" in={true} timeout={500}>
         <FullSizeTopCenteredFlexBox>
-          <GiftListsList editable={true} />
+          <GiftListsList />
         </FullSizeTopCenteredFlexBox>
       </Slide>
 
