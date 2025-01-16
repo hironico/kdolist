@@ -3,7 +3,7 @@ import { grey, red } from '@mui/material/colors';
 import { createTheme } from '@mui/material/styles';
 import { deepmerge } from '@mui/utils';
 
-const iOSBoxShadow =
+export const iOSBoxShadow =
   '0 2px 1px rgba(0,0,0,0.03),0 4px 8px rgba(0,0,0,0.13),0 0 0 1px rgba(0,0,0,0.02)';
 
 const baseTheme = createTheme({
