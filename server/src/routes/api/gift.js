@@ -112,4 +112,30 @@ giftApi.get('/v1/gift/links/:id', authenticateJWT, (req, res) => {
     });
 });
 
+giftApi.post('/v1/gift/take/:id', authenticateJWT, (req, res) => {
+    const giftId = req.params.id;
+    if (!giftId) {
+        res.status(403).send('Invalid gift id').end();
+        return;
+    }
+
+    giftlistcontroller.updateGift(giftId, {selectedById: req.user.id, selectedAt: new Date()})
+    .then(theGift => {
+        res.status(200).json(theGift);
+    })
+});
+
+giftApi.post('/v1/gift/untake/:id', authenticateJWT, (req, res) => {
+    const giftId = req.params.id;
+    if (!giftId) {
+        res.status(403).send('Invalid gift id').end();
+        return;
+    }
+
+    giftlistcontroller.updateGift(giftId, {selectedById: null, selectedAt: null})
+    .then(theGift => {
+        res.status(200).json(theGift);
+    })
+});
+
 module.exports = { giftApi };

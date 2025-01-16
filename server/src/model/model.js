@@ -116,7 +116,7 @@ Gift.init({
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },
-  selectedAt: DataTypes.DATE
+  selectedAt: DataTypes.DATE,
 }, { sequelize, modelName: 'gift', onDelete: 'CASCADE' });
 
 class Link extends Model {}
