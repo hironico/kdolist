@@ -199,7 +199,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
             }
           : {})}
         secondaryAction={
-          !isTouchDevice && (
+          !isTouchDevice && (totalSwipeDistance > 0) && (
             <IconButton onClick={toggleOpen}>
               <MoreVertIcon />
             </IconButton>
