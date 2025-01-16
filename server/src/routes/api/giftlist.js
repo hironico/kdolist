@@ -40,6 +40,17 @@ giftListApi.get('/v1/giftlist/shared', authenticateJWT, async (req, res) => {
 });
 
 /**
+ * Get all lists regardless the owner
+ */
+giftListApi.get('/v1/giftlist/all', authenticateJWT, async (req, res) => {
+    const allLists = await GiftList.findAll({
+        include: 'owner'
+    });
+
+    res.json(allLists);
+});
+
+/**
  * Get the list contents whose ID is given as path parameter :id
  */
 giftListApi.get('/v1/giftlist/contents/:id', authenticateJWT, async (req, res) => {
@@ -60,7 +71,7 @@ giftListApi.get('/v1/giftlist/contents/:id', authenticateJWT, async (req, res) =
 
 /**
  * Create or update a new list for the current loggedin user.
- * Returns the newly create dlist json to client.
+ * Returns the newly created list json to client.
  */
 giftListApi.post('/v1/giftlist', authenticateJWT, async (req, res) => {
     try {
