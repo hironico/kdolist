@@ -143,10 +143,8 @@ authApi.post('/v1/auth/login', async (req, res) => {
         const refreshToken = generateRefreshToken(user);
 
         res.status(200).json({
-            username: email,
-            email: user.email,
-            id: user.id,            
-            jwt: accessToken
+            jwt: accessToken,
+            profile: user
         });        
     }).catch(error => {
         logger.error(`Cannot find user with password in database. ${error}`);
@@ -169,7 +167,8 @@ authApi.post('/v1/auth/fb', async (req, res) => {
 
     res.json({
         accessToken: accessToken,
-        refreshToken: refreshToken
+        refreshToken: refreshToken,
+        profile: user,
     });
 });
 
@@ -188,7 +187,8 @@ authApi.post('/v1/auth/google', async (req, res) => {
 
     res.json({
         accessToken: accessToken,
-        refreshToken: refreshToken
+        refreshToken: refreshToken,
+        profile: user,
     });
 });
 
