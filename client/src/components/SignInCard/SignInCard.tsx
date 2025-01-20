@@ -77,7 +77,7 @@ export default function SignInCard() {
               profile: data.profile,
             };
 
-            console.log(`Received token: ${JSON.stringify(data)}`);
+            //console.log(`Received token: ${JSON.stringify(data)}`);
             loginContext.setLoginInfo(loginInfo);
             navigate('/mylists', { replace: true });
             showNotificationLoginSuccess(loginInfo);
@@ -98,7 +98,7 @@ export default function SignInCard() {
 
     if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
       setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
+      setEmailErrorMessage('Addresse email invalide.');
       isValid = false;
     } else {
       setEmailError(false);
@@ -107,7 +107,7 @@ export default function SignInCard() {
 
     if (!password.value || password.value.length < 6) {
       setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
+      setPasswordErrorMessage(`Le mot de passe doit contenir 6 charactères au moins.`);
       isValid = false;
     } else {
       setPasswordError(false);
@@ -120,7 +120,7 @@ export default function SignInCard() {
   };
 
   const authenticate = (profile: ProfileSuccessResponse, authProvider: 'GOOGLE' | 'FACEBOOK') => {
-    console.log(`Authenticate ${authProvider}: ${JSON.stringify(profile, null, 2)}`);
+    //console.log(`Authenticate ${authProvider}: ${JSON.stringify(profile, null, 2)}`);
 
     const loginInfo: LoginInfoProps = {
       username: profile.name,
@@ -131,8 +131,6 @@ export default function SignInCard() {
       jwt: '',
       profile: null,
     };
-
-    // loginContext.setLoginInfo(profile);
 
     const apiUrl =
       'FACEBOOK' === authProvider ? `${apiBaseUrl}/auth/fb` : `${apiBaseUrl}/auth/google`;
@@ -146,7 +144,7 @@ export default function SignInCard() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(`Received token: ${JSON.stringify(data)}`);
+        //console.log(`Received token: ${JSON.stringify(data)}`);
         loginInfo.jwt = data.accessToken;
         loginInfo.profile = data.profile;
         loginContext.setLoginInfo(loginInfo);
