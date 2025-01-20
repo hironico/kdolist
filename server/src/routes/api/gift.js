@@ -119,10 +119,25 @@ giftApi.post('/v1/gift/take/:id', authenticateJWT, (req, res) => {
         return;
     }
 
-    giftlistcontroller.updateGift(giftId, {selectedById: req.user.id, selectedAt: new Date()})
+    Gift.findByPk(giftId)
     .then(theGift => {
-        res.status(200).json(theGift);
-    })
+        if (theGift === null) {
+            res.status(400).send('Cannot find gift to mark as taken.').end();
+            return;
+        }
+        if (theGift.selectedById !== null && theGift.selectedById !== '') {
+            res.status(400).send('Gift is already taken by someone. Cannot take it for you.').end();
+        } else {
+            giftlistcontroller.updateGift(giftId, {selectedById: req.user.id, selectedAt: new Date()})
+            .then(theGift => {
+                res.status(200).json(theGift);
+            }).catch(error => {
+                res.status(500).send('Cannot mark gift as taken.' + error).end();
+            })
+        }
+    }).catch(error => {
+        res.status(500).send(`Cannot find gift to mark as taken. ${error}`).end();
+    });
 });
 
 giftApi.post('/v1/gift/untake/:id', authenticateJWT, (req, res) => {

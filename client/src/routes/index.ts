@@ -13,7 +13,7 @@ const routes: Routes = {
     path: '/',
     title: 'Welcome',
     icon: HomeIcon,
-    inSideBar: true,
+    inSideBar: false,
   },
   [Pages.LoginPage]: {
     component: asyncComponentLoader(() => import('@/pages/LoginPage')),
@@ -25,8 +25,8 @@ const routes: Routes = {
   [Pages.MyLists]: {
     component: asyncComponentLoader(() => import('@/pages/MyListsPage')),
     path: '/mylists',
-    title: 'K.DO-List',
-    icon: CardGiftcardIcon,
+    title: 'Listes',
+    icon: HomeIcon,
     inSideBar: true,
   },
   [Pages.ListContentsPage]: {
