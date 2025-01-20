@@ -1,3 +1,4 @@
 import EmptyStateCard from "./EmptyStateCard";
+import FacebookLikeCircularProgress from "./FacebookLikeCircularProgress";
 
-export { EmptyStateCard }
+export { EmptyStateCard, FacebookLikeCircularProgress }
