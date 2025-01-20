@@ -1,5 +1,5 @@
-import { Box, List, Typography } from '@mui/material';
-import React, { useContext, useEffect, useState } from 'react';
+import { Box, capitalize, List, Typography } from '@mui/material';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import { Gift, LoginContext } from '@/LoginContext';
@@ -11,7 +11,7 @@ import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
 import { BottomDialog } from '../BottomDialog';
 import GiftForm from './GiftForm';
 import { GiftsFAB } from './GiftsFAB';
-import { EmptyStateCard } from '../EmptyStateCard';
+import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 
 const newEmptyGift = (): Gift => {
   return {
@@ -36,6 +36,16 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [gift, setGift] = useState<Gift>(newEmptyGift());
   const [giftEditorOpen, setGiftEditorOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const showError = useCallback((message: string) => {
+    notificationsActions.push({
+      options: {
+        variant: 'error',
+      },
+      message: message,
+    });
+  }, []);
 
   const fetchListContents = () => {
     try {
@@ -46,6 +56,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
       console.log('Fetching list contents: ', appContext.giftList.id);
 
+      setLoading(true);
+
       fetch(`${apiBaseUrl}/giftlist/contents/${appContext.giftList.id}`, {
         method: 'GET',
         headers: {
@@ -53,12 +65,19 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         },
       }).then((response) => {
         if (response.ok) {
-          response.json().then((data) => appContext.setGiftListContents(data));
+          response.json().then((data) => {
+            appContext.setGiftListContents(data);
+            setLoading(false);
+        });
         } else {
+          setLoading(false);
+          showError('Impossible de récupérer le contenu de la liste.');
           console.error('Failed to fetch details', JSON.stringify(response, null, 2));
         }
       });
     } catch (error) {
+      setLoading(false);
+      showError(`Erreur technique: ${error}`);
       console.error('Error fetching details:', error);
     }
   };
@@ -73,12 +92,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     }).then((response) => {
       if (!response.ok) {
         console.error(JSON.stringify(response));
-        notificationsActions.push({
-          options: {
-            variant: 'error',
-          },
-          message: `Impossible de supprimer l'entrée dans la liste.`,
-        });
+        showError(`Impossible de supprimer l'entrée dans la liste.`);
       } else {
         fetchListContents();
         setGift(newEmptyGift);
@@ -97,12 +111,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     }).then((response) => {
       if (!response.ok) {
         console.error(JSON.stringify(response));
-        notificationsActions.push({
-          options: {
-            variant: 'error',
-          },
-          message: `Impossible de marquer ce cadeau comme étant offert.`,
-        });
+        showError(`Impossible de marquer ce cadeau comme étant offert.`);
       } else {
         fetchListContents();
         setGift(newEmptyGift);
@@ -130,12 +139,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     }).then((response) => {
       if (!response.ok) {
         console.error(JSON.stringify(response));
-        notificationsActions.push({
-          options: {
-            variant: 'error',
-          },
-          message: `Impossible de sauver la liste pour le moment.`,
-        });
+        showError(`Impossible de sauvegarder la liste pour le moment.`);
       } else {
         fetchListContents(); //may be useless !
         setGift(newEmptyGift);
@@ -227,9 +231,10 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
           );
         })}
       </List>
-    ) : (
-      <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'."/>
-    )}
+    ) : 
+        loading ? (<EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon=<FacebookLikeCircularProgress/> />)
+        : (<EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'."/>)     
+    }
 
       <BottomDialog
         open={giftEditorOpen}

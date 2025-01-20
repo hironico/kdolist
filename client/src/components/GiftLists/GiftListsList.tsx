@@ -14,7 +14,8 @@ import ListEditor from '@/components/GiftLists/ListEditorForm';
 import GiftListsFAB from './GiftListsFAB';
 import FilterBar, { Filter } from '../FilterBar/FilterBar';
 import { Box } from '@mui/system';
-import { EmptyStateCard } from '../EmptyStateCard';
+import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 
 const GiftListsList: React.FC = () => {
   const [giftLists, setGiftLists] = useState<GiftList[]>([]);
@@ -23,13 +24,17 @@ const GiftListsList: React.FC = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [giftListEditorVisible, setGiftListEditorVisible] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
 
   const fetchGiftLists = async () => {
-    
+
     const url = `${apiBaseUrl}/giftlist/all`;
+
+    setLoading(true);
 
     try {
       const response = await fetch(url, {
@@ -38,11 +43,15 @@ const GiftListsList: React.FC = () => {
           Authorization: `Bearer ${appContext.loginInfo.jwt}`,
         },
       });
+
+      setLoading(false);
+
       if (response.ok) {
         const myLists = await response.json();
         setGiftLists(myLists);
       }
     } catch (error) {
+      setLoading(false);
       console.error(`Failed to fetch gift lists: ${error}`);
       notificationsActions.push({
         options: {
@@ -162,79 +171,78 @@ const GiftListsList: React.FC = () => {
     setActiveFilters(newActiveFilters);
   }, []);
 
-console.log(`Login profile: ${JSON.stringify(appContext.loginInfo)}`);
 
-const filteredLists = giftLists.filter(list => {
-  if (activeFilters.length === 0) {
-    return true;
-  }
+  const filteredLists = giftLists.filter(list => {
+    if (activeFilters.length === 0) {
+      return true;
+    }
 
-  let matching = false;
-  activeFilters.forEach(filter => {
-    matching = matching || filter.filterFn(list);
+    let matching = false;
+    activeFilters.forEach(filter => {
+      matching = matching || filter.filterFn(list);
+    });
+
+    return matching;
   });
 
-  return matching;
-});
-
   return (
-    <Box display="grid" gridTemplateColumns="auto" m={2} p={0} width="100%">
-      <FilterBar<GiftList> onFiltersChange={onGiftFilterChange} filters={giftListsFilters}/>
-      { 
-      filteredLists.length > 0 ? (
-      <List sx={{m: '0px', mt: '10px'}}>
-        {filteredLists.map((item, index) => {
-          const modifDate = new Date(item.updatedAt.toString());
-          const secondaryText = (
-            <>
-              <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
-              <br />
-              <Typography variant="caption">{`Par: ${item.owner?.firstname}`}</Typography>
-            </>
-          );
+    <Box display="grid" gridTemplateColumns="auto" p={2} width="100%">
+      <FilterBar<GiftList> onFiltersChange={onGiftFilterChange} filters={giftListsFilters} />
+      {
+        filteredLists.length > 0 ? (
+          <List sx={{ m: '0px', mt: '10px' }}>
+            {filteredLists.map((item, index) => {
+              const modifDate = new Date(item.updatedAt.toString());
+              const secondaryText = (
+                <>
+                  <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
+                  <br />
+                  <Typography variant="caption">{`Par: ${item.owner?.firstname}`}</Typography>
+                </>
+              );
 
-          const deleteAction: SwipeableListItemAction = {
-            icon: <DeleteIcon />,
-            color: 'error',
-            onAction: () => handleSelectAndConfirmDelete(item),
-          };
+              const deleteAction: SwipeableListItemAction = {
+                icon: <DeleteIcon />,
+                color: 'error',
+                onAction: () => handleSelectAndConfirmDelete(item),
+              };
 
-          const editListAction: SwipeableListItemAction = {
-            icon: <EditIcon />,
-            color: 'default',
-            onAction: () => handleEditGiftList(item),
-          };
+              const editListAction: SwipeableListItemAction = {
+                icon: <EditIcon />,
+                color: 'default',
+                onAction: () => handleEditGiftList(item),
+              };
 
-          const icon = <FormatListBulleted />;
+              const icon = <FormatListBulleted />;
 
-          const editable = item.ownerId === appContext.loginInfo.profile?.id;
+              const editable = item.ownerId === appContext.loginInfo.profile?.id;
 
-          console.log(`list owner id: ${item.ownerId} === profile user id : ${appContext.loginInfo.profile?.id}`);
+              console.log(`list owner id: ${item.ownerId} === profile user id : ${appContext.loginInfo.profile?.id}`);
 
-          return (
-            <SwipeableListItem
-              onClickMain={() => handleNavigateList(item, editable)}
-              action1={editable ? deleteAction : undefined}
-              action2={editable ? editListAction: undefined}
-              primaryText={item.name}
-              secondaryText={secondaryText}
-              icon={icon}
-              keyId={`index-${index}`}
-              key={`index-${index}`}
-            />
-          );
-        })}
-      </List>
-      ) : (
-        <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter une liste, appuie sur le bouton '+'."/>
-      )}
+              return (
+                <SwipeableListItem
+                  onClickMain={() => handleNavigateList(item, editable)}
+                  action1={editable ? deleteAction : undefined}
+                  action2={editable ? editListAction : undefined}
+                  primaryText={item.name}
+                  secondaryText={secondaryText}
+                  icon={icon}
+                  keyId={`index-${index}`}
+                  key={`index-${index}`}
+                />
+              );
+            })}
+          </List>
+        ) : loading ? (<EmptyStateCard title="Patience..." caption="Les listes de cadeaux sont en train d'être récupérées. Ca ne devrait pas être long." icon=<FacebookLikeCircularProgress/> />)
+              : (<EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter une liste, appuie sur le bouton '+'." icon=<SentimentVeryDissatisfiedIcon/> />)
+        }
 
       <BottomDialog
-              title="Nouvelle liste"
-              open={giftListEditorVisible}
-              handleClose={() => setGiftListEditorVisible(false)}
-              contents={listEditor}
-            />
+        title="Nouvelle liste"
+        open={giftListEditorVisible}
+        handleClose={() => setGiftListEditorVisible(false)}
+        contents={listEditor}
+      />
 
       <ActionSheet
         open={showConfirmDialog}
