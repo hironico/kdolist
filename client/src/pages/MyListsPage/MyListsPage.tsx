@@ -13,8 +13,6 @@ function MyListsPage() {
           <GiftListsList />
         </FullSizeTopCenteredFlexBox>
       </Slide>
-
-      
     </ProtectedRoute>
   );
 }

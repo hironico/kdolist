@@ -182,9 +182,9 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   };
 
   return (
-    <Box display="grid" gridTemplateColumns="auto" m={2} p={0} width="100%">
+    <Box display="grid" gridTemplateColumns="auto" p={2} width="100%">
     {appContext.giftListContents.length > 0 ? (
-      <List>
+      <List sx={{ m: '0px', mt: '10px' }}>
         {appContext.giftListContents?.map((oneGift, index) => {
 
           const isTaken = oneGift.selectedById !== null;
