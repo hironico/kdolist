@@ -43,7 +43,7 @@ export interface Gift {
   giftListId?: string;
 
   links: GiftLink[];
-  images?: GiftImage[];
+  images: GiftImage[];
 }
 
 export interface GiftLink {
@@ -56,8 +56,8 @@ export interface GiftLink {
 }
 
 export interface GiftImage {
-  id: string;
-  data: string;
+  id?: string;
+  url: string;
   createdAt: Date;
   updatedAt: Date;
   giftId: string;
