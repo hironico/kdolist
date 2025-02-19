@@ -23,7 +23,7 @@ giftApi.post('/v1/gift/', authenticateJWT, async (req, res) => {
         });
 
         if (theList === null) {
-            res.status(403).send('Cannot add gift to list. List not found.').end();
+            res.status(403).send('Cannot add gift to list. List not found or you are not the owner.').end();
             return;
         }
 
@@ -45,7 +45,16 @@ giftApi.post('/v1/gift/', authenticateJWT, async (req, res) => {
             await giftlistcontroller.addAllGiftLinks(linksToCreate);
         }
 
-        // TODO ajouter les immages
+        // do not destroy images if  no images prop is present
+        if (req.body.images) {
+            await giftlistcontroller.removeAllGiftImages(gift.id);
+            // check the images have the gift id set.
+            const imagesToCreate = req.body.images.map(img => {
+                img.giftId = gift.id;
+                return img;
+            });
+            await giftlistcontroller.addAllGiftImages(imagesToCreate);
+        }
 
         // return newly created gift with links and images
         const newGift = await Gift.findByPk(gift.id, {
@@ -63,7 +72,7 @@ giftApi.post('/v1/gift/', authenticateJWT, async (req, res) => {
 giftApi.delete('/v1/gift/:id', authenticateJWT, (req, res) => {
     const giftId = req.params.id;
     if (!giftId) {
-        res.status(403).send('Invalid gift list id').end();
+        res.status(403).send('Invalid gift id').end();
         return;
     }
 

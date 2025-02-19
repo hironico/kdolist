@@ -80,7 +80,7 @@ class GiftListController {
   async addAllGiftLinks(links) {
     const allPromises = [];
 
-    logger.debug(`links are:\n${JSON.stringify(links, null, 2)}`);
+    logger.debug(`adding all links:\n${JSON.stringify(links, null, 2)}`);
 
     for (const link of links) {
       const prom = this.addGiftLink(link)
@@ -88,6 +88,39 @@ class GiftListController {
     }
 
     return Promise.all(allPromises);
+  }
+
+  async addGiftImage({giftId, url}) {
+    logger.debug(`Adding image to gift id: ${giftId}`);
+    return Image.create({giftId, url});
+  }
+
+  async removeGiftImage(giftImageId) {
+    const img = await Image.findByPk(giftImageId);
+    if (!img) throw new Error(`Cannot remove image with id ${giftImageId}. Not found.`);
+
+    return img.destroy();
+  }
+
+  async addAllGiftImages(images) {
+    const allPromises = [];
+
+    for (let img of images) {
+      const prom = this.addGiftImage(img);
+      allPromises.push(prom);
+    }
+
+    return Promise.all(allPromises);
+  }
+
+  async removeAllGiftImages(giftId) {
+    return Image.destroy({
+      where: {
+        giftId: giftId
+      }
+    }).then(() => {
+      logger.debug(`Delete all gift images for gif id: ${giftId}. Success.`);
+    });
   }
 
   async shareWithGroup(giftListId, groupId) {

@@ -141,8 +141,9 @@ Image.init({
     primaryKey: true
   },
   url: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: DataTypes.TEXT,    
+    allowNull: false,
+    comment: 'Base64 representation of the data URL to use when displaying the image in the application.'
   },
   altText: DataTypes.STRING
 }, { sequelize, modelName: 'image', onDelete: 'CASCADE'});
