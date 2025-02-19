@@ -1,7 +1,7 @@
 import { GiftLink } from '@/LoginContext';
 import LinkIcon from '@mui/icons-material/Link';
 import LaunchIcon from '@mui/icons-material/Launch';
-import { Button, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip } from '@mui/material';
+import { Button, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip } from '@mui/material';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import AddLinkIcon from '@mui/icons-material/AddLink';
 import { FC, useState } from 'react';
@@ -54,11 +54,19 @@ const GiftLinksMenu: FC<GiftLinksMenuProps> = ({ links, editable, handleAddLink 
         endIcon={<KeyboardArrowUpIcon />}
         sx={{ width: '100%' }}
       >
-        Liens
+        {`Liens (${links.length})`}
       </Button>
       <Menu
         id="menu-appbar"
         anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
         open={open}
         onClose={handleClose}
         MenuListProps={{
@@ -76,6 +84,7 @@ const GiftLinksMenu: FC<GiftLinksMenuProps> = ({ links, editable, handleAddLink 
             </MenuItem>
           </Tooltip>
         ))}
+        {links.length > 0 && <Divider />}
         <MenuItem onClick={openLinkEditor} disabled={!editable}>
           <ListItemIcon>
             <AddLinkIcon />

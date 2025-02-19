@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { DialogContentText, TextField, Button, Stack } from '@mui/material';
-import BottomDialog from '../BottomDialog/BottomDialog';
+import { DialogContentText, TextField, Button, Stack, Paper } from '@mui/material';
+import BottomDialog, { BottomDialogAction } from '../BottomDialog/BottomDialog';
 import { GiftLink } from '@/LoginContext';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import CheckIcon from '@mui/icons-material/Check';
+import { Box } from '@mui/system';
 
 interface ModalProps {
   open: boolean;
@@ -56,30 +59,24 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
     onClose();
   };
 
-  const getActions = () => {
-    return (
-      <Stack sx={{ width: '100%' }}>
-        {canPaste && (
-          <Button
-            onClick={handlePaste}
-            variant="contained"
-            color="secondary"
-            sx={{ ml: '15px', mr: '15px' }}
-          >
-            Coller
-          </Button>
-        )}
-        <Button onClick={handleSubmit} variant="contained" color="primary" sx={{ margin: '15px' }}>
-          Ajouter
-        </Button>
-      </Stack>
-    );
+  const getActions = (): BottomDialogAction[] => {
+    return [
+      {
+        icon: <AutoFixHighIcon/>,
+        label: 'Coller',
+        onClick: handlePaste
+      },
+      {
+        icon: <CheckIcon/>,
+        label: 'OK',
+        onClick: handleSubmit
+      }
+    ];
   };
 
   const getContents = () => {
     return (
-      <>
-        <DialogContentText>Renseigner le nouveau lien:</DialogContentText>
+      <Box sx={{marginBottom: '20px'}}>
         <TextField
           autoFocus
           margin="dense"
@@ -100,7 +97,7 @@ const GiftLinkEditorModal: React.FC<ModalProps> = ({ open, onClose, onSave }) =>
           value={lien}
           onChange={handleLienChange}
         />
-      </>
+      </Box>
     );
   };
 
