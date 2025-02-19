@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react';
 import {
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   IconButton,
@@ -13,12 +12,18 @@ import { TransitionProps } from '@mui/material/transitions';
 import { ChevronLeft } from '@mui/icons-material';
 import { Box } from '@mui/system';
 
+export type BottomDialogAction = {
+  icon: ReactNode,
+  label: string,
+  onClick: () => void
+}
+
 export type BottomDialogProps = {
   open: boolean;
   handleClose: () => void;
   title: string;
   contents: ReactNode;
-  actions?: ReactNode;
+  actions?: BottomDialogAction[];
 };
 
 const Transition = React.forwardRef(function Transition(
@@ -49,19 +54,24 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
         width: '100hw',
         marginLeft: '-45px',
         marginRight: '-45px',
-        marginBottom: '-45px',
+        marginBottom: '-35px',
       }}
     >
-      <Toolbar>
-        <IconButton color="inherit" aria-label="open drawer" onClick={() => handleClose()}>
-          <ChevronLeft />
-        </IconButton>
-        <Typography fontSize={16}>{title}</Typography>
-        <Box sx={{ flexGrow: 1 }} />
-      </Toolbar>
-      <DialogTitle></DialogTitle>
+      <DialogTitle sx={{padding: '0px'}}>
+        <Toolbar sx={{padding: '0px', mt: '0px', mb: '0px', ml: '15px', mr: '15px'}}>
+          <IconButton color="primary" aria-label="open drawer" onClick={() => handleClose()} sx={{padding: '0px'}}>
+            <ChevronLeft />
+          </IconButton>
+          <Typography fontSize={16}>{title}</Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          {actions ? actions.map( (a,index) => {
+            return <IconButton key={`bottom-dlg-key-${a.label}-${index}`} color="primary" aria-label="open drawer" onClick={a.onClick} sx={{ml: '10px', padding: '0px'}}>
+                    {a.icon}
+                  </IconButton>
+          }): <></>}
+        </Toolbar>
+      </DialogTitle>            
       <DialogContent>{contents}</DialogContent>
-      <DialogActions>{actions ? actions : <></>}</DialogActions>
     </Dialog>
   );
 };
