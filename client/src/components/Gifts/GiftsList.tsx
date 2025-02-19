@@ -1,4 +1,4 @@
-import { Box, capitalize, List, Typography } from '@mui/material';
+import { Box, List, Typography } from '@mui/material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
@@ -8,7 +8,6 @@ import { Redeem } from '@mui/icons-material';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
-import { BottomDialog } from '../BottomDialog';
 import GiftForm from './GiftForm';
 import { GiftsFAB } from './GiftsFAB';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
@@ -119,34 +118,6 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     });
   };
 
-  const handleSaveGift = (giftToSave: Gift) => {
-    setGiftEditorOpen(false);
-
-    if (!appContext.giftList) {
-      console.error('When calling handleSaveGift, the gift list must be set in app context.');
-      return;
-    }
-
-    giftToSave.giftListId = appContext.giftList.id;
-
-    fetch(`${apiBaseUrl}/gift/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-      },
-      body: JSON.stringify(giftToSave),
-    }).then((response) => {
-      if (!response.ok) {
-        console.error(JSON.stringify(response));
-        showError(`Impossible de sauvegarder la liste pour le moment.`);
-      } else {
-        fetchListContents(); //may be useless !
-        setGift(newEmptyGift);
-      }
-    });
-  };
-
   const handleDeleteGift = () => {
     deleteGift();
     setConfirmDeleteOpen(false);
@@ -158,9 +129,14 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   };
 
   const handleEditGift = (giftToEdit: Gift) => {
-    setGift(giftToEdit);
+    setGift({...giftToEdit});
     setGiftEditorOpen(true);
   };
+
+  const handleCloseGiftForm = () => {
+    setGiftEditorOpen(false);
+    fetchListContents();
+  }
 
   useEffect(() => {
     fetchListContents();
@@ -236,12 +212,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         : (<EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'."/>)     
     }
 
-      <BottomDialog
-        open={giftEditorOpen}
-        handleClose={() => setGiftEditorOpen(false)}
-        title="Editer un cadeau"
-        contents={<GiftForm gift={gift} handleSave={handleSaveGift} editable={editable} />}
-      />
+      <GiftForm gift={gift} editable={editable} open={giftEditorOpen} onClose={handleCloseGiftForm} />
 
       <ActionSheet
         open={confirmDeleteOpen}
