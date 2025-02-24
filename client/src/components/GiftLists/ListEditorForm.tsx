@@ -96,7 +96,7 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({ onListSaved }) => {
           helperText={listNameErrorMessage}
         />
       </FormControl>
-      <Button type="submit" variant="contained" color="primary" sx={{ width: '100%' }}>
+      <Button type="submit" variant="contained" color="primary" sx={{ width: '100%', mb: '15px' }}>
         Créer
       </Button>
     </form>
