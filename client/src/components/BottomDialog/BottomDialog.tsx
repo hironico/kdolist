@@ -58,8 +58,8 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
       }}
     >
       <DialogTitle sx={{padding: '0px'}}>
-        <Toolbar sx={{padding: '0px', mt: '0px', mb: '0px', ml: '15px', mr: '15px'}}>
-          <IconButton color="primary" aria-label="open drawer" onClick={() => handleClose()} sx={{padding: '0px'}}>
+        <Toolbar sx={{padding: '0px', margin: '0px'}}>
+          <IconButton color="primary" aria-label="open drawer" onClick={() => handleClose()} sx={{padding: '0px', marginLeft: '0px'}}>
             <ChevronLeft />
           </IconButton>
           <Typography fontSize={16}>{title}</Typography>
