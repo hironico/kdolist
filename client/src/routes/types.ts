@@ -8,6 +8,7 @@ enum Pages {
   LoginPage,
   MyLists,
   ListContentsPage,
+  SharePage,
   PrivacyPage,
   NotFound,
 }

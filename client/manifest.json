@@ -20,5 +20,9 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ], 
+  "share_target": {
+    "action": "/share", 
+    "method": "POST"
+  }
 }

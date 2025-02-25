@@ -1,4 +1,3 @@
-import Diversity1Icon from '@mui/icons-material/Diversity1';
 import HomeIcon from '@mui/icons-material/Home';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
@@ -32,6 +31,12 @@ const routes: Routes = {
   [Pages.ListContentsPage]: {
     component: asyncComponentLoader(() => import('@/pages/ListContentsPage')),
     path: '/listcontents',
+    icon: CardGiftcardIcon,
+    inSideBar: false,
+  },
+  [Pages.SharePage]: {
+    component: asyncComponentLoader(() => import('@/pages/SharePage')),
+    path: '/share',
     icon: CardGiftcardIcon,
     inSideBar: false,
   },
