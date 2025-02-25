@@ -29,7 +29,7 @@ const authenticateJWT = (req, res, next) => {
 };
 
 const generateAccessToken = (user) => {
-    return jwt.sign(user.get({ plain: true }), process.env.AUTH_SECRET, { expiresIn: '20m' });
+    return jwt.sign(user.get({ plain: true }), process.env.AUTH_SECRET, { expiresIn: process.env.AUTH_TOKEN_EXPIRATION_TIME });
 }
 
 const generateRefreshToken = (user) => {
