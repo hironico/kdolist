@@ -35,6 +35,8 @@ export function KeycloakCallback() {
         
         const payload = JSON.parse(jsonPayload);
 
+        console.log(`Login callback with user: ${JSON.stringify(payload, null, 4)}`);
+
         // Update login context with user information
         setLoginInfo({
           id: payload.id || undefined,

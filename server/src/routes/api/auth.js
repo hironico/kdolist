@@ -39,6 +39,17 @@ const generateRefreshToken = (user) => {
     return refreshToken;
 }
 
+const addSampleGiftList = async (user) => {
+    const giftList = await usercontroller.createGiftList(user.id, `Liste de ${user.username}`);
+    const gift = {
+        giftListId: giftList.id,
+        name: 'Un exemple de cadeau',
+        description: 'C\'est un super cadeau qui me ferait très plaisir.'
+    }
+
+    await giftlistcontroller.addGift(gift);
+}
+
 /**
  * This function will find the corresponding user for the social account this user is logged into. 
  * If the user is already present (same email) but with qnother social network, then this function fails
@@ -80,23 +91,17 @@ const loginSocialUser = async (profile, provider) => {
                     email: email
                 }
             });
-
+            
             if (existingUser) {
-                logger.error('A user attempting to login with a social account but already exsits with another.');
-                return null;
+                logger.warn('A user attempting to login with a social account but already exsits with another.');
+                user = existingUser;
+            } else {
+                user = await usercontroller.createUser(profile.username, firstLastNames[0], firstLastNames[1], email);
+                await addSampleGiftList(user);
             }
-
-            user = await usercontroller.createUser(profile.username, firstLastNames[0], firstLastNames[1], email);
-            await usercontroller.addSocialAccount(user.id, provider, profile.id);
-            const giftList = await usercontroller.createGiftList(user.id, 'Ma première liste');
-
-            const gift = {
-                giftListId: giftList.id,
-                name: 'Un exemple de cadeau',
-                description: 'C\'est un super cadeau qui me ferait très plaisir.'
-            }
-
-            await giftlistcontroller.addGift(gift);
+            
+            await usercontroller.addSocialAccount(user.id, provider, profile.id);           
+            
         } else {
             user = await User.findByPk(socialAccount.userId);
         }
@@ -294,15 +299,16 @@ authApi.get('/v1/auth/keycloak/callback', async (req, res) => {
         delete req.session.codeVerifier;
 
         // Redirect to client with tokens
-        // The client app should handle this redirect and extract the tokens
-        const clientRedirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?token=${accessToken}&refresh=${refreshToken}`;
+        // When serving both API and client from the same server, use relative URL
+        const clientRedirectUrl = `/auth/callback?token=${accessToken}&refresh=${refreshToken}`;
         
+        logger.info(`Redirecting to client callback: ${clientRedirectUrl}`);
         res.redirect(clientRedirectUrl);
     } catch (error) {
         logger.error(`Keycloak callback error: ${error.message}`);
         
         // Redirect to client with error
-        const errorRedirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/error?message=${encodeURIComponent(error.message)}`;
+        const errorRedirectUrl = `/auth/error?message=${encodeURIComponent(error.message)}`;
         res.redirect(errorRedirectUrl);
     }
 });

@@ -3,6 +3,7 @@ const cors = require('cors');
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
+const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 
@@ -22,7 +23,11 @@ var corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(process.env.WEBUI_HOME_DIR)); // Serve static files from the 'public' directory see .env file
+
+// Serve static files using absolute path to avoid permission issues
+const staticPath = path.resolve(process.cwd(), process.env.WEBUI_HOME_DIR);
+logger.info(`Serving static files from: ${staticPath}`);
+app.use(express.static(staticPath));
 
 // Session middleware for OIDC flow
 app.use(session({
@@ -45,6 +50,32 @@ app.use((req, res, next) => {
 // Route loading
 app.use('/api', require('./routes/api/')); 
 app.use('/legal', require('./routes/legal/')); 
+
+// SPA fallback: serve index.html for all non-API routes
+// This allows React Router to handle client-side routing
+app.get('*', (req, res) => {
+  // Only serve index.html for HTML requests (not for assets like .js, .css, etc.)
+  if (req.accepts('html')) {
+    // Resolve to absolute path to avoid permission issues
+    const indexPath = path.resolve(process.cwd(), process.env.WEBUI_HOME_DIR, 'index.html');
+    logger.debug(`Serving SPA index.html for route: ${req.url} from ${indexPath}`);
+    
+    // Check if file exists before trying to serve it
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath, (err) => {
+        if (err) {
+          logger.error(`Failed to serve index.html: ${err.message}`);
+          res.status(500).send('Error serving application');
+        }
+      });
+    } else {
+      logger.error(`index.html not found at: ${indexPath}`);
+      res.status(404).send('React app not found. Make sure the client is built with: cd client && npm run build');
+    }
+  } else {
+    res.status(404).send('Not found');
+  }
+});
 
 // Error handling
 app.use((err, req, res, next) => {
