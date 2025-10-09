@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 
 import ForgotPassword from './ForgotPassword';
 import { GoogleIcon, FacebookIcon } from '../CustomIcons/CustomIcons';
+import { Key as KeyIcon } from '@mui/icons-material';
 import FacebookLogin, { ProfileSuccessResponse } from '@greatsumini/react-facebook-login';
 import useNotifications from '@/store/notifications';
 import { LoginContext, LoginInfoProps } from '@/LoginContext';
@@ -28,6 +29,7 @@ export default function SignInCard() {
   const [open, setOpen] = React.useState(false);
   const [, notificationsActions] = useNotifications();
   const [noAccountOpen, setNoAccountOpen] = React.useState(false);
+  const [goKeycloak, setGoKeycloak] = React.useState(false)
 
   const loginContext = React.useContext(LoginContext);
   const navigate = useNavigate();
@@ -216,122 +218,141 @@ export default function SignInCard() {
     onSuccess: (tokenResponse) => fetchGoogleProfile(tokenResponse.access_token),
   });
 
-  return (
-    <Card variant="outlined">
-      <Typography
-        component="h1"
-        variant="h4"
-        sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-      >
-        S&apos;identifier...
-      </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Button
-          fullWidth
-          variant="outlined"
-          onClick={() => googleLogin()}
-          autoFocus
-          startIcon={<GoogleIcon />}
-        >
-          <Typography sx={{ color: 'text.primary' }}>Google</Typography>
-        </Button>
+  const handleKeycloakLogin = () => {
+    setGoKeycloak(true);
+  };
 
-        <FacebookLogin
-          appId="8944125668933019"
-          onSuccess={(response) => {
-            console.log('Login Success!', response);
-          }}
-          onFail={(error) => {
-            const errMsg = `Impossible de se connecter avec Facebook. ${JSON.stringify(error)}`;
-            console.error(errMsg);
-            showNotificationLoginError(errMsg);
-          }}
-          onProfileSuccess={(response) => {
-            console.log('Get Profile Success!', response);
-            authenticate(response, 'FACEBOOK');
-          }}
-          render={({ onClick }) => (
-            <Button
+
+  if (goKeycloak) {
+    // TODO get this location by configuration 
+    window.location.replace("https://localhost:2020/api/v1/auth/keycloak/login");
+    return (<></>);
+  } else {
+    return (
+      <Card variant="outlined">
+        <Typography
+          component="h1"
+          variant="h4"
+          sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+        >
+          S&apos;identifier...
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={handleKeycloakLogin}
+            startIcon={<KeyIcon />}
+          >
+            <Typography sx={{ color: 'text.primary' }}>Keycloak SSO</Typography>
+          </Button>
+
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={() => googleLogin()}
+            startIcon={<GoogleIcon />}
+          >
+            <Typography sx={{ color: 'text.primary' }}>Google</Typography>
+          </Button>
+
+          <FacebookLogin
+            appId="8944125668933019"
+            onSuccess={(response) => {
+              console.log('Login Success!', response);
+            }}
+            onFail={(error) => {
+              const errMsg = `Impossible de se connecter avec Facebook. ${JSON.stringify(error)}`;
+              console.error(errMsg);
+              showNotificationLoginError(errMsg);
+            }}
+            onProfileSuccess={(response) => {
+              console.log('Get Profile Success!', response);
+              authenticate(response, 'FACEBOOK');
+            }}
+            render={({ onClick }) => (
+              <Button
+                fullWidth
+                variant="outlined"
+                onClick={onClick}
+                startIcon={<FacebookIcon />}
+                sx={{ display: 'none' }}
+              >
+                <Typography sx={{ color: 'text.primary' }}>Facebook</Typography>
+              </Button>
+            )}
+          />
+        </Box>
+        <Divider>ou bien à l&apos;ancienne</Divider>
+        <Box
+          component="form"
+          noValidate
+          sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}
+        >
+          <FormControl>
+            <FormLabel htmlFor="email">Email</FormLabel>
+            <TextField
+              error={emailError}
+              helperText={emailErrorMessage}
+              id="email"
+              type="email"
+              name="email"
+              placeholder="mon@email.com"
+              autoComplete="email"
+              required
               fullWidth
               variant="outlined"
-              onClick={onClick}
-              startIcon={<FacebookIcon />}
-              sx={{ display: 'none' }}
-            >
-              <Typography sx={{ color: 'text.primary' }}>Facebook</Typography>
-            </Button>
-          )}
-        />
-      </Box>
-      <Divider>ou bien à l&apos;ancienne</Divider>
-      <Box
-        component="form"
-        noValidate
-        sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}
-      >
-        <FormControl>
-          <FormLabel htmlFor="email">Email</FormLabel>
-          <TextField
-            error={emailError}
-            helperText={emailErrorMessage}
-            id="email"
-            type="email"
-            name="email"
-            placeholder="mon@email.com"
-            autoComplete="email"
-            required
-            fullWidth
-            variant="outlined"
-            color={emailError ? 'error' : 'primary'}
-            sx={{ ariaLabel: 'email' }}
-          />
-        </FormControl>
-        <FormControl>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <FormLabel htmlFor="password">Mot de passe</FormLabel>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: 'baseline' }}
-            >
-              Mot de passe oublié ?
-            </Link>
-          </Box>
-          <TextField
-            error={passwordError}
-            helperText={passwordErrorMessage}
-            name="password"
-            placeholder="••••••"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            required
-            fullWidth
-            variant="outlined"
-            color={passwordError ? 'error' : 'primary'}
-          />
-        </FormControl>
-        <ForgotPassword open={open} handleClose={handleClose} />
-        <Button fullWidth variant="contained" onClick={validateInputs}>
-          Entrer
-        </Button>
-        <Typography sx={{ textAlign: 'center' }}>
-          <span>
-            <Link
-              component="button"
-              type="button"
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-              onClick={() => setNoAccountOpen(true)}
-            >
-              Je n&apos;ai pas de compte.
-            </Link>
-          </span>
-        </Typography>
-        <NoAccount open={noAccountOpen} handleClose={() => setNoAccountOpen(false)} />
-      </Box>
-    </Card>
-  );
+              color={emailError ? 'error' : 'primary'}
+              sx={{ ariaLabel: 'email' }}
+            />
+          </FormControl>
+          <FormControl>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <FormLabel htmlFor="password">Mot de passe</FormLabel>
+              <Link
+                component="button"
+                type="button"
+                onClick={handleClickOpen}
+                variant="body2"
+                sx={{ alignSelf: 'baseline' }}
+              >
+                Mot de passe oublié ?
+              </Link>
+            </Box>
+            <TextField
+              error={passwordError}
+              helperText={passwordErrorMessage}
+              name="password"
+              placeholder="••••••"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              required
+              fullWidth
+              variant="outlined"
+              color={passwordError ? 'error' : 'primary'}
+            />
+          </FormControl>
+          <ForgotPassword open={open} handleClose={handleClose} />
+          <Button fullWidth variant="contained" onClick={validateInputs}>
+            Entrer
+          </Button>
+          <Typography sx={{ textAlign: 'center' }}>
+            <span>
+              <Link
+                component="button"
+                type="button"
+                variant="body2"
+                sx={{ alignSelf: 'center' }}
+                onClick={() => setNoAccountOpen(true)}
+              >
+                Je n&apos;ai pas de compte.
+              </Link>
+            </span>
+          </Typography>
+          <NoAccount open={noAccountOpen} handleClose={() => setNoAccountOpen(false)} />
+        </Box>
+      </Card>
+    );
+  }
 }

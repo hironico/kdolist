@@ -10,6 +10,8 @@ enum Pages {
   ListContentsPage,
   SharePage,
   PrivacyPage,
+  KeycloakCallback,
+  KeycloakError,
   NotFound,
 }
 

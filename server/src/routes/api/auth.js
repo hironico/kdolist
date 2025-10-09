@@ -5,6 +5,7 @@ const logger = require('../../logger');
 const { User, SocialAccount } = require('../../model/model');
 const usercontroller = require('../../controller/usercontroller');
 const giftlistcontroller = require('../../controller/giftlistcontroller');
+const { getAuthorizationUrl, getClient } = require('../../config/keycloak');
 
 const refreshTokens = [];
 
@@ -216,6 +217,94 @@ authApi.post('/v1/auth/logout', authenticateJWT, (req, res) => {
     refreshTokens = refreshTokens.filter(t => t !== token);
 
     res.status(200).send("Logout successful");
+});
+
+/**
+ * Keycloak OIDC Login - Initiate authentication flow
+ */
+authApi.get('/v1/auth/keycloak/login', (req, res) => {
+    try {
+        const { authUrl, codeVerifier } = getAuthorizationUrl();
+        
+        // Store code verifier in session for PKCE flow
+        req.session.codeVerifier = codeVerifier;
+        
+        logger.info(`Redirecting to Keycloak for authentication: ${authUrl}`);
+        res.redirect(authUrl);
+    } catch (error) {
+        logger.error(`Keycloak login error: ${error.message}`);
+        res.status(500).json({ 
+            error: 'Keycloak authentication not available',
+            message: error.message 
+        });
+    }
+});
+
+/**
+ * Keycloak OIDC Callback - Handle authentication response
+ */
+authApi.get('/v1/auth/keycloak/callback', async (req, res) => {
+    try {
+
+        logger.info(`Keycloak call back after login`);
+        
+        const client = getClient();
+        
+        if (!client) {
+            throw new Error('Keycloak client not initialized');
+        }
+
+        const params = client.callbackParams(req);
+        const codeVerifier = req.session.codeVerifier;
+
+        if (!codeVerifier) {
+            throw new Error('Code verifier not found in session');
+        }
+
+        // Exchange authorization code for tokens
+        const tokenSet = await client.callback(
+            process.env.KEYCLOAK_REDIRECT_URI,
+            params,
+            { code_verifier: codeVerifier }
+        );
+
+        logger.info('Successfully received tokens from Keycloak');
+
+        // Get user info from Keycloak
+        const userInfo = await client.userinfo(tokenSet.access_token);
+        
+        logger.info(`Keycloak user info: ${JSON.stringify(userInfo, null, 2)}`);
+
+        // Find or create user in database
+        const user = await loginSocialUser({
+            id: userInfo.sub,
+            email: userInfo.email,
+            username: userInfo.preferred_username || userInfo.email || `user_${userInfo.sub}`
+        }, 'KEYCLOAK');
+
+        if (!user) {
+            throw new Error('Failed to create or login user');
+        }
+
+        // Generate JWT tokens for the application
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user);
+
+        // Clear session data
+        delete req.session.codeVerifier;
+
+        // Redirect to client with tokens
+        // The client app should handle this redirect and extract the tokens
+        const clientRedirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/callback?token=${accessToken}&refresh=${refreshToken}`;
+        
+        res.redirect(clientRedirectUrl);
+    } catch (error) {
+        logger.error(`Keycloak callback error: ${error.message}`);
+        
+        // Redirect to client with error
+        const errorRedirectUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/auth/error?message=${encodeURIComponent(error.message)}`;
+        res.redirect(errorRedirectUrl);
+    }
 });
 
 module.exports = { authApi, authenticateJWT };
