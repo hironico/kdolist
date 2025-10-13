@@ -7,7 +7,7 @@ const usercontroller = require('../../controller/usercontroller');
 const giftlistcontroller = require('../../controller/giftlistcontroller');
 const { getAuthorizationUrl, getClient } = require('../../config/keycloak');
 
-const refreshTokens = [];
+let refreshTokens = [];
 
 const authenticateJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;
