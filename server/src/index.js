@@ -43,7 +43,7 @@ app.use(session({
 
 // Set up express to use the logger
 app.use((req, res, next) => {
-    logger.http(`Request: ${req.method} ${req.url}`);
+    logger.http(`${req.method} ${req.url}`);
     next();
   });
 
