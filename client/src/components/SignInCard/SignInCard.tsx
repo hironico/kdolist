@@ -224,19 +224,22 @@ export default function SignInCard() {
 
 
   if (goKeycloak) {
-    // TODO get this location by configuration 
-    window.location.replace("https://localhost:2020/api/v1/auth/keycloak/login");
+    window.location.replace(`${apiBaseUrl}/auth/keycloak/login`);
     return (<></>);
   } else {
     return (
       <Card variant="outlined">
+
         <Typography
           component="h1"
-          variant="h4"
           sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-        >
-          S&apos;identifier...
+        >ßNouveau !
         </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: '250px' }}>
+          <Typography>
+            Pour accéder à toutes nos applications, vous avez besoin d'un compte hironico.net.
+          </Typography>
+        </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Button
             fullWidth
@@ -244,7 +247,7 @@ export default function SignInCard() {
             onClick={handleKeycloakLogin}
             startIcon={<KeyIcon />}
           >
-            <Typography sx={{ color: 'text.primary' }}>Keycloak SSO</Typography>
+            <Typography sx={{ color: 'text.primary' }}>Compte hironico.net</Typography>
           </Button>
 
           <Button
@@ -252,6 +255,7 @@ export default function SignInCard() {
             variant="outlined"
             onClick={() => googleLogin()}
             startIcon={<GoogleIcon />}
+            sx={{ display: 'none' }}
           >
             <Typography sx={{ color: 'text.primary' }}>Google</Typography>
           </Button>
@@ -283,11 +287,11 @@ export default function SignInCard() {
             )}
           />
         </Box>
-        <Divider>ou bien à l&apos;ancienne</Divider>
+        <Divider sx={{ display: 'none' }}>ou bien à l&apos;ancienne</Divider>
         <Box
           component="form"
           noValidate
-          sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}
+          sx={{ display: 'none', flexDirection: 'column', width: '100%', gap: 2 }}
         >
           <FormControl>
             <FormLabel htmlFor="email">Email</FormLabel>
