@@ -233,7 +233,7 @@ export default function SignInCard() {
         <Typography
           component="h1"
           sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-        >ßNouveau !
+        >Nouveau !
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: '250px' }}>
           <Typography>

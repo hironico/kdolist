@@ -24,6 +24,10 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Route loading
+app.use('/api', require('./routes/api/')); 
+app.use('/legal', require('./routes/legal/')); 
+
 // Serve static files using absolute path to avoid permission issues
 const staticPath = path.resolve(process.cwd(), process.env.WEBUI_HOME_DIR);
 logger.info(`Serving static files from: ${staticPath}`);
@@ -47,10 +51,6 @@ app.use((req, res, next) => {
     next();
   });
 
-// Route loading
-app.use('/api', require('./routes/api/')); 
-app.use('/legal', require('./routes/legal/')); 
-
 // SPA fallback: serve index.html for all non-API routes
 // This allows React Router to handle client-side routing
 app.get('*', (req, res) => {
@@ -73,6 +73,7 @@ app.get('*', (req, res) => {
       res.status(404).send('React app not found. Make sure the client is built with: cd client && npm run build');
     }
   } else {
+    logger.error(`Not Found: ${req.url}`);
     res.status(404).send('Not found');
   }
 });
