@@ -63,7 +63,7 @@ const apiBaseUrl =
 const keycloakAccountUrl =
   url.hostname === 'localhost'
     ? 'https://localhost:9443/realms/hironico.net/account'
-    : 'https://auth.hironico.net/realms/hironico.net/acoount';
+    : 'https://auth.hironico.net/realms/hironico.net/account';
 
 export {
   loader,

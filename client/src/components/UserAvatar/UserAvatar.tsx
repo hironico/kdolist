@@ -143,7 +143,7 @@ const UserAvatar = () => {
             <ListItemIcon>
               <AccountCircle fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Mon comote</ListItemText>
+            <ListItemText>Mon compte</ListItemText>
           </MenuItem>
         )}
         {accessTokenProvider === 'KEYCLOAK' && <Divider />}
