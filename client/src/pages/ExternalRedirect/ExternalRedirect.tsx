@@ -13,7 +13,7 @@ export function ExternalRedirect() {
   useEffect(() => {
     if (url) {
       // Use replace to avoid adding to browser history
-      window.location.replace(url);
+      window.location.assign(url);
     }
   }, [url]);
 
