@@ -12,7 +12,6 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      manifestFilename: 'manifest.json',
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       // switch to "true" to enable sw on development
       devOptions: {
@@ -20,6 +19,12 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html}', '**/*.{svg,png,jpg,gif}'],
+        // Exclude API routes from service worker navigation handling
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [
+          /^\/api\/.*/,     // Exclude all /api/* routes
+          /^\/legal\/.*/,   // Exclude all /legal/* routes
+        ],
       },
     }),
     mkcert(),

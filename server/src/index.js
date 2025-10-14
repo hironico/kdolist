@@ -4,7 +4,6 @@ const https = require('https');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const bodyParser = require('body-parser');
 const session = require('express-session');
 
 // configure application with process env variables from .env file
@@ -14,15 +13,18 @@ const app = express();
 const logger = require('./logger');
 const { initKeycloakClient } = require('./config/keycloak');
 
-var corsOptions = {
-  origin: '*',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
+// enable CORS for the webdav server to be used by a client in the browser.
+// we use the regular cors methods plus thoses from RFC2518 aka webdav (6 last http methods)
+const corsOptions = {
+    origin: (origin, callback) => { callback(null, true)},
+    credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,PROPFIND,PROPPATCH,MKCOL,COPY,MOVE,LOCK,UNLOCK",
+    allowedHeaders: 'Content-Type,Authorization'
+};
 
 // Middlewares
-app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true }));
 
 // Session middleware for OIDC flow
 app.use(session({
@@ -31,7 +33,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     secure: process.env.SERVER_SSL_ENABLED === 'true',
-    httpOnly: true,
+    httpOnly: false,
     maxAge: 1000 * 60 * 30 // 30 minutes
   }
 }));
@@ -42,19 +44,26 @@ app.use((req, res, next) => {
     next();
   });
 
-// Route loading
+// Route loading - MUST come before static files
 app.use('/api', require('./routes/api/')); 
-app.use('/legal', require('./routes/legal/')); 
+app.use('/legal', require('./routes/legal/'));
 
 // Serve static files using absolute path to avoid permission issues
+// This comes AFTER API routes so API calls are handled first
 const staticPath = path.resolve(process.cwd(), process.env.WEBUI_HOME_DIR);
 logger.info(`Serving static files from: ${staticPath}`);
 app.use(express.static(staticPath));
 
-/*
 // SPA fallback: serve index.html for all non-API routes
 // This allows React Router to handle client-side routing
-app.get('*', (req, res) => {
+// Explicitly exclude /api and /legal routes from SPA fallback
+app.get('*', (req, res, next) => {
+  // Skip SPA fallback for API and legal routes
+  if (req.path.startsWith('/api') || req.path.startsWith('/legal')) {
+    logger.warn(`Skipping SPA fallback for API route: ${req.path}`);
+    return next();
+  }
+
   // Only serve index.html for HTML requests (not for assets like .js, .css, etc.)
   if (req.accepts('html')) {
     // Resolve to absolute path to avoid permission issues
@@ -74,16 +83,15 @@ app.get('*', (req, res) => {
       res.status(404).send('React app not found. Make sure the client is built with: cd client && npm run build');
     }
   } else {
-    logger.error(`Not Found: ${req.url}`);
+    logger.debug(`Not serving HTML for: ${req.url}`);
     res.status(404).send('Not found');
   }
 });
-*/
 
 // Error handling
 app.use((err, req, res, next) => {
   logger.error(err);
-  res.status(500).send({ message: 'Internal Server Error' });
+  res.status(500).json({ message: 'Internal Server Error', err: err });
 });
 
 const port = process.env.SERVER_PORT;
@@ -102,12 +110,10 @@ if (process.env.SERVER_SSL_ENABLED === 'true') {
       key: fs.readFileSync(`${process.cwd()}/${process.env.SERVER_SSL_KEY_FILE}`),
       cert: fs.readFileSync(`${process.cwd()}/${process.env.SERVER_SSL_CERT_FILE}`)
   }, app).listen(port, () => {
-      // tslint:disable-next-line:no-console
       logger.info(`Server started at https://localhost:${port}`);
   });
 } else {
   http.createServer(app).listen(port, () => {
-      // tslint:disable-next-line:no-console
       logger.info(`Development server started at http://localhost:${port}`);
   })
 }
