@@ -12,7 +12,7 @@ const giftApi = express.Router();
  * Save a gift with dependencies into the database. Saves the gift, its links and images.
  * Links and images MUST be present when calling this endpoints or existing relations will be wiped out.
  */
-giftApi.post('/v1/gift/', authenticateJWT, async (req, res) => {
+giftApi.post('/', authenticateJWT, async (req, res) => {
 
     try {
         const theList = await GiftList.findOne({
@@ -69,7 +69,7 @@ giftApi.post('/v1/gift/', authenticateJWT, async (req, res) => {
     }
 });
 
-giftApi.delete('/v1/gift/:id', authenticateJWT, (req, res) => {
+giftApi.delete('/:id', authenticateJWT, (req, res) => {
     const giftId = req.params.id;
     if (!giftId) {
         res.status(403).send('Invalid gift id').end();
@@ -101,7 +101,7 @@ giftApi.delete('/v1/gift/:id', authenticateJWT, (req, res) => {
     }
 });
 
-giftApi.get('/v1/gift/links/:id', authenticateJWT, (req, res) => {
+giftApi.get('/links/:id', authenticateJWT, (req, res) => {
     const giftId = req.params.id;
     if (!giftId) {
         res.status(403).send('Invalid gift id').end();
@@ -121,7 +121,7 @@ giftApi.get('/v1/gift/links/:id', authenticateJWT, (req, res) => {
     });
 });
 
-giftApi.post('/v1/gift/take/:id', authenticateJWT, (req, res) => {
+giftApi.post('/take/:id', authenticateJWT, (req, res) => {
     const giftId = req.params.id;
     if (!giftId) {
         res.status(403).send('Invalid gift id').end();
@@ -149,7 +149,7 @@ giftApi.post('/v1/gift/take/:id', authenticateJWT, (req, res) => {
     });
 });
 
-giftApi.post('/v1/gift/untake/:id', authenticateJWT, (req, res) => {
+giftApi.post('/untake/:id', authenticateJWT, (req, res) => {
     const giftId = req.params.id;
     if (!giftId) {
         res.status(403).send('Invalid gift id').end();
