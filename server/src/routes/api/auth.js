@@ -116,89 +116,10 @@ const loginSocialUser = async (profile, provider) => {
 
 const authApi = express.Router();
 
-authApi.get('/v1/auth/whoami', authenticateJWT, (req, res) => {
+authApi.get('/whoami', authenticateJWT, (req, res) => {
     res.status(200).json(req.user).end();
 });
-
-authApi.post('/v1/auth/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        res.status(400).send('Provide proper login info').end();
-        return;
-    }
-
-    User.findOne({
-        where: {
-            email: email,
-        }
-    }).then(async user => {
-
-        if (!user) {
-            res.status(403).send('Invalid login info.').end();
-            return;
-        }
-
-        const valid = await bcrypt.compare(password, user.password);
-        if (!valid) {
-            res.status(403).send('Invalid login info').end();
-            return;
-        }
-
-        const accessToken = generateAccessToken(user);
-        const refreshToken = generateRefreshToken(user);
-
-        res.status(200).json({
-            jwt: accessToken,
-            profile: user
-        });        
-    }).catch(error => {
-        logger.error(`Cannot find user with password in database. ${error}`);
-        res.status(500).send(`Cannot find userin database. ${error}`).end();
-    });
-})
-
-authApi.post('/v1/auth/fb', async (req, res) => {
-    // TODO verify access token from FB
-
-    const user = loginSocialUser(req.body, 'FACEBOOK');
-
-    if (user === null) {
-        res.status(500).send('Cannot create or logina user with FACEBOOK').end();
-        return;
-    }
-    
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    res.json({
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        profile: user,
-    });
-});
-
-authApi.post('/v1/auth/google', async (req, res) => {
-    // TODO verify access token from Google
-
-    const user = await loginSocialUser(req.body, 'GOOGLE');
-
-    if (user === null) {
-        res.status(500).send('Cannot create or logina user with GOOGLE').end();
-        return;
-    }
-    
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    res.json({
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        profile: user,
-    });
-});
-
-authApi.post('/v1/auth/refresh', authenticateJWT, (req, res) => {
+authApi.post('/refresh', authenticateJWT, (req, res) => {
     const { token } = req.body;
 
     if (!token) {
@@ -216,7 +137,7 @@ authApi.post('/v1/auth/refresh', authenticateJWT, (req, res) => {
     });
 });
 
-authApi.post('/v1/auth/logout', authenticateJWT, (req, res) => {
+authApi.post('/logout', authenticateJWT, (req, res) => {
     const { token } = req.body;
 
     refreshTokens = refreshTokens.filter(t => t !== token);
@@ -227,7 +148,7 @@ authApi.post('/v1/auth/logout', authenticateJWT, (req, res) => {
 /**
  * Keycloak OIDC Login - Initiate authentication flow
  */
-authApi.get('/v1/auth/keycloak/login', (req, res) => {
+authApi.get('/keycloak/login', (req, res) => {
     try {
         const { authUrl, codeVerifier } = getAuthorizationUrl();
         
@@ -235,20 +156,23 @@ authApi.get('/v1/auth/keycloak/login', (req, res) => {
         req.session.codeVerifier = codeVerifier;
         
         logger.info(`Redirecting to Keycloak for authentication: ${authUrl}`);
-        res.redirect(authUrl);
+
+        res.status(200).json({
+            authUrl: authUrl
+        });
     } catch (error) {
         logger.error(`Keycloak login error: ${error.message}`);
         res.status(500).json({ 
             error: 'Keycloak authentication not available',
             message: error.message 
-        });
+        }).end();
     }
 });
 
 /**
  * Keycloak OIDC Callback - Handle authentication response
  */
-authApi.get('/v1/auth/keycloak/callback', async (req, res) => {
+authApi.get('/keycloak/callback', async (req, res) => {
     try {
 
         logger.info(`Keycloak call back after login`);
@@ -303,7 +227,8 @@ authApi.get('/v1/auth/keycloak/callback', async (req, res) => {
         const clientRedirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&refresh=${refreshToken}`;
         
         logger.info(`Redirecting to client callback: ${clientRedirectUrl}`);
-        res.redirect(clientRedirectUrl);
+
+        res.redirect(301, clientRedirectUrl);
     } catch (error) {
         logger.error(`Keycloak callback error: ${error.message}`);
         
