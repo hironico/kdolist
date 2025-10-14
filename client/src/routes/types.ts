@@ -12,6 +12,7 @@ enum Pages {
   PrivacyPage,
   KeycloakCallback,
   KeycloakError,
+  ExternalRedirect,
   NotFound,
 }
 

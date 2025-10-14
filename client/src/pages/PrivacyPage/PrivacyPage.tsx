@@ -4,7 +4,7 @@ import { Box } from '@mui/system';
 import { Button, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-function PrivacyPage() {
+export function PrivacyPage() {
   const navigate = useNavigate();
 
   return (
@@ -33,5 +33,3 @@ function PrivacyPage() {
     </>
   );
 }
-
-export default PrivacyPage;

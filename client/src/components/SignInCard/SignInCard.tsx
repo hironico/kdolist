@@ -29,7 +29,6 @@ export default function SignInCard() {
   const [open, setOpen] = React.useState(false);
   const [, notificationsActions] = useNotifications();
   const [noAccountOpen, setNoAccountOpen] = React.useState(false);
-  const [goKeycloak, setGoKeycloak] = React.useState(false)
 
   const loginContext = React.useContext(LoginContext);
   const navigate = useNavigate();
@@ -219,15 +218,12 @@ export default function SignInCard() {
   });
 
   const handleKeycloakLogin = () => {
-    setGoKeycloak(true);
+    // Navigate to the redirect route with the Keycloak login URL as a parameter
+    const keycloakLoginUrl = `${apiBaseUrl}/auth/keycloak/login`;
+    navigate(`/redirect?url=${encodeURIComponent(keycloakLoginUrl)}`);
   };
 
-
-  if (goKeycloak) {
-    window.location.replace(`${apiBaseUrl}/auth/keycloak/login`);
-    return (<></>);
-  } else {
-    return (
+  return (
       <Card variant="outlined">
 
         <Typography
@@ -358,5 +354,4 @@ export default function SignInCard() {
         </Box>
       </Card>
     );
-  }
 }
