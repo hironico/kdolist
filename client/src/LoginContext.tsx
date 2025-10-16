@@ -128,7 +128,7 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
       setLoginInfo(loginInfo);
     }
 
-    return !response.ok;
+    return response.ok;
   };
 
   return (
