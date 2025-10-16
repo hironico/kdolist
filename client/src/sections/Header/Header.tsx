@@ -60,7 +60,6 @@ function Header() {
    * back to the content list page for a new list.
    */
   const goToMyLists = () => {
-    loginContext.setGiftListContents([]);
     navigate('/mylists');
   }
 

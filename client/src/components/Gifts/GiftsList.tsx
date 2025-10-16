@@ -4,7 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import { Gift, LoginContext } from '@/LoginContext';
 import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
-import { Redeem } from '@mui/icons-material';
+import { Gif, Redeem } from '@mui/icons-material';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
@@ -55,6 +55,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         return;
       }
 
+      appContext.setGiftListContents([]);
       setLoading(true);
 
       fetch(`${apiBaseUrl}/giftlist/contents/${appContext.giftList.id}`, {
@@ -139,8 +140,10 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   }
 
   useEffect(() => {
+    appContext.setGiftListContents([]);
+    setLoading(true);
     fetchListContents();
-    setGift(newEmptyGift());
+    setGift(newEmptyGift());    
   }, []);
 
   const actions: ActionSheetEntry[] = [
