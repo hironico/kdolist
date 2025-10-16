@@ -169,7 +169,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   };
 
   if (loading) {
-    return <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon=<FacebookLikeCircularProgress/> />;
+    const fbIcon = <FacebookLikeCircularProgress/>;
+    return <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
   }
 
   if (appContext.giftListContents.length === 0) {
