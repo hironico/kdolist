@@ -1,10 +1,7 @@
-import { Box, List, Typography } from '@mui/material';
+import { Box, List } from '@mui/material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckIcon from '@mui/icons-material/Check';
+
 import { Gift, LoginContext } from '@/LoginContext';
-import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
-import { Gif, Redeem } from '@mui/icons-material';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
@@ -12,6 +9,7 @@ import GiftForm from './GiftForm';
 import { GiftsFAB } from './GiftsFAB';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 import { useNavigate } from 'react-router-dom';
+import GiftsListItem from './GiftsListItem';
 
 const newEmptyGift = (): Gift => {
   return {
@@ -82,6 +80,13 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     }
   };
 
+  useEffect(() => {
+    appContext.setGiftListContents([]);
+    setLoading(true);
+    fetchListContents();
+    setGift(newEmptyGift());    
+  }, []);
+
   const deleteGift = () => {
     fetch(`${apiBaseUrl}/gift/${gift.id}`, {
       method: 'DELETE',
@@ -97,8 +102,23 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         fetchListContents();
         setGift(newEmptyGift);
       }
+    }).catch(error => {
+        console.error(`Cannot delete gift item from the list: ${error}`);
+        showError(`Impossible de supprimer l'entrée dans la liste.`);
+    }).finally(()=> {
+        setConfirmDeleteOpen(false);
     });
   };
+
+  const handleDeleteGift = () => {
+    deleteGift();
+    setConfirmDeleteOpen(false);
+  };
+
+  const handleConfirmDeleteGift = (gift: Gift) => {
+    setGift(gift);
+    setConfirmDeleteOpen(true);
+  }
 
   const toggleSelectGift = (gift: Gift) => {
     const url = gift.selectedById !== null ? `${apiBaseUrl}/gift/untake/${gift.id}` : `${apiBaseUrl}/gift/take/${gift.id}`;
@@ -117,12 +137,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         setGift(newEmptyGift);
       }
     });
-  };
-
-  const handleDeleteGift = () => {
-    deleteGift();
-    setConfirmDeleteOpen(false);
-  };
+  };  
 
   const handleAddGift = () => {
     setGift(newEmptyGift());
@@ -139,13 +154,6 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     fetchListContents();
   }
 
-  useEffect(() => {
-    appContext.setGiftListContents([]);
-    setLoading(true);
-    fetchListContents();
-    setGift(newEmptyGift());    
-  }, []);
-
   const actions: ActionSheetEntry[] = [
     {
       label: 'Oui, effacer ce cadeau de la liste',
@@ -160,60 +168,27 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     onAction: () => setConfirmDeleteOpen(false),
   };
 
+  if (loading) {
+    return <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon=<FacebookLikeCircularProgress/> />;
+  }
+
+  if (appContext.giftListContents.length === 0) {
+    return <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'."/>;
+  }
+
   return (
     <Box display="grid" gridTemplateColumns="auto" p={2} width="100%">
-    {appContext.giftListContents.length > 0 ? (
-      <List sx={{ m: '0px', mt: '10px' }}>
-        {appContext.giftListContents?.map((oneGift, index) => {
-
-          const isTaken = oneGift.selectedById !== null;
-          const decoration = isTaken ? 'line-through' : 'none';
-          const primaryText = (
-            <Typography sx={{textDecoration: decoration}}>{`${oneGift.name}`}</Typography>
-          );
-
-          const modifDate = new Date(oneGift.updatedAt.toString());
-          const secondaryText = (
-            <Typography variant="caption">
-              {`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}
-            </Typography>
-          );
-
-          const deleteAction: SwipeableListItemAction = {
-            icon: <DeleteIcon />,
-            color: 'error',
-            onAction: () => {
-              setGift(oneGift);
-              setConfirmDeleteOpen(true);
-            },
-          };
-
-          const takeAction : SwipeableListItemAction = {
-            icon: <CheckIcon />,
-            color: isTaken ? 'success' : 'default',
-            onAction: () => {
-              toggleSelectGift(oneGift);
-            }
-          }
-
-          return (
-            <SwipeableListItem
-              key={`kdo-${index}`}
-              keyId={`kdo-${index}`}
-              onClickMain={() => handleEditGift(oneGift)}
-              primaryText={primaryText}
-              secondaryText={secondaryText}
-              action1={editable ? deleteAction : undefined}
-              action2={takeAction}
-              icon={<Redeem />}
-            />
-          );
-        })}
-      </List>
-    ) : 
-        loading ? (<EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon=<FacebookLikeCircularProgress/> />)
-        : (<EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'."/>)     
-    }
+    <List sx={{ m: '0px', mt: '10px' }}>
+      {appContext.giftListContents?.map((oneGift, index) => {
+        return <GiftsListItem key={`kdo-${index}`} 
+                              oneGift={oneGift} 
+                              editable={editable} 
+                              onDelete={() => handleConfirmDeleteGift(oneGift)} 
+                              onTake={() => toggleSelectGift(oneGift)} 
+                              onEdit={() => handleEditGift(oneGift)}/>
+        
+      })}
+    </List>
 
       <GiftForm gift={gift} editable={editable} open={giftEditorOpen} onClose={handleCloseGiftForm} />
 
