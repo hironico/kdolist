@@ -35,7 +35,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [gift, setGift] = useState<Gift>(newEmptyGift());
   const [giftEditorOpen, setGiftEditorOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const showError = useCallback((message: string) => {
     notificationsActions.push({
@@ -65,24 +65,29 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         if (response.ok) {
           response.json().then((data) => {
             appContext.setGiftListContents(data);
-          });
+          }).finally(() => setLoading(false));
         } else {
           showError('Impossible de récupérer le contenu de la liste.');
           console.error('Failed to fetch details', JSON.stringify(response, null, 2));
           navigate('/login');
+          setLoading(false);
         }
       });
     } catch (error) {
       showError(`Erreur technique: ${error}`);
       console.error('Error fetching details:', error);
-    } finally {
       setLoading(false);
     }
+
+    // do not use finally block here because of threading issue
+    // the json transform of response is async and finally block will 
+    // execute before json promise is finished leading to display inconsistencies
   };
 
   useEffect(() => {
-    appContext.setGiftListContents([]);
+    console.log('USe effect, set loading to true');
     setLoading(true);
+    appContext.setGiftListContents([]);    
     fetchListContents();
     setGift(newEmptyGift());    
   }, []);
@@ -169,11 +174,13 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   };
 
   if (loading) {
+    console.log('Rendering loading state...');
     const fbIcon = <FacebookLikeCircularProgress/>;
     return <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
   }
 
   if (appContext.giftListContents.length === 0) {
+    console.log('Rendering empty list state');
     return <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'."/>;
   }
 
