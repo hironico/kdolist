@@ -53,8 +53,6 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         return;
       }
 
-      console.log('Fetching list contents: ', appContext.giftList.id);
-
       setLoading(true);
 
       fetch(`${apiBaseUrl}/giftlist/contents/${appContext.giftList.id}`, {
