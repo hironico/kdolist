@@ -2,7 +2,11 @@
 
 CURRENT_DATE=$(date +"%Y%m%d-%H%M%S")
 
-LOG_FILE="/var/log/sites/kdolist/kdolit_$CURRENT_DATE.log"
+LOG_DIR="/var/log/sites/kdolist"
+
+mkdir -p $LOG_DIR
+
+LOG_FILE="$LOG_DIR/kdolit_$CURRENT_DATE.log"
 
 nohup node ./src/index.js > $LOG_FILE 2>&1 &
 
