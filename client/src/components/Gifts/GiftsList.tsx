@@ -37,7 +37,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [gift, setGift] = useState<Gift>(newEmptyGift());
   const [giftEditorOpen, setGiftEditorOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const showError = useCallback((message: string) => {
     notificationsActions.push({
