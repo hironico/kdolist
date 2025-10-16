@@ -73,7 +73,7 @@ giftListApi.get('/contents/:id', authenticateJWT, async (req, res) => {
  * Create or update a new list for the current loggedin user.
  * Returns the newly created list json to client.
  */
-giftListApi.post('/v1/giftlist', authenticateJWT, async (req, res) => {
+giftListApi.post('/', authenticateJWT, async (req, res) => {
     try {
         const newGiftList = await giftlistcontroller.addOrUpdateGiftList(req.body, req.user.id);
 
