@@ -11,6 +11,7 @@ import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
 import GiftForm from './GiftForm';
 import { GiftsFAB } from './GiftsFAB';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
+import { useNavigate } from 'react-router-dom';
 
 const newEmptyGift = (): Gift => {
   return {
@@ -31,11 +32,12 @@ type GiftsListProps = {
 
 const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const appContext = useContext(LoginContext);
+  const navigate = useNavigate();
   const [, notificationsActions] = useNotifications();
   const [gift, setGift] = useState<Gift>(newEmptyGift());
   const [giftEditorOpen, setGiftEditorOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const showError = useCallback((message: string) => {
     notificationsActions.push({
@@ -64,18 +66,18 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         if (response.ok) {
           response.json().then((data) => {
             appContext.setGiftListContents(data);
-            setLoading(false);
-        });
+          });
         } else {
-          setLoading(false);
           showError('Impossible de récupérer le contenu de la liste.');
           console.error('Failed to fetch details', JSON.stringify(response, null, 2));
+          navigate('/login');
         }
       });
     } catch (error) {
-      setLoading(false);
       showError(`Erreur technique: ${error}`);
       console.error('Error fetching details:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
