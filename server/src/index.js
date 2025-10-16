@@ -16,14 +16,14 @@ const { initKeycloakClient } = require('./config/keycloak');
 // enable CORS for the webdav server to be used by a client in the browser.
 // we use the regular cors methods plus thoses from RFC2518 aka webdav (6 last http methods)
 const corsOptions = {
-    origin: (origin, callback) => { callback(null, true)},
+    origin: '*',
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,PROPFIND,PROPPATCH,MKCOL,COPY,MOVE,LOCK,UNLOCK",
     allowedHeaders: 'Content-Type,Authorization'
 };
 
 // Middlewares
-app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '5mb' }));
 
 // Session middleware for OIDC flow
