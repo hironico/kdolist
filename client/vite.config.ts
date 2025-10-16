@@ -13,6 +13,7 @@ export default defineConfig({
     react(),
     VitePWA({
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+      registerType: 'autoUpdate', // Enable automatic updates
       // switch to "true" to enable sw on development
       devOptions: {
         enabled: false,
@@ -25,6 +26,9 @@ export default defineConfig({
           /^\/api\/.*/,     // Exclude all /api/* routes
           /^\/legal\/.*/,   // Exclude all /legal/* routes
         ],
+        // Check for updates more frequently
+        clientsClaim: true,
+        skipWaiting: true,
       },
     }),
     mkcert(),
