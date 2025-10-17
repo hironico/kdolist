@@ -217,8 +217,6 @@ const GiftListsList: React.FC = () => {
 
               const editable = item.ownerId === appContext.loginInfo.profile?.id;
 
-              console.log(`list owner id: ${item.ownerId} === profile user id : ${appContext.loginInfo.profile?.id}`);
-
               return (
                 <SwipeableListItem
                   onClickMain={() => handleNavigateList(item, editable)}

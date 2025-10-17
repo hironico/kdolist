@@ -1,16 +1,15 @@
-import { Box, List, Typography } from '@mui/material';
+import { Box, List } from '@mui/material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckIcon from '@mui/icons-material/Check';
+
 import { Gift, LoginContext } from '@/LoginContext';
-import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
-import { Redeem } from '@mui/icons-material';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
 import GiftForm from './GiftForm';
 import { GiftsFAB } from './GiftsFAB';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
+import { useNavigate } from 'react-router-dom';
+import GiftsListItem from './GiftsListItem';
 
 const newEmptyGift = (): Gift => {
   return {
@@ -31,11 +30,12 @@ type GiftsListProps = {
 
 const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const appContext = useContext(LoginContext);
+  const navigate = useNavigate();
   const [, notificationsActions] = useNotifications();
   const [gift, setGift] = useState<Gift>(newEmptyGift());
   const [giftEditorOpen, setGiftEditorOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const showError = useCallback((message: string) => {
     notificationsActions.push({
@@ -53,8 +53,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         return;
       }
 
-      console.log('Fetching list contents: ', appContext.giftList.id);
-
+      appContext.setGiftListContents([]);
       setLoading(true);
 
       fetch(`${apiBaseUrl}/giftlist/contents/${appContext.giftList.id}`, {
@@ -66,20 +65,32 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         if (response.ok) {
           response.json().then((data) => {
             appContext.setGiftListContents(data);
-            setLoading(false);
-        });
+          }).finally(() => setLoading(false));
         } else {
-          setLoading(false);
           showError('Impossible de récupérer le contenu de la liste.');
           console.error('Failed to fetch details', JSON.stringify(response, null, 2));
+          navigate('/login');
+          setLoading(false);
         }
       });
     } catch (error) {
-      setLoading(false);
       showError(`Erreur technique: ${error}`);
       console.error('Error fetching details:', error);
+      setLoading(false);
     }
+
+    // do not use finally block here because of threading issue
+    // the json transform of response is async and finally block will 
+    // execute before json promise is finished leading to display inconsistencies
   };
+
+  useEffect(() => {
+    console.log('USe effect, set loading to true');
+    setLoading(true);
+    appContext.setGiftListContents([]);
+    fetchListContents();
+    setGift(newEmptyGift());
+  }, []);
 
   const deleteGift = () => {
     fetch(`${apiBaseUrl}/gift/${gift.id}`, {
@@ -96,8 +107,23 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         fetchListContents();
         setGift(newEmptyGift);
       }
+    }).catch(error => {
+      console.error(`Cannot delete gift item from the list: ${error}`);
+      showError(`Impossible de supprimer l'entrée dans la liste.`);
+    }).finally(() => {
+      setConfirmDeleteOpen(false);
     });
   };
+
+  const handleDeleteGift = () => {
+    deleteGift();
+    setConfirmDeleteOpen(false);
+  };
+
+  const handleConfirmDeleteGift = (gift: Gift) => {
+    setGift(gift);
+    setConfirmDeleteOpen(true);
+  }
 
   const toggleSelectGift = (gift: Gift) => {
     const url = gift.selectedById !== null ? `${apiBaseUrl}/gift/untake/${gift.id}` : `${apiBaseUrl}/gift/take/${gift.id}`;
@@ -118,18 +144,13 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     });
   };
 
-  const handleDeleteGift = () => {
-    deleteGift();
-    setConfirmDeleteOpen(false);
-  };
-
   const handleAddGift = () => {
     setGift(newEmptyGift());
     setGiftEditorOpen(true);
   };
 
   const handleEditGift = (giftToEdit: Gift) => {
-    setGift({...giftToEdit});
+    setGift({ ...giftToEdit });
     setGiftEditorOpen(true);
   };
 
@@ -137,11 +158,6 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     setGiftEditorOpen(false);
     fetchListContents();
   }
-
-  useEffect(() => {
-    fetchListContents();
-    setGift(newEmptyGift());
-  }, []);
 
   const actions: ActionSheetEntry[] = [
     {
@@ -157,60 +173,29 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     onAction: () => setConfirmDeleteOpen(false),
   };
 
+  let listContents;
+  if (loading) {
+    const fbIcon = <FacebookLikeCircularProgress />;
+    listContents = <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
+  } else if (appContext.giftListContents.length === 0) {
+    listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'." />;
+  } else {
+    listContents = appContext.giftListContents?.map((oneGift, index) => {
+      return <GiftsListItem key={`kdo-${index}`}
+        oneGift={oneGift}
+        editable={editable}
+        onDelete={() => handleConfirmDeleteGift(oneGift)}
+        onTake={() => toggleSelectGift(oneGift)}
+        onEdit={() => handleEditGift(oneGift)} />
+
+    });
+  }
+
   return (
     <Box display="grid" gridTemplateColumns="auto" p={2} width="100%">
-    {appContext.giftListContents.length > 0 ? (
       <List sx={{ m: '0px', mt: '10px' }}>
-        {appContext.giftListContents?.map((oneGift, index) => {
-
-          const isTaken = oneGift.selectedById !== null;
-          const decoration = isTaken ? 'line-through' : 'none';
-          const primaryText = (
-            <Typography sx={{textDecoration: decoration}}>{`${oneGift.name}`}</Typography>
-          );
-
-          const modifDate = new Date(oneGift.updatedAt.toString());
-          const secondaryText = (
-            <Typography variant="caption">
-              {`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}
-            </Typography>
-          );
-
-          const deleteAction: SwipeableListItemAction = {
-            icon: <DeleteIcon />,
-            color: 'error',
-            onAction: () => {
-              setGift(oneGift);
-              setConfirmDeleteOpen(true);
-            },
-          };
-
-          const takeAction : SwipeableListItemAction = {
-            icon: <CheckIcon />,
-            color: isTaken ? 'success' : 'default',
-            onAction: () => {
-              toggleSelectGift(oneGift);
-            }
-          }
-
-          return (
-            <SwipeableListItem
-              key={`kdo-${index}`}
-              keyId={`kdo-${index}`}
-              onClickMain={() => handleEditGift(oneGift)}
-              primaryText={primaryText}
-              secondaryText={secondaryText}
-              action1={editable ? deleteAction : undefined}
-              action2={takeAction}
-              icon={<Redeem />}
-            />
-          );
-        })}
+        {listContents}
       </List>
-    ) : 
-        loading ? (<EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon=<FacebookLikeCircularProgress/> />)
-        : (<EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'."/>)     
-    }
 
       <GiftForm gift={gift} editable={editable} open={giftEditorOpen} onClose={handleCloseGiftForm} />
 

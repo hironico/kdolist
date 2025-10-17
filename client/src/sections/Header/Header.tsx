@@ -54,6 +54,15 @@ function Header() {
     });
   }
 
+  /**
+   * Before leaving the list contents page and return to mylists, clear the contents
+   * opf the currently displayed list to avoid flicker effect with last loaded list when going
+   * back to the content list page for a new list.
+   */
+  const goToMyLists = () => {
+    navigate('/mylists');
+  }
+
   const renderMenuIconButton = (): ReactNode => {
     return (
       <IconButton
@@ -74,7 +83,7 @@ function Header() {
     
     return (
       <IconButton
-        onClick={() => navigate('/mylists')}
+        onClick={() => goToMyLists()}
         size="large"
         edge="start"
         color="info"

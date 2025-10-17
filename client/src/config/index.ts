@@ -55,8 +55,15 @@ const giphy404 = 'https://giphy.com/embed/xTiN0L7EW5trfOvEk0';
 const url = new URL(window.location.href);
 const apiBaseUrl =
   url.hostname === 'localhost'
-    ? `http://${url.hostname}:9090/api/v1`
-    : `${url.protocol}//${url.hostname}/api/v1`;
+    ? `https://${url.hostname}:2020/api/v1`
+    : `https://kdolist.hironico.net/api/v1`;
+
+// Keycloak configuration
+// The Keycloak account management URL
+const keycloakAccountUrl =
+  url.hostname === 'localhost'
+    ? 'https://localhost:9443/realms/hironico.net/account'
+    : 'https://auth.hironico.net/realms/hironico.net/account';
 
 export {
   loader,
@@ -69,4 +76,5 @@ export {
   defaultMetaTags,
   giphy404,
   apiBaseUrl,
+  keycloakAccountUrl,
 };

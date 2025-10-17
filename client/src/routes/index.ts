@@ -41,11 +41,26 @@ const routes: Routes = {
     inSideBar: false,
   },
   [Pages.PrivacyPage]: {
-    component: asyncComponentLoader(() => import('@/pages/PrivacyPage')),
+    component: asyncComponentLoader(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage }))),
     path: '/privacy',
     title: 'Confidentialité',
     icon: PrivacyTipIcon,
     inSideBar: true,
+  },
+  [Pages.KeycloakCallback]: {
+    component: asyncComponentLoader(() => import('@/pages/KeycloakCallback').then(m => ({ default: m.KeycloakCallback }))),
+    path: '/auth/callback',
+    inSideBar: false,
+  },
+  [Pages.KeycloakError]: {
+    component: asyncComponentLoader(() => import('@/pages/KeycloakCallback').then(m => ({ default: m.KeycloakError }))),
+    path: '/auth/error',
+    inSideBar: false,
+  },
+  [Pages.ExternalRedirect]: {
+    component: asyncComponentLoader(() => import('@/pages/ExternalRedirect').then(m => ({ default: m.ExternalRedirect }))),
+    path: '/redirect',
+    inSideBar: false,
   },
   [Pages.NotFound]: {
     component: asyncComponentLoader(() => import('@/pages/NotFound')),

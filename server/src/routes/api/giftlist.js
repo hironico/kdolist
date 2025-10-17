@@ -12,7 +12,7 @@ const giftListApi = express.Router();
 /**
  * Get the lists of the current logged in user.
  */
-giftListApi.get('/v1/giftlist/', authenticateJWT, async (req, res) => {
+giftListApi.get('/', authenticateJWT, async (req, res) => {
     const allMyLists = await GiftList.findAll({
         where: {
             ownerId: req.user.id
@@ -26,7 +26,7 @@ giftListApi.get('/v1/giftlist/', authenticateJWT, async (req, res) => {
 /**
  * Get the lists that are SHARED with the current logged in user.
  */
-giftListApi.get('/v1/giftlist/shared', authenticateJWT, async (req, res) => {
+giftListApi.get('/shared', authenticateJWT, async (req, res) => {
     const allMyLists = await GiftList.findAll({
         where: {
             ownerId: {
@@ -42,7 +42,7 @@ giftListApi.get('/v1/giftlist/shared', authenticateJWT, async (req, res) => {
 /**
  * Get all lists regardless the owner
  */
-giftListApi.get('/v1/giftlist/all', authenticateJWT, async (req, res) => {
+giftListApi.get('/all', authenticateJWT, async (req, res) => {
     const allLists = await GiftList.findAll({
         include: 'owner'
     });
@@ -53,7 +53,7 @@ giftListApi.get('/v1/giftlist/all', authenticateJWT, async (req, res) => {
 /**
  * Get the list contents whose ID is given as path parameter :id
  */
-giftListApi.get('/v1/giftlist/contents/:id', authenticateJWT, async (req, res) => {
+giftListApi.get('/contents/:id', authenticateJWT, async (req, res) => {
     const listId = req.params.id;
     if (!listId) {
         res.status(403).send('Invalid gift list id').end();
@@ -73,7 +73,7 @@ giftListApi.get('/v1/giftlist/contents/:id', authenticateJWT, async (req, res) =
  * Create or update a new list for the current loggedin user.
  * Returns the newly created list json to client.
  */
-giftListApi.post('/v1/giftlist', authenticateJWT, async (req, res) => {
+giftListApi.post('/', authenticateJWT, async (req, res) => {
     try {
         const newGiftList = await giftlistcontroller.addOrUpdateGiftList(req.body, req.user.id);
 
@@ -83,7 +83,7 @@ giftListApi.post('/v1/giftlist', authenticateJWT, async (req, res) => {
     }
 });
 
-giftListApi.delete('/v1/giftlist/:id', authenticateJWT, async (req, res) => {
+giftListApi.delete('/:id', authenticateJWT, async (req, res) => {
     const listId = req.params.id;
     if (!listId) {
         res.status(403).send('Invalid gift list id').end();

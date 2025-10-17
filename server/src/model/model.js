@@ -50,7 +50,7 @@ SocialAccount.init({
     primaryKey: true
   },
   provider: {
-    type: DataTypes.ENUM('GOOGLE', 'FACEBOOK', 'MICROSOFT', 'APPLE', 'LOGIN'),
+    type: DataTypes.ENUM('GOOGLE', 'FACEBOOK', 'MICROSOFT', 'APPLE', 'LOGIN', 'KEYCLOAK'),
     allowNull: false
   },
   socialId: {
