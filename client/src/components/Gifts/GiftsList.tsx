@@ -87,9 +87,9 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   useEffect(() => {
     console.log('USe effect, set loading to true');
     setLoading(true);
-    appContext.setGiftListContents([]);    
+    appContext.setGiftListContents([]);
     fetchListContents();
-    setGift(newEmptyGift());    
+    setGift(newEmptyGift());
   }, []);
 
   const deleteGift = () => {
@@ -108,10 +108,10 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         setGift(newEmptyGift);
       }
     }).catch(error => {
-        console.error(`Cannot delete gift item from the list: ${error}`);
-        showError(`Impossible de supprimer l'entrée dans la liste.`);
-    }).finally(()=> {
-        setConfirmDeleteOpen(false);
+      console.error(`Cannot delete gift item from the list: ${error}`);
+      showError(`Impossible de supprimer l'entrée dans la liste.`);
+    }).finally(() => {
+      setConfirmDeleteOpen(false);
     });
   };
 
@@ -142,7 +142,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         setGift(newEmptyGift);
       }
     });
-  };  
+  };
 
   const handleAddGift = () => {
     setGift(newEmptyGift());
@@ -150,7 +150,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   };
 
   const handleEditGift = (giftToEdit: Gift) => {
-    setGift({...giftToEdit});
+    setGift({ ...giftToEdit });
     setGiftEditorOpen(true);
   };
 
@@ -173,30 +173,29 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     onAction: () => setConfirmDeleteOpen(false),
   };
 
+  let listContents;
   if (loading) {
-    console.log('Rendering loading state...');
-    const fbIcon = <FacebookLikeCircularProgress/>;
-    return <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
-  }
+    const fbIcon = <FacebookLikeCircularProgress />;
+    listContents = <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
+  } else if (appContext.giftListContents.length === 0) {
+    listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'." />;
+  } else {
+    listContents = appContext.giftListContents?.map((oneGift, index) => {
+      return <GiftsListItem key={`kdo-${index}`}
+        oneGift={oneGift}
+        editable={editable}
+        onDelete={() => handleConfirmDeleteGift(oneGift)}
+        onTake={() => toggleSelectGift(oneGift)}
+        onEdit={() => handleEditGift(oneGift)} />
 
-  if (appContext.giftListContents.length === 0) {
-    console.log('Rendering empty list state');
-    return <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'."/>;
+    });
   }
 
   return (
     <Box display="grid" gridTemplateColumns="auto" p={2} width="100%">
-    <List sx={{ m: '0px', mt: '10px' }}>
-      {appContext.giftListContents?.map((oneGift, index) => {
-        return <GiftsListItem key={`kdo-${index}`} 
-                              oneGift={oneGift} 
-                              editable={editable} 
-                              onDelete={() => handleConfirmDeleteGift(oneGift)} 
-                              onTake={() => toggleSelectGift(oneGift)} 
-                              onEdit={() => handleEditGift(oneGift)}/>
-        
-      })}
-    </List>
+      <List sx={{ m: '0px', mt: '10px' }}>
+        {listContents}
+      </List>
 
       <GiftForm gift={gift} editable={editable} open={giftEditorOpen} onClose={handleCloseGiftForm} />
 
