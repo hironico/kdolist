@@ -133,7 +133,7 @@ function Header() {
               <IconButton
                 color="warning"
                 onClick={() => setUpdateDialogOpen(true)}
-                aria-label="mise a jour disponible"
+                aria-label="mise à jour disponible"
               >
                 <Badge badgeContent="!" color="error">
                   <NotificationsIcon />
