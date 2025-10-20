@@ -159,7 +159,7 @@ const GiftListsList: React.FC = () => {
     },
     {
       id: 'shared-lists',
-      label: 'Listes partagées',
+      label: 'Autres listes',
       filterFn: function (item: GiftList): boolean {
         return item.ownerId !== appContext.loginInfo.profile?.id;
       }
