@@ -154,9 +154,12 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     setGiftEditorOpen(true);
   };
 
-  const handleCloseGiftForm = () => {
+  const handleCloseGiftForm = (refresh: boolean) => {
     setGiftEditorOpen(false);
-    fetchListContents();
+
+    if (refresh) {
+      fetchListContents();
+    }    
   }
 
   const actions: ActionSheetEntry[] = [
