@@ -51,13 +51,13 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
       sx={{
         top: 'auto',
         bottom: 0,
-        width: '100hw',
+        width: '90hw',
         marginLeft: '-45px',
         marginRight: '-45px',
         marginBottom: '-35px',
       }}
     >
-      <DialogTitle sx={{padding: '0px'}}>
+      <DialogTitle sx={{pt: '0px', pb: '0px', pl: '10px', pr: '10px' }}>
         <Toolbar sx={{padding: '0px', margin: '0px'}}>
           <IconButton color="primary" aria-label="open drawer" onClick={() => handleClose()} sx={{padding: '0px', marginLeft: '0px'}}>
             <ChevronLeft />
@@ -65,7 +65,7 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
           <Typography fontSize={16}>{title}</Typography>
           <Box sx={{ flexGrow: 1 }} />
           {actions ? actions.map( (a,index) => {
-            return <IconButton key={`bottom-dlg-key-${a.label}-${index}`} color="primary" aria-label="open drawer" onClick={a.onClick} sx={{ml: '10px', padding: '0px'}}>
+            return <IconButton key={`bottom-dlg-key-${a.label}-${index}`} color="primary" aria-label="open drawer" onClick={a.onClick} sx={{ml: '10px', mr: '10px', padding: '0px'}}>
                     {a.icon}
                   </IconButton>
           }): <></>}
