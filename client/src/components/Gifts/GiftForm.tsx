@@ -15,7 +15,7 @@ interface GiftFormProps {
   gift: Gift;
   editable: boolean;
   open: boolean;
-  onClose: () => void;
+  onClose: (refresh: boolean) => void;
 }
 
 const defaultImages: GiftImage[] = [
@@ -61,8 +61,9 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   }, []);
 
   const handleSaveGift = (giftToSave: Gift) => {
-    if (!appContext.giftList) {
-      console.error('When calling handleSaveGift, the gift list must be set in app context.');
+    if (!appContext.giftList || !editable) {
+      console.error('When calling handleSaveGift, the gift list must be set in app context and the gift must be editable.');
+      onClose(false);
       return;
     }
 
@@ -82,7 +83,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       }
 
       // close this dialog after save is performed
-      onClose();
+      onClose(true);
     });
   };
 
@@ -116,7 +117,11 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     setUpdatedGift({ ...updatedGift, [event.target.name]: event.target.value });
   };
 
-  const handlePasteImage = () => {
+  const handleMagicPaste = () => {
+    if (!editable) {
+      return;
+    }
+
     try {
       navigator.clipboard.read()
         .then(items => {
@@ -186,7 +191,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     {
       icon: <AutoFixHighIcon />,
       label: 'Coller',
-      onClick: handlePasteImage
+      onClick: handleMagicPaste
     },
     {
       icon: <CheckIcon />,
@@ -233,7 +238,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
           onDelete={() => handleRemoveLink(link)}
           onClick={() => handleRedirect(link.url)}
           color='primary'
-          variant='filled'
+          variant='filled'          
           sx={{
             '&:hover': 'rgba(0, 0, 0, 0.04)'
           }}
@@ -244,7 +249,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
 
   return (
     <BottomDialog open={open}
-      handleClose={onClose}
+      handleClose={() => onClose(false)}
       title={'Editer...'}
       actions={actions}
       contents={contents} />
