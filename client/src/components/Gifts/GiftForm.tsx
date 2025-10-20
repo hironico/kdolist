@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { TextField, Box } from '@mui/material';
+import { TextField, Box, Link, ListItem, List, Tooltip, MenuItem, ListItemIcon, ListItemText, IconButton } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import { Gift, GiftImage, GiftLink, LoginContext } from '@/LoginContext';
 import { FullSizeCenteredFlexBox } from '../styled';
@@ -7,6 +7,8 @@ import GiftLinksMenu from './GiftLinksMenu';
 import BottomDialog, { BottomDialogAction } from '../BottomDialog/BottomDialog';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import CheckIcon from '@mui/icons-material/Check';
+import LaunchIcon from '@mui/icons-material/Launch';
+import DeleteIcon from '@mui/icons-material/DeleteTwoTone';
 import useNotifications from '@/store/notifications';
 
 import { apiBaseUrl } from '@/config';
@@ -131,7 +133,8 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
           console.log(`clip board item: ${JSON.stringify(item.types)}`);         
           
           for(let j = 0; j< item.types.length; j++) {
-            const theType = item.types[j];            
+            const theType = item.types[j];     
+            console.log('Reading clipboard item type: ' + theType);       
               item.getType(theType)
               .then(blob => {                
                 const fileReader = new FileReader();
@@ -145,10 +148,29 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
                     const b64Data = data.split(';')[1].split(',')[1];                    
                     const plainData = atob(b64Data);
                     console.log(`Text data = ${plainData}`);
-                  }
+
+                    if (plainData.startsWith('https://')) {
+                      const hostname = new URL(plainData).host;
+                      const newLink: GiftLink = {
+                        id: '',
+                        description: hostname ? hostname : 'Lien',
+                        url: plainData,
+                        giftId: updatedGift.id,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                      }
+
+                      handleAddLink(newLink);
+                    }
+              
                 };
-                fileReader.readAsDataURL(blob);
-              });
+                if (theType.startsWith('text')) {
+                  fileReader.readAsText(blob);
+                }
+                if (theType.startsWith('image')) {
+                  fileReader.readAsDataURL(blob);
+                }
+              }}).catch(error => console.log('Error while reading clipboard type:' + theType + '. Error: ' + error))
           }
         }
       });
@@ -201,17 +223,24 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     fullWidth
     disabled={!editable}
   />
-  <TextField
-    label="Description"
-    name="description"
-    value={updatedGift.description ? updatedGift.description : ''}
-    onChange={handleInputChange}
-    margin="normal"
-    fullWidth
-    multiline
-    rows={3}
-    disabled={!editable}
-  />
+
+<List>
+  {updatedGift.links?.map((link) => (
+          <Tooltip title={link.url} key={link.id}>
+            <ListItem secondaryAction={
+              <IconButton edge="end" aria-label="comments" onClick={(evt) => handleRemoveLink(link)}>
+                <DeleteIcon />
+              </IconButton>
+            }>
+              <ListItemIcon>
+                <LaunchIcon />
+              </ListItemIcon>
+              <Link href={link.url} underline="hover" target="_blank" rel="noopener">{link.description}</Link>
+            </ListItem>
+          </Tooltip>
+        ))}
+</List>
+
   <GiftLinksMenu
       links={updatedGift.links}
       handleAddLink={handleAddLink}

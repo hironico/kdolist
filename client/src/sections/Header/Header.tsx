@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
+import Badge from '@mui/material/Badge';
 import { FlexBox } from '@/components/styled';
 import useNotifications from '@/store/notifications';
 import useSidebar from '@/store/sidebar';
@@ -11,10 +12,11 @@ import { getRandomJoke } from './utils';
 import routes from '@/routes';
 import { PathRouteProps, useLocation, useNavigate } from 'react-router-dom';
 import { PathRouteCustomProps, Routes } from '@/routes/types';
-import { ReactNode, useContext } from 'react';
-import { ChevronLeft } from '@mui/icons-material';
+import { ReactNode, useContext, useState } from 'react';
+import { ChevronLeft, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { LoginContext } from '@/LoginContext';
 import UserAvatar from '@/components/UserAvatar/UserAvatar';
+import { UpdateDialog } from '@/components/UpdateDialog';
 
 function Header() {
   const [, sidebarActions] = useSidebar();
@@ -22,6 +24,7 @@ function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const loginContext = useContext(LoginContext);
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
 
   function getRouteByPath(
     routes: Routes,
@@ -124,11 +127,32 @@ function Header() {
             </Button>
           </FlexBox>
 
-          <IconButton>
-            <UserAvatar />
-          </IconButton>
+          <FlexBox sx={{ alignItems: 'center', gap: 1 }}>
+            {/* Update notification bell */}
+            {loginContext.updateAvailable && (
+              <IconButton
+                color="warning"
+                onClick={() => setUpdateDialogOpen(true)}
+                aria-label="mise a jour disponible"
+              >
+                <Badge badgeContent="!" color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            )}
+            
+            <IconButton>
+              <UserAvatar />
+            </IconButton>
+          </FlexBox>
         </Toolbar>
       </AppBar>
+
+      {/* Update dialog */}
+      <UpdateDialog
+        open={updateDialogOpen}
+        onClose={() => setUpdateDialogOpen(false)}
+      />
     </Box>
   );
 }

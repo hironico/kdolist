@@ -33,7 +33,6 @@ export interface GiftList {
 export interface Gift {
   id: string;
   name: string;
-  description?: string;
   isHidden?: boolean;
   selectedAt?: Date | null;
   selectedById?: string | null;
@@ -72,6 +71,10 @@ export interface AppContext {
 
   giftListContents: Gift[];
   setGiftListContents: (contents: Gift[]) => void;
+
+  // PWA update status
+  updateAvailable: boolean;
+  setUpdateAvailable: (available: boolean) => void;
 }
 
 const defaultLoginInfo: LoginInfoProps = {
@@ -106,6 +109,9 @@ const defaultAppContext: AppContext = {
 
   giftListContents: defaultListContent,
   setGiftListContents: (_contents: Gift[]) => {},
+
+  updateAvailable: false,
+  setUpdateAvailable: (_available: boolean) => {},
 };
 
 export const LoginContext = createContext<AppContext>(defaultAppContext);
@@ -114,6 +120,7 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
   const [loginInfo, setLoginInfo] = useState<AppContext['loginInfo']>(defaultLoginInfo);
   const [giftList, setGiftList] = useState<AppContext['giftList']>(defaultListInfo);
   const [giftListContents, setGiftListContents] = useState<AppContext['giftListContents']>([]);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   const checkToken = async () => {
     const response = await fetch(`${apiBaseUrl}/auth/whoami`, {
@@ -141,6 +148,8 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
         setGiftList,
         giftListContents,
         setGiftListContents,
+        updateAvailable,
+        setUpdateAvailable,
       }}
     >
       {props.children}

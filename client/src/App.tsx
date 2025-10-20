@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 
 import CssBaseline from '@mui/material/CssBaseline';
@@ -11,26 +10,16 @@ import HotKeys from '@/sections/HotKeys';
 import Notifications from '@/sections/Notifications';
 import Sidebar from '@/sections/Sidebar';
 import { LoginContextProvider } from './LoginContext';
-import { AppInitializer } from '@/components/AppInitializer';
+import { UpdateNotifier } from '@/components/UpdateNotifier';
 
 function App() {
-  const [isReady, setIsReady] = useState(false);
-
-  if (!isReady) {
-    return (
-      <>
-        <CssBaseline />
-        <AppInitializer onReady={() => setIsReady(true)} />
-      </>
-    );
-  }
-
   return (
     <>
       <LoginContextProvider>
         <CssBaseline />
         <Notifications />
         <HotKeys />
+        <UpdateNotifier />
         <BrowserRouter>
           <Header />
           <Sidebar />

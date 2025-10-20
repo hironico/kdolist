@@ -13,22 +13,27 @@ export default defineConfig({
     react(),
     VitePWA({
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-      registerType: 'autoUpdate', // Enable automatic updates
-      // switch to "true" to enable sw on development
-      devOptions: {
-        enabled: false,
-      },
+      registerType: "prompt", 
+      injectRegister: "inline",
+      strategies: "generateSW",
       workbox: {
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html}', '**/*.{svg,png,jpg,gif}'],
+        globDirectory: "dist/",
         // Exclude API routes from service worker navigation handling
-        navigateFallback: '/index.html',
+        navigateFallback: "/index.html",
         navigateFallbackDenylist: [
           /^\/api\/.*/,     // Exclude all /api/* routes
           /^\/legal\/.*/,   // Exclude all /legal/* routes
         ],
-        // Check for updates more frequently
-        clientsClaim: true,
-        skipWaiting: true,
+        // Don't auto-activate - wait for user confirmation
+        clientsClaim: false,
+        skipWaiting: false,
+      },
+      manifest: manifest,
+      // switch to "true" to enable sw on development
+      devOptions: {
+        enabled: false,
       },
     }),
     mkcert(),
