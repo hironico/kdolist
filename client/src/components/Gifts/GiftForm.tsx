@@ -1,17 +1,15 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { TextField, Box, Link, ListItem, List, Tooltip, MenuItem, ListItemIcon, ListItemText, IconButton } from '@mui/material';
+import { TextField, Box, Chip } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import { Gift, GiftImage, GiftLink, LoginContext } from '@/LoginContext';
 import { FullSizeCenteredFlexBox } from '../styled';
-import GiftLinksMenu from './GiftLinksMenu';
 import BottomDialog, { BottomDialogAction } from '../BottomDialog/BottomDialog';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import CheckIcon from '@mui/icons-material/Check';
-import LaunchIcon from '@mui/icons-material/Launch';
-import DeleteIcon from '@mui/icons-material/DeleteTwoTone';
 import useNotifications from '@/store/notifications';
 
 import { apiBaseUrl } from '@/config';
+import { useNavigate } from 'react-router-dom';
 
 interface GiftFormProps {
   gift: Gift;
@@ -45,20 +43,22 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   const [updatedGift, setUpdatedGift] = useState<Gift>(gift);
 
   const appContext = useContext(LoginContext);
-  const [, notificationsActions] = useNotifications();  
+  const [, notificationsActions] = useNotifications();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setUpdatedGift({...updatedGift, ...gift});
+    setUpdatedGift(gift);
   }, [gift]);
 
   const showError = useCallback((message: string) => {
-      notificationsActions.push({
-        options: {
-          variant: 'error',
-        },
-        message: message,
-      });
-    }, []);
+    notificationsActions.push({
+      options: {
+        variant: 'error',
+      },
+      message: message,
+    });
+  }, []);
 
   const handleSaveGift = (giftToSave: Gift) => {
     if (!appContext.giftList) {
@@ -79,7 +79,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       if (!response.ok) {
         console.error(JSON.stringify(response));
         showError(`Impossible de sauvegarder la liste pour le moment.`);
-      } 
+      }
 
       // close this dialog after save is performed
       onClose();
@@ -88,36 +88,28 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
 
   const handleAddLink = (link: GiftLink) => {
     link.giftId = updatedGift.id;
-    if (updatedGift.links) {
-      updatedGift.links.push(link);
-    } else {
-      const newLinks: GiftLink[] = [];
-      newLinks.push(link);
-      updatedGift.links = newLinks;
-    }
-    setUpdatedGift(updatedGift);
+    const newLinks = updatedGift.links ? [...updatedGift.links, link] : [link];
+    setUpdatedGift({ ...updatedGift, links: newLinks });
   };
 
   const handleRemoveLink = (link: GiftLink) => {
-    if (!updatedGift.links) {
+    if (!updatedGift.links || !editable) {
       return;
     }
 
     const newLinks = updatedGift.links.filter((l) => l.id !== link.id);
-    updatedGift.links = newLinks;
-    setUpdatedGift(updatedGift);
+    setUpdatedGift({ ...updatedGift, links: newLinks });
   };
 
-  const handleAddImage = (imgUrl : string) => {
+  const handleAddImage = (imgUrl: string) => {
     const newImg: GiftImage = {
       url: imgUrl,
       createdAt: new Date(),
       updatedAt: new Date(),
       giftId: updatedGift.id
     };
-    const myImages = updatedGift.images;
-    myImages.push(newImg);
-    setUpdatedGift({...updatedGift, images: myImages});
+    const newImages = [...updatedGift.images, newImg];
+    setUpdatedGift({ ...updatedGift, images: newImages });
   }
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,136 +117,137 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   };
 
   const handlePasteImage = () => {
-    try {      
+    try {
       navigator.clipboard.read()
-      .then(items => {
-        for (let i = 0; i < items.length; i++) {
-          const item: ClipboardItem = items[i];
-          console.log(`clip board item: ${JSON.stringify(item.types)}`);         
-          
-          for(let j = 0; j< item.types.length; j++) {
-            const theType = item.types[j];     
-            console.log('Reading clipboard item type: ' + theType);       
-              item.getType(theType)
-              .then(blob => {                
-                const fileReader = new FileReader();
-                fileReader.onload = (e) => {
-                  const data: string = e.target?.result as string;
-                  console.log(`Data found for ${theType} : ${data}`);
-                  if (theType.startsWith('image')) {
-                    handleAddImage(data);
-                  }
-                  if(theType.startsWith('text')) {
-                    const b64Data = data.split(';')[1].split(',')[1];                    
-                    const plainData = atob(b64Data);
-                    console.log(`Text data = ${plainData}`);
+        .then(items => {
+          for (let i = 0; i < items.length; i++) {
+            const item: ClipboardItem = items[i];
+            console.log(`clip board item: ${JSON.stringify(item.types)}`);
 
-                    if (plainData.startsWith('https://')) {
-                      const hostname = new URL(plainData).host;
-                      const newLink: GiftLink = {
-                        id: '',
-                        description: hostname ? hostname : 'Lien',
-                        url: plainData,
-                        giftId: updatedGift.id,
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                      }
+            for (let j = 0; j < item.types.length; j++) {
+              const theType = item.types[j];
+              console.log('Reading clipboard item type: ' + theType);
 
-                      handleAddLink(newLink);
+              if (theType.startsWith('text')) {
+                navigator.clipboard.readText()
+                  .then((plainData) => {
+                    if (!plainData.startsWith('https')) {
+                      console.log(`Did not received a https url from paste: ${plainData}`);
+                      return;
                     }
-              
-                };
-                if (theType.startsWith('text')) {
-                  fileReader.readAsText(blob);
-                }
-                if (theType.startsWith('image')) {
-                  fileReader.readAsDataURL(blob);
-                }
-              }}).catch(error => console.log('Error while reading clipboard type:' + theType + '. Error: ' + error))
+
+                    console.log(`Creating new link...`);
+                    const hostname = new URL(plainData).host;
+                    const newLink: GiftLink = {
+                      id: '',
+                      description: hostname ? hostname : `Lien ${updatedGift.links.length + 1}`,
+                      url: plainData,
+                      giftId: updatedGift.id,
+                      createdAt: new Date(),
+                      updatedAt: new Date()
+                    }
+
+                    handleAddLink(newLink);
+                  })
+
+              } else {
+
+                item.getType(theType)
+                  .then(blob => {
+                    const fileReader = new FileReader();
+                    fileReader.onload = (e) => {
+                      const data: string = e.target?.result as string;
+                      console.log(`Data found for ${theType} : ${data}`);
+                      if (theType.startsWith('image')) {
+                        handleAddImage(data);
+                      }
+                    };
+                    if (theType.startsWith('image')) {
+                      fileReader.readAsDataURL(blob);
+                    }
+                  }).catch(error => console.log('Error while reading clipboard type:' + theType + '. Error: ' + error));
+
+              }
+            }
           }
-        }
-      });
+        });
     } catch (error) {
       console.error('Error pasting image:', error);
     }
   };
 
+  const handleRedirect = (url: string) => {    
+    navigate(`/redirect?url=${encodeURI(url)}&newTab=true`);
+  }
+
   const images: GiftImage[] = updatedGift.images.length === 0 ? defaultImages : updatedGift.images;
 
   const actions: BottomDialogAction[] = [
     {
-      icon: <AutoFixHighIcon/>,
+      icon: <AutoFixHighIcon />,
       label: 'Coller',
       onClick: handlePasteImage
     },
     {
-      icon: <CheckIcon/>,
+      icon: <CheckIcon />,
       label: 'OK',
       onClick: () => handleSaveGift(updatedGift)
     }
   ];
 
-  const contents = <Box component="form" sx={{marginBottom: '20px'}}>
-  <Carousel sx={{ width: '100%' }}>
-    {images.map((oneImg, index) => {
-      return (
-        <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>
-          <Box
-            sx={{
-              background: `url('${oneImg.url}')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              width: '250px',
-              height: '250px',
-            }}
-            key={`gift-img-key-${index}`}
-          />
-        </FullSizeCenteredFlexBox>
-      );
-    })}
-  </Carousel>
+  const contents = <Box component="form" sx={{ marginBottom: '20px' }}>
+    <Carousel sx={{ width: '100%' }}>
+      {images.map((oneImg, index) => {
+        return (
+          <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>
+            <Box
+              sx={{
+                background: `url('${oneImg.url}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                width: '250px',
+                height: '250px',
+              }}
+              key={`gift-img-key-${index}`}
+            />
+          </FullSizeCenteredFlexBox>
+        );
+      })}
+    </Carousel>
 
-  <TextField
-    label="Nom"
-    name="name"
-    value={updatedGift.name}
-    onChange={handleInputChange}
-    margin="normal"
-    fullWidth
-    disabled={!editable}
-  />
-
-<List>
-  {updatedGift.links?.map((link) => (
-          <Tooltip title={link.url} key={link.id}>
-            <ListItem secondaryAction={
-              <IconButton edge="end" aria-label="comments" onClick={(evt) => handleRemoveLink(link)}>
-                <DeleteIcon />
-              </IconButton>
-            }>
-              <ListItemIcon>
-                <LaunchIcon />
-              </ListItemIcon>
-              <Link href={link.url} underline="hover" target="_blank" rel="noopener">{link.description}</Link>
-            </ListItem>
-          </Tooltip>
-        ))}
-</List>
-
-  <GiftLinksMenu
-      links={updatedGift.links}
-      handleAddLink={handleAddLink}
-      handleRemoveLink={handleRemoveLink}
-      editable={editable}
+    <TextField
+      label="Nom"
+      name="name"
+      value={updatedGift.name}
+      onChange={handleInputChange}
+      margin="normal"
+      fullWidth
+      disabled={!editable}
     />
-</Box>
+
+    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, mt: 2}}>
+      {updatedGift.links?.map((link) => (
+      <Chip
+          key={link.id}
+          label={link.description}
+          onDelete={() => handleRemoveLink(link)}
+          onClick={() => handleRedirect(link.url)}
+          color='primary'
+          variant='filled'
+          sx={{
+            '&:hover': 'rgba(0, 0, 0, 0.04)'
+          }}
+        />
+      ))}
+    </Box>
+  </Box>
 
   return (
-    <BottomDialog open={open} 
-                  handleClose={onClose} 
-                  title={'Editer...'} 
-                  actions={actions}
-                  contents={contents} />    
+    <BottomDialog open={open}
+      handleClose={onClose}
+      title={'Editer...'}
+      actions={actions}
+      contents={contents} />
   );
 };
 
