@@ -23,6 +23,13 @@ export function ExternalRedirect() {
     }
   }, [url]);
 
+  let shortUrl = 'page'
+  if (url) {
+    let theURL = new URL(url);    
+    shortUrl = `${theURL.protocol}//${theURL.hostname}`;
+  }
+  
+
   return (
     <Box
       display="flex"
@@ -34,7 +41,7 @@ export function ExternalRedirect() {
     >
       <CircularProgress size={60} />
       <Typography variant="h6" color="text.secondary">
-        Redirecting to {url}...
+        Redirecting to {shortUrl}...
       </Typography>
     </Box>
   );
