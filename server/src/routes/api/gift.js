@@ -162,4 +162,43 @@ giftApi.post('/untake/:id', authenticateJWT, (req, res) => {
     })
 });
 
+giftApi.delete('/image/:id', authenticateJWT, async (req, res) => {
+    const imageId = req.params.id;
+    if (!imageId) {
+        res.status(400).send('Invalid image id').end();
+        return;
+    }
+
+    try {
+        // Find the image with its associated gift and gift list
+        const theImage = await Image.findByPk(imageId, {
+            include: [{
+                model: Gift,
+                include: [GiftList]
+            }]
+        });
+
+        if (!theImage) {
+            res.status(404).send('Image not found').end();
+            return;
+        }
+
+        // Check if user owns the gift list
+        if (theImage.gift.giftList.ownerId !== req.user.id) {
+            logger.warning(`Attempt to delete an image where user is not owner of the list!`);
+            res.status(403).send('You cannot delete an image from someone else\'s gift.').end();
+            return;
+        }
+
+        // Delete the image
+        await theImage.destroy();
+        logger.info(`Image ${imageId} deleted by user ${req.user.id}`);
+        res.status(200).send('Image has been removed.').end();
+
+    } catch (error) {
+        logger.error(`Cannot delete image ${imageId}. Error: ${error}`);
+        res.status(500).send(`Cannot delete image. ${error}`).end();
+    }
+});
+
 module.exports = { giftApi };
