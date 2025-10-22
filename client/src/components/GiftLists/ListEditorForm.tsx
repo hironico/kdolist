@@ -97,7 +97,7 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({ onListSaved }) => {
         />
       </FormControl>
       <Button type="submit" variant="contained" color="primary" sx={{ width: '100%', mb: '15px' }}>
-        Créer
+        Enregistrer
       </Button>
     </form>
   );

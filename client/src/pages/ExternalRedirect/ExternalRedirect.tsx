@@ -9,11 +9,17 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 export function ExternalRedirect() {
   const [searchParams] = useSearchParams();
   const url = searchParams.get('url');
+  const newTab = searchParams.get('newTab');
 
   useEffect(() => {
     if (url) {
       // Use replace to avoid adding to browser history
-      window.location.assign(url);
+      if (newTab === 'true') {
+        window.open(url, '_blank');
+        window.history.back();
+      } else {
+        window.location.assign(url);
+      }
     }
   }, [url]);
 
@@ -28,7 +34,7 @@ export function ExternalRedirect() {
     >
       <CircularProgress size={60} />
       <Typography variant="h6" color="text.secondary">
-        Redirecting to authentication provider...
+        Redirecting to {url}...
       </Typography>
     </Box>
   );

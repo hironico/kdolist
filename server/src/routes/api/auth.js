@@ -43,8 +43,7 @@ const addSampleGiftList = async (user) => {
     const giftList = await usercontroller.createGiftList(user.id, `Liste de ${user.username}`);
     const gift = {
         giftListId: giftList.id,
-        name: 'Un exemple de cadeau',
-        description: 'C\'est un super cadeau qui me ferait très plaisir.'
+        name: 'Un exemple de cadeau'
     }
 
     await giftlistcontroller.addGift(gift);

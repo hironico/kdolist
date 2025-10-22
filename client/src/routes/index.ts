@@ -5,6 +5,7 @@ import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import asyncComponentLoader from '@/utils/loader';
 
 import { Pages, Routes } from './types';
+import { Notifications } from '@mui/icons-material';
 
 const routes: Routes = {
   [Pages.Welcome]: {
@@ -61,6 +62,13 @@ const routes: Routes = {
     component: asyncComponentLoader(() => import('@/pages/ExternalRedirect').then(m => ({ default: m.ExternalRedirect }))),
     path: '/redirect',
     inSideBar: false,
+  },
+  [Pages.CheckUpdates]: {
+    component: asyncComponentLoader(() => import('@/pages/CheckUpdates').then(m => ({ default: m.CheckUpdates }))),
+    path: '/checkupdates',
+    title: 'Check app update',
+    icon: Notifications,
+    inSideBar: true,
   },
   [Pages.NotFound]: {
     component: asyncComponentLoader(() => import('@/pages/NotFound')),

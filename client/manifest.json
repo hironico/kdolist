@@ -1,4 +1,6 @@
 {
+  "start_url": "/",
+  "scope": "/",
   "name": "kdolist",
   "short_name": "kdo list",
   "description": "hironico's KDO list is a gift list manager for you and your family.",
@@ -22,7 +24,12 @@
     }
   ], 
   "share_target": {
-    "action": "/share", 
-    "method": "POST"
+    "params": {
+      "title": "K.DO-List",
+      "text": "Add to kdolist",
+      "url": "link"
+    },    
+    "action": "/share/",
+    "enctype": "application/x-www-form-urlencoded"
   }
 }

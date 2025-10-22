@@ -13,6 +13,7 @@ enum Pages {
   KeycloakCallback,
   KeycloakError,
   ExternalRedirect,
+  CheckUpdates,
   NotFound,
 }
 

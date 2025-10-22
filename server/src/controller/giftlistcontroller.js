@@ -3,11 +3,11 @@ const { GiftList, Gift, GroupAccess, Notification, Link, Image, sequelize } = re
 const logger = require('../logger');
 
 class GiftListController {
-  async addGift({ giftListId, name, description, isHidden, selectedAt, selectedById }) {
+  async addGift({ giftListId, name, isHidden, selectedAt, selectedById }) {
     const giftList = await GiftList.findByPk(giftListId);
     if (!giftList) throw new Error(`Cannot add Gift to list. List not found ${giftListId}`);
 
-    const gift = await Gift.create({ name, description, giftListId, isHidden, selectedAt, selectedById });
+    const gift = await Gift.create({ name, giftListId, isHidden, selectedAt, selectedById });
 
     logger.debug(`Created gift: ${JSON.stringify(gift)}`);
 
