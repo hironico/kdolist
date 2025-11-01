@@ -23,14 +23,14 @@ giftApi.post('/', authenticateJWT, async (req, res) => {
         });
 
         if (theList === null) {
-            res.status(403).send('Cannot add gift to list. List not found or you are not the owner.').end();
+            res.status(400).send('Cannot add gift to list. List not found or you are not the owner.').end();
             return;
         }
 
         const gift = req.body.id ? await giftlistcontroller.updateGift(req.body.id, req.body) : await giftlistcontroller.addGift(req.body);
 
         if (gift === null) {
-            res.status(403).send(`Cannot create or update gift. Invalid gift ID`).end();
+            res.status(400).send(`Cannot create or update gift. Invalid gift ID`).end();
             return;
         }
 
@@ -56,6 +56,9 @@ giftApi.post('/', authenticateJWT, async (req, res) => {
             await giftlistcontroller.addAllGiftImages(imagesToCreate);
         }
 
+        // update the last modified date of the list to indicate there are changes to this list
+        giftlistcontroller.addOrUpdateGiftList(theList, req.user.id);
+
         // return newly created gift with links and images
         const newGift = await Gift.findByPk(gift.id, {
             include: [{ model: Link }, { model: Image }]
@@ -65,7 +68,7 @@ giftApi.post('/', authenticateJWT, async (req, res) => {
 
     } catch (error) {
         logger.error(error);
-        res.status(403).json(error).end();
+        res.status(500).json(error).end();
     }
 });
 
