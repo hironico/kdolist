@@ -190,9 +190,15 @@ class GiftListController {
 
   async addOrUpdateGiftList(giftList, ownerId) {
     if (giftList.id && giftList.id !== '') {
-      const list = await GiftList.findByPk(giftList.id)
-      if (list === null || list?.ownerId !== ownerId) {
-        logger.error(`Cannot update list with id: ${giftList.id}. Not found or not owned by current user.`);
+      const list = await GiftList.findByPk(giftList.id);
+
+      if (list === null) {
+        logger.error(`Cannot update list with id: ${giftList.id}. Not found.`);
+        return null;
+      }
+
+      if (list.ownerId !== ownerId) {
+        logger.error(`Cannot update list with id: ${giftList.id}. Not owned by current user: ${list.ownerId} <> ${ownerId}`);
         return null;
       }
 
