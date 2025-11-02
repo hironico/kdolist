@@ -1,6 +1,5 @@
 import { Box, CardContent, styled, Typography } from "@mui/material";
 import { Card } from "../Card";
-import FacebookLikeCircularProgress from "./FacebookLikeCircularProgress";
 import { ReactElement } from "react";
 
 const EmptyListContainer = styled(Card)(({ theme }) => ({

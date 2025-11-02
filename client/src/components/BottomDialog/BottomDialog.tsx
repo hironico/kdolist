@@ -15,7 +15,8 @@ import { Box } from '@mui/system';
 export type BottomDialogAction = {
   icon: ReactNode,
   label: string,
-  onClick: () => void
+  onClick: () => void,
+  disabled?: boolean
 }
 
 export type BottomDialogProps = {
@@ -24,6 +25,7 @@ export type BottomDialogProps = {
   title: string;
   contents: ReactNode;
   actions?: BottomDialogAction[];
+  disableBackdropClick?: boolean;
 };
 
 const Transition = React.forwardRef(function Transition(
@@ -41,11 +43,19 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
   title,
   contents,
   actions,
+  disableBackdropClick = false,
 }) => {
+  const handleDialogClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown') => {
+    if (disableBackdropClick && reason === 'backdropClick') {
+      return;
+    }
+    handleClose();
+  };
+
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={handleDialogClose}
       fullWidth={true}
       TransitionComponent={Transition}
       sx={{
@@ -65,7 +75,13 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
           <Typography fontSize={16}>{title}</Typography>
           <Box sx={{ flexGrow: 1 }} />
           {actions ? actions.map( (a,index) => {
-            return <IconButton key={`bottom-dlg-key-${a.label}-${index}`} color="primary" aria-label="open drawer" onClick={a.onClick} sx={{ml: '10px', mr: '10px', padding: '0px'}}>
+            return <IconButton 
+                    key={`bottom-dlg-key-${a.label}-${index}`} 
+                    color="primary" 
+                    aria-label="open drawer" 
+                    onClick={a.onClick} 
+                    disabled={a.disabled}
+                    sx={{ml: '10px', mr: '10px', padding: '0px'}}>
                     {a.icon}
                   </IconButton>
           }): <></>}

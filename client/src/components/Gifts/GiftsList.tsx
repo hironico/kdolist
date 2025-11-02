@@ -10,6 +10,9 @@ import { GiftsFAB } from './GiftsFAB';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 import { useNavigate } from 'react-router-dom';
 import GiftsListItem from './GiftsListItem';
+import { FilterBAndW } from '@mui/icons-material';
+import { FilterBar } from '../FilterBar';
+import { Filter } from '../FilterBar/FilterBar';
 
 const newEmptyGift = (): Gift => {
   return {
@@ -36,6 +39,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [giftEditorOpen, setGiftEditorOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeFilters, setActiveFilters] = useState<Filter<Gift>[]>([]);
 
   const showError = useCallback((message: string) => {
     notificationsActions.push({
@@ -183,19 +187,52 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   } else if (appContext.giftListContents.length === 0) {
     listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'." />;
   } else {
-    listContents = appContext.giftListContents?.map((oneGift, index) => {
+    listContents = appContext.giftListContents?.filter(g => {
+      if (activeFilters.length === 0) {
+        return true;
+      }
+
+      let matching = false;
+      activeFilters.forEach(filter => {
+        matching = matching || filter.filterFn(g);
+      });
+
+      return matching;
+    }).map((oneGift, index) => {
       return <GiftsListItem key={`kdo-${index}`}
         oneGift={oneGift}
         editable={editable}
         onDelete={() => handleConfirmDeleteGift(oneGift)}
         onTake={() => toggleSelectGift(oneGift)}
         onEdit={() => handleEditGift(oneGift)} />
-
     });
   }
 
+  const giftFilters: Filter<Gift>[] = [
+    {
+      id: 'gifts-non-taken',
+      label: 'Non rayés',
+      filterFn: function (item: Gift): boolean {
+        return item.selectedById === null;
+      }
+    },  
+    {
+        id: 'gifts-taken',
+        label: 'Rayés',
+        filterFn: function (item: Gift): boolean {
+          return item.selectedById !== null;
+        }
+      }
+    ];
+
+  const onGiftFilterChange = useCallback((activeFilterIds: string[]) => {
+      const newActiveFilters = giftFilters.filter(f => activeFilterIds.includes(f.id));
+      setActiveFilters(newActiveFilters);
+    }, []);
+
   return (
     <Box display="grid" gridTemplateColumns="auto" p={2} width="100%">
+      <FilterBar<Gift> onFiltersChange={onGiftFilterChange} filters={giftFilters} />
       <List sx={{ m: '0px', mt: '10px' }}>
         {listContents}
       </List>
