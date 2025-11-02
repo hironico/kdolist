@@ -108,7 +108,7 @@ Gift.init({
     primaryKey: true
   },
   name: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(2048),
     allowNull: false
   },
   isHidden: {
