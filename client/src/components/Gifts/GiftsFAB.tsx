@@ -10,7 +10,7 @@ export const GiftsFAB: React.FC<GiftFABProps> = ({ handleAdd }) => {
   // const listEditorContext = useContext(LoginContext);
 
   return (
-    <FlexBox flexDirection={'row-reverse'} sx={{ position: 'absolute', bottom: 16, right: 16 }}>
+    <FlexBox flexDirection={'row-reverse'} sx={{ position: 'fixed', bottom: 16, right: 16, zIndex: 1000 }}>
       <Fab color="primary" aria-label="add" onClick={handleAdd}>
         <AddIcon />
       </Fab>
