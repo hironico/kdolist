@@ -124,7 +124,7 @@ function SharePage() {
         }
       } catch (error) {
         console.error('Error fetching gift lists:', error);
-        setError('Network error while loading lists');
+        setError('Erreur réseau pendant la recupération de tes listes.');
       }
     };
 
@@ -135,7 +135,7 @@ function SharePage() {
     if (!selectedListId) {
       notificationsActions.push({
         options: { variant: 'error' },
-        message: 'Please select a gift list',
+        message: 'Sélectionne une liste !',
       });
       return;
     }
@@ -143,7 +143,7 @@ function SharePage() {
     if (!giftName.trim()) {
       notificationsActions.push({
         options: { variant: 'error' },
-        message: 'Please enter a gift name',
+        message: 'Donne un nom a ce cadeau !',
       });
       return;
     }
@@ -154,10 +154,23 @@ function SharePage() {
       // Create the gift object
       const links: GiftLink[] = [];
       if (sharedData?.url) {
-        const hostname = sharedData.url ? new URL(sharedData.url).hostname : 'Shared link';
+        const hostname = sharedData.url ? new URL(sharedData.url).hostname : 'Shared link url';
         links.push({
           id: '',
           url: sharedData.url,
+          description: hostname,
+          giftId: '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+
+      // maybe this is also a link in the text but do not add 2 times the same link
+      if (sharedData?.text?.startsWith('https') && sharedData?.text !== sharedData?.url) {
+        const hostname = sharedData.text ? new URL(sharedData.text).hostname : 'Shared link text';
+        links.push({
+          id: '',
+          url: sharedData.text,
           description: hostname,
           giftId: '',
           createdAt: new Date(),
@@ -190,7 +203,7 @@ function SharePage() {
       if (response.ok) {
         notificationsActions.push({
           options: { variant: 'success' },
-          message: 'Gift added successfully!',
+          message: 'Cadeau ajouté dans la liste!',
         });
         
         // Navigate to the list
@@ -206,13 +219,13 @@ function SharePage() {
           navigate('/listcontents', opts);
         }
       } else {
-        throw new Error('Failed to create gift');
+        throw new Error('Impossible de créer le cadeau.');
       }
     } catch (error) {
       console.error('Error saving gift:', error);
       notificationsActions.push({
         options: { variant: 'error' },
-        message: 'Could not save gift',
+        message: 'Impossible de sauvegarder depuis la page de partage.',
       });
     } finally {
       setIsSaving(false);
@@ -232,7 +245,7 @@ function SharePage() {
       <Card>
         <CardContent>
           <Typography variant="h5" gutterBottom>
-            Add Shared Content to Gift List
+            Ajouter du contenu partagé dans une liste
           </Typography>
 
           {error && (
@@ -244,28 +257,28 @@ function SharePage() {
           {sharedData && (
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Shared Content:
+                Contenu partagé:
               </Typography>
               {sharedData.title && (
                 <Typography variant="body2">
-                  <strong>Title:</strong> {sharedData.title}
+                  <strong>Titre:</strong> {sharedData.title}
                 </Typography>
               )}
               {sharedData.text && (
                 <Typography variant="body2">
-                  <strong>Text:</strong> {sharedData.text}
+                  <strong>Texte:</strong> {sharedData.text}
                 </Typography>
               )}
               {sharedData.url && (
                 <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-                  <strong>URL:</strong> {sharedData.url}
+                  <strong>Lien:</strong> {sharedData.url}
                 </Typography>
               )}
             </Box>
           )}
 
           <TextField
-            label="Gift Name"
+            label="Nom du cadeau"
             value={giftName}
             onChange={(e) => setGiftName(e.target.value)}
             fullWidth
@@ -274,7 +287,7 @@ function SharePage() {
           />
 
           <FormControl fullWidth margin="normal" required>
-            <InputLabel>Select Gift List</InputLabel>
+            <InputLabel>Selectionner la liste:</InputLabel>
             <Select
               value={selectedListId}
               onChange={(e) => setSelectedListId(e.target.value)}
@@ -297,7 +310,7 @@ function SharePage() {
               startIcon={isSaving ? <CircularProgress size={20} /> : <CheckIcon />}
               fullWidth
             >
-              {isSaving ? 'Saving...' : 'Add to List'}
+              {isSaving ? 'Enregistrement...' : 'Ajouter à cette liste'}
             </Button>
             <Button
               variant="outlined"
@@ -305,7 +318,7 @@ function SharePage() {
               disabled={isSaving}
               fullWidth
             >
-              Cancel
+              Laisse tomber
             </Button>
           </Box>
         </CardContent>
