@@ -39,7 +39,7 @@ export default function SignInCard() {
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: '250px' }}>
           <Typography>
-            Pour accéder à toutes nos applications, vous avez besoin d'un compte hironico.net.
+            Il faut se connecter pour accéder a cette application.
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

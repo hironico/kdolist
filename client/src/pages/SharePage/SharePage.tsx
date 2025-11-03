@@ -87,7 +87,13 @@ function SharePage() {
   // Fetch user's gift lists
   useEffect(() => {
     const fetchGiftLists = async () => {
+      // Wait a bit for JWT to load from localStorage
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       if (!appContext.loginInfo.jwt) {
+        console.log('No JWT found, redirecting to login');
+        // Store the current URL to redirect back after login
+        sessionStorage.setItem('kdolist_redirect_after_login', window.location.href);
         navigate('/login');
         return;
       }
@@ -108,7 +114,13 @@ function SharePage() {
             setSelectedListId(lists[0].id);
           }
         } else {
-          setError('Could not load your gift lists');
+          if (response.status === 401) {
+            // Token invalid, redirect to login
+            sessionStorage.setItem('kdolist_redirect_after_login', window.location.href);
+            navigate('/login');
+          } else {
+            setError('Could not load your gift lists');
+          }
         }
       } catch (error) {
         console.error('Error fetching gift lists:', error);

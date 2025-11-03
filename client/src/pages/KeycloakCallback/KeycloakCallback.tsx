@@ -61,8 +61,16 @@ export function KeycloakCallback() {
           localStorage.setItem('refreshToken', refreshToken);
         }
 
-        // Redirect to main application
-        navigate('/mylists');
+        // Check if there's a stored redirect URL (e.g., from share target)
+        const redirectUrl = sessionStorage.getItem('kdolist_redirect_after_login');
+        if (redirectUrl) {
+          sessionStorage.removeItem('kdolist_redirect_after_login');
+          // Redirect to the stored URL
+          window.location.href = redirectUrl;
+        } else {
+          // Default redirect to main application
+          navigate('/mylists');
+        }
       } catch (error) {
         console.error('Authentication callback error:', error);
         navigate('/auth/error', { 

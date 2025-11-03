@@ -117,12 +117,46 @@ const defaultAppContext: AppContext = {
 export const LoginContext = createContext<AppContext>(defaultAppContext);
 
 export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
-  const [loginInfo, setLoginInfo] = useState<AppContext['loginInfo']>(defaultLoginInfo);
+  // Initialize login info from localStorage if available
+  const [loginInfo, setLoginInfoState] = useState<AppContext['loginInfo']>(() => {
+    try {
+      const stored = localStorage.getItem('kdolist_auth');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return { ...defaultLoginInfo, ...parsed };
+      }
+    } catch (error) {
+      console.error('Error loading stored auth:', error);
+    }
+    return defaultLoginInfo;
+  });
+
   const [giftList, setGiftList] = useState<AppContext['giftList']>(defaultListInfo);
   const [giftListContents, setGiftListContents] = useState<AppContext['giftListContents']>([]);
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
+  // Wrapper to persist login info to localStorage
+  const setLoginInfo = (info: LoginInfoProps) => {
+    setLoginInfoState(info);
+    
+    // Persist to localStorage
+    try {
+      if (info.jwt) {
+        localStorage.setItem('kdolist_auth', JSON.stringify(info));
+      } else {
+        // Clear auth if JWT is empty
+        localStorage.removeItem('kdolist_auth');
+      }
+    } catch (error) {
+      console.error('Error saving auth to localStorage:', error);
+    }
+  };
+
   const checkToken = async () => {
+    if (!loginInfo.jwt) {
+      return false;
+    }
+
     const response = await fetch(`${apiBaseUrl}/auth/whoami`, {
       method: 'GET',
       headers: {
@@ -131,8 +165,8 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
     });
 
     if (!response.ok) {
-      loginInfo.jwt = '';
-      setLoginInfo(loginInfo);
+      // Clear invalid token
+      setLoginInfo({ ...loginInfo, jwt: '' });
     }
 
     return response.ok;
