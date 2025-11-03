@@ -18,6 +18,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import { LoginContext, Gift, GiftList, GiftImage, GiftLink } from '@/LoginContext';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
+import Meta from '@/components/Meta';
 
 function SharePage() {
   const [sharedData, setSharedData] = useState<{
@@ -241,6 +242,8 @@ function SharePage() {
   }
 
   return (
+    <>
+    <Meta title="Contenu partagé" />
     <Box sx={{ p: 2 }}>
       <Card>
         <CardContent>
@@ -324,6 +327,7 @@ function SharePage() {
         </CardContent>
       </Card>
     </Box>
+    </>
   );
 }
 
