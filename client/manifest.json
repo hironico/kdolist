@@ -24,12 +24,19 @@
     }
   ], 
   "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
     "params": {
-      "title": "K.DO-List",
-      "text": "Add to kdolist",
-      "url": "link"
-    },    
-    "action": "/share/",
-    "enctype": "application/x-www-form-urlencoded"
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "image",
+          "accept": ["image/*"]
+        }
+      ]
+    }
   }
 }

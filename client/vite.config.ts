@@ -15,22 +15,13 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       registerType: "prompt", 
       injectRegister: "inline",
-      strategies: "generateSW",
-      workbox: {
-        cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html}', '**/*.{svg,png,jpg,gif}'],
-        globDirectory: "dist/",
-        // Exclude API routes from service worker navigation handling
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [
-          /^\/api\/.*/,     // Exclude all /api/* routes
-          /^\/legal\/.*/,   // Exclude all /legal/* routes
-        ],
-        // Don't auto-activate - wait for user confirmation
-        clientsClaim: false,
-        skipWaiting: false,
+      strategies: "injectManifest",
+      srcDir: 'src',
+      filename: 'share-sw.ts',
+      manifest: manifest as any,
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,gif,ico}'],
       },
-      manifest: manifest,
       // switch to "true" to enable sw on development
       devOptions: {
         enabled: false,
