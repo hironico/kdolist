@@ -17,7 +17,7 @@ export default defineConfig({
       injectRegister: "auto",
       strategies: "injectManifest",
       srcDir: 'src',
-      filename: 'share-sw.ts',
+      filename: 'sw.ts',
       manifest: manifest as any,
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,gif,ico}'],
