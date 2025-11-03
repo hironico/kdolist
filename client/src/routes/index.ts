@@ -66,7 +66,7 @@ const routes: Routes = {
   [Pages.CheckUpdates]: {
     component: asyncComponentLoader(() => import('@/pages/CheckUpdates').then(m => ({ default: m.CheckUpdates }))),
     path: '/checkupdates',
-    title: 'Check app update',
+    title: 'Vérif. MAJ',
     icon: Notifications,
     inSideBar: true,
   },
