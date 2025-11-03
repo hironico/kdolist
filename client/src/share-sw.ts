@@ -11,8 +11,24 @@ precacheAndRoute(self.__WB_MANIFEST);
 // Clean up old caches
 cleanupOutdatedCaches();
 
-// Allow service worker to take control of page immediately
-// clientsClaim();
+// Listen for skip waiting message from the app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// Claim clients immediately after activation
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    Promise.all([
+      // Clean up old caches
+      cleanupOutdatedCaches(),
+      // Take control of all pages immediately
+      self.clients.claim()
+    ])
+  );
+});
 
 // Navigate to index.html for navigation requests
 const navigationRoute = new NavigationRoute(

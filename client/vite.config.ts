@@ -14,17 +14,21 @@ export default defineConfig({
     VitePWA({
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       registerType: "prompt", 
-      injectRegister: "inline",
+      injectRegister: "auto",
       strategies: "injectManifest",
       srcDir: 'src',
       filename: 'share-sw.ts',
       manifest: manifest as any,
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,gif,ico}'],
+        injectionPoint: undefined,
+      },
+      workbox: {
+        sourcemap: true,
       },
       // switch to "true" to enable sw on development
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
     }),
     mkcert(),
