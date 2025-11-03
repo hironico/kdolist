@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavigateOptions, useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -197,7 +197,13 @@ function SharePage() {
         const selectedList = giftLists.find(l => l.id === selectedListId);
         if (selectedList) {
           appContext.setGiftList(selectedList);
-          navigate('/listcontents');
+
+          const opts: NavigateOptions = {
+            state: { list: selectedList, editable: true },
+            replace: true,
+          };
+
+          navigate('/listcontents', opts);
         }
       } else {
         throw new Error('Failed to create gift');
