@@ -21,7 +21,6 @@ export default defineConfig({
       manifest: manifest as any,
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,gif,ico}'],
-        injectionPoint: undefined,
       },
       workbox: {
         sourcemap: true,

@@ -4,6 +4,7 @@ const https = require('https');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const mime = require('mime');
 const session = require('express-session');
 
 // configure application with process env variables from .env file
@@ -50,6 +51,23 @@ app.use('/legal', require('./routes/legal/'));
 
 // Serve static files using absolute path to avoid permission issues
 // This comes AFTER API routes so API calls are handled first
+
+// we also define custom mime type to serve the manifest with proper mime type
+mime.define({ 'application/manifest+json': ['webmanifest', 'json'] }, true);
+// Middleware that forces header only for manifest and service worker
+app.use((req, res, next) => {
+  if (req.path === '/manifest.json' || req.path === '/manifest.webmanifest') {
+    res.type('application/manifest+json');
+    res.set('Cache-Control', 'public, max-age=86400');
+  } else if (req.path.endsWith('sw.js') || req.path.includes('/sw.js')) {
+    // Service worker must be served with correct MIME type and no caching
+    res.type('application/javascript');
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Service-Worker-Allowed', '/');
+  }
+  next();
+});
+
 const staticPath = path.resolve(process.cwd(), process.env.WEBUI_HOME_DIR);
 logger.info(`Serving static files from: ${staticPath}`);
 app.use(express.static(staticPath));
