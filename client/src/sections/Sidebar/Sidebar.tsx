@@ -36,6 +36,12 @@ function Sidebar() {
               </ListItemButton>
             </ListItem>
           ))}
+          <ListItem sx={{ p: 0 }} key="github">
+              <ListItemButton component={Link} to="/redirect?url=https://github.com/hironico/kdolist&newTab=true" onClick={sidebarActions.close}>
+                <ListItemIcon><DefaultIcon /></ListItemIcon>
+                <ListItemText>GitHub</ListItemText>
+              </ListItemButton>
+            </ListItem>
       </List>
     </SwipeableDrawer>
   );
