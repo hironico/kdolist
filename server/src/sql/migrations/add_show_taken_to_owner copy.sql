@@ -3,7 +3,8 @@
 -- Description: Adds a boolean flag to allow list owners to optionally see which gifts are marked as taken
 --              Useful for tracking collections or series
 
--- Add the column with default value falseALTER TABLE public."giftLists"
+-- Add the column with default value false
+ALTER TABLE public."giftLists"
 ADD COLUMN IF NOT EXISTS "showTakenToOwner" BOOLEAN NOT NULL DEFAULT false;
 
 -- Add comment for documentation
