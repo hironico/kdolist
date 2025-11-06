@@ -19,6 +19,7 @@ const newEmptyGift = (): Gift => {
   return {
     id: '',
     name: '',
+    description: '',
     createdAt: new Date(),
     updatedAt: new Date(),
     links: [],

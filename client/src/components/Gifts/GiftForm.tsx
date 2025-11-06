@@ -78,7 +78,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     giftToSave.giftListId = appContext.giftList.id;
 
     try {
-      const response = await api.post(`${apiBaseUrl}/gift/`, JSON.stringify(giftToSave));
+      const response = await api.post(`${apiBaseUrl}/gift/`, giftToSave);
 
       setIsSaving(false);
 
@@ -378,15 +378,13 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     <TextField
       label="Description"
       name="description"
-      value={updatedGift.description}
+      value={updatedGift.description?? ''}
       onChange={handleInputChange}
       margin="normal"
       fullWidth
       disabled={!editable}
       placeholder="Nous en dire plus dans cette zone si besoin."
       multiline
-      maxRows={2}
-      minRows={2}
       rows={2}
     />
 
