@@ -231,9 +231,9 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     }, []);
 
   return (
-    <Box display="grid" gridTemplateColumns="auto" p={2} width="100%">
+    <Box display="grid" gridTemplateColumns="auto" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative">
       <FilterBar<Gift> onFiltersChange={onGiftFilterChange} filters={giftFilters} />
-      <List sx={{ m: '0px', mt: '10px' }}>
+      <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
         {listContents}
       </List>
 
