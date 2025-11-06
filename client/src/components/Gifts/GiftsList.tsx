@@ -13,6 +13,7 @@ import GiftsListItem from './GiftsListItem';
 import { FilterBAndW } from '@mui/icons-material';
 import { FilterBar } from '../FilterBar';
 import { Filter } from '../FilterBar/FilterBar';
+import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 
 const newEmptyGift = (): Gift => {
   return {
@@ -41,6 +42,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [loading, setLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState<Filter<Gift>[]>([]);
 
+  const api = useAuthenticatedApi();
+
   const showError = useCallback((message: string) => {
     notificationsActions.push({
       options: {
@@ -60,12 +63,10 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
       appContext.setGiftListContents([]);
       setLoading(true);
 
-      fetch(`${apiBaseUrl}/giftlist/contents/${appContext.giftList.id}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-        },
-      }).then((response) => {
+      const url = `${apiBaseUrl}/giftlist/contents/${appContext.giftList.id}`;
+
+      api.get(url)
+      .then((response) => {
         if (response.ok) {
           response.json().then((data) => {
             appContext.setGiftListContents(data);
@@ -97,13 +98,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   }, []);
 
   const deleteGift = () => {
-    fetch(`${apiBaseUrl}/gift/${gift.id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-      },
-    }).then((response) => {
+    api.delete(`${apiBaseUrl}/gift/${gift.id}`)
+    .then((response) => {
       if (!response.ok) {
         console.error(JSON.stringify(response));
         showError(`Impossible de supprimer l'entrée dans la liste.`);
@@ -131,16 +127,11 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
   const toggleSelectGift = (gift: Gift) => {
     const url = gift.selectedById !== null ? `${apiBaseUrl}/gift/untake/${gift.id}` : `${apiBaseUrl}/gift/take/${gift.id}`;
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-      },
-    }).then((response) => {
+
+    api.post(url, {}).then((response) => {
       if (!response.ok) {
         console.error(JSON.stringify(response));
-        showError(`Impossible de marquer ce cadeau comme étant offert.`);
+        showError(`Impossible de marquer ce cadeau comme étant offert/réservé.`);
       } else {
         fetchListContents();
         setGift(newEmptyGift);
