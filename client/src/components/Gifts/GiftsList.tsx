@@ -172,7 +172,12 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   };
 
   let listContents;
-  if (loading) {
+
+  // Check if current user owns this list and list settings
+  const isOwner = appContext.giftList?.ownerId === appContext.loginInfo.id;
+  const showTakenToOwner = appContext.giftList?.showTakenToOwner ?? false;
+  
+    if (loading) {
     const fbIcon = <FacebookLikeCircularProgress />;
     listContents = <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
   } else if (appContext.giftListContents.length === 0) {
@@ -193,13 +198,16 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
       return <GiftsListItem key={`kdo-${index}`}
         oneGift={oneGift}
         editable={editable}
+        isOwner={isOwner}
+        showTakenToOwner={showTakenToOwner}
         onDelete={() => handleConfirmDeleteGift(oneGift)}
         onTake={() => toggleSelectGift(oneGift)}
         onEdit={() => handleEditGift(oneGift)} />
     });
   }
 
-  const giftFilters: Filter<Gift>[] = [
+  // no filters if list is owned by current user and he/she did not force display of taken gifts
+  const giftFilters: Filter<Gift>[] = isOwner && !showTakenToOwner ? [] : [
     {
       id: 'gifts-non-taken',
       label: 'Non rayés',

@@ -28,6 +28,7 @@ export interface GiftList {
   updatedAt: Date;
   ownerId: string;
   owner?: LoginInfoProps;
+  showTakenToOwner?: boolean;
 }
 
 export interface Gift {

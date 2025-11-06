@@ -10,6 +10,8 @@ type GiftsListContentsProps = {
     key: string;
     oneGift: Gift;
     editable: boolean;
+    isOwner: boolean;
+    showTakenToOwner: boolean;
     onDelete: () => void;
     onTake: () => void;
     onEdit: () => void;
@@ -17,11 +19,18 @@ type GiftsListContentsProps = {
 
 /**
  * Represents a Gift item in the Gift List under the form of a SwipeableListItem.
+ * The strikethrough decoration logic:
+ * - Always shown for non-owners when gift is taken
+ * - For owners: only shown if showTakenToOwner is true (useful for collections/series tracking)
  */
-const GiftsListItem: React.FC<GiftsListContentsProps> = ({ key, oneGift, editable, onDelete: deleteAction, onTake: takeAction, onEdit: editAction}) => {
+const GiftsListItem: React.FC<GiftsListContentsProps> = ({ key, oneGift, editable, isOwner, showTakenToOwner, onDelete: deleteAction, onTake: takeAction, onEdit: editAction}) => {
 
     const isTaken = oneGift.selectedById !== null;
-    const decoration = isTaken ? 'line-through' : 'none';
+    // Show strikethrough if:
+    // - Gift is taken AND user is NOT the owner, OR
+    // - Gift is taken AND user IS the owner AND showTakenToOwner is enabled
+    const shouldShowStrikethrough = isTaken && (!isOwner || showTakenToOwner);
+    const decoration = shouldShowStrikethrough ? 'line-through' : 'none';
     const primaryText = (
         <Typography sx={{ textDecoration: decoration }}>{`${oneGift.name}`}</Typography>
     );
