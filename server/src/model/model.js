@@ -117,6 +117,10 @@ Gift.init({
     type: DataTypes.STRING(2048),
     allowNull: false
   },
+  description: {
+    type: DataTypes.STRING(4096),
+    allowNull: true
+  },
   isHidden: {
     type: DataTypes.BOOLEAN,
     defaultValue: false

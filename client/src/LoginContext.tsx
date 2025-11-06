@@ -34,6 +34,7 @@ export interface GiftList {
 export interface Gift {
   id: string;
   name: string;
+  description?: string;
   isHidden?: boolean;
   selectedAt?: Date | null;
   selectedById?: string | null;

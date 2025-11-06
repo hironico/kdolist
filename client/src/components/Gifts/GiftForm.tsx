@@ -11,6 +11,7 @@ import useNotifications from '@/store/notifications';
 
 import { apiBaseUrl } from '@/config';
 import { useNavigate } from 'react-router-dom';
+import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 
 interface GiftFormProps {
   gift: Gift;
@@ -49,6 +50,8 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
 
   const navigate = useNavigate();
 
+  const api = useAuthenticatedApi(); 
+
   useEffect(() => {
     setUpdatedGift(gift);
   }, [gift]);
@@ -75,14 +78,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     giftToSave.giftListId = appContext.giftList.id;
 
     try {
-      const response = await fetch(`${apiBaseUrl}/gift/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-        },
-        body: JSON.stringify(giftToSave),
-      });
+      const response = await api.post(`${apiBaseUrl}/gift/`, JSON.stringify(giftToSave));
 
       setIsSaving(false);
 
@@ -200,12 +196,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     }
 
     try {
-      const response = await fetch(`${apiBaseUrl}/gift/image/${image.id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-        },
-      });
+      const response = await api.delete(`${apiBaseUrl}/gift/image/${image.id}`);
 
       if (!response.ok) {
         console.error('Failed to delete image:', response);
@@ -216,6 +207,8 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       // Remove from local state
       const newImages = updatedGift.images.filter((img) => img.id !== image.id);
       setUpdatedGift({ ...updatedGift, images: newImages });
+
+      handleSaveGift(updatedGift);
     } catch (error) {
       console.error('Error deleting image:', error);
       showError(`Erreur lors de la suppression de l'image.`);
@@ -262,6 +255,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
                     }
 
                     handleAddLink(newLink);
+                    handleSaveGift(updatedGift);
                   })
 
               } else {
@@ -274,19 +268,20 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
                       console.log(`Data found for ${theType} : ${data}`);
                       if (theType.startsWith('image')) {
                         handleAddImage(data);
+                        handleSaveGift(updatedGift);
                       }
                     };
                     if (theType.startsWith('image')) {
                       fileReader.readAsDataURL(blob);
                     }
-                  }).catch(error => console.log('Error while reading clipboard type:' + theType + '. Error: ' + error));
+                  }).catch(error => console.error('Error while reading clipboard type:' + theType + '. Error: ' + error));
 
               }
             }
           }
         });
     } catch (error) {
-      console.error('Error pasting image:', error);
+      console.error('Error in magic paste', error);
     }
   };
 
@@ -354,16 +349,6 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       })}
     </Carousel>
 
-    <TextField
-      label="Nom"
-      name="name"
-      value={updatedGift.name}
-      onChange={handleInputChange}
-      margin="normal"
-      fullWidth
-      disabled={!editable}
-    />
-
     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, mt: 2 }}>
       {updatedGift.links?.map((link) => (
         <Chip
@@ -379,6 +364,33 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
         />
       ))}
     </Box>
+
+    <TextField
+      label="Nom"
+      name="name"
+      value={updatedGift.name}
+      onChange={handleInputChange}
+      margin="normal"
+      fullWidth
+      disabled={!editable}
+    />
+
+    <TextField
+      label="Description"
+      name="description"
+      value={updatedGift.description}
+      onChange={handleInputChange}
+      margin="normal"
+      fullWidth
+      disabled={!editable}
+      placeholder="Nous en dire plus dans cette zone si besoin."
+      multiline
+      maxRows={2}
+      minRows={2}
+      rows={2}
+    />
+
+    
   </Box>
 
   return (
