@@ -82,7 +82,24 @@ const carouselItems: CarouselItem[] = [
     description: 'Notre nouvelle façon de partager nos listes de cadeaux',
     buttonText: 'Commencer',
   },
-  // Ajoutez d'autres éléments du carousel ici
+  {
+    image: './background/kdolist-2.jpeg',
+    title: 'K.DO-List',
+    description: 'Notre nouvelle façon de partager nos listes de cadeaux',
+    buttonText: 'Commencer',
+  },
+  {
+    image: './background/kdolist-3.jpeg',
+    title: 'K.DO-List',
+    description: 'Notre nouvelle façon de partager nos listes de cadeaux',
+    buttonText: 'Commencer',
+  },
+  {
+    image: './background/kdolist-4.jpeg',
+    title: 'K.DO-List',
+    description: 'Notre nouvelle façon de partager nos listes de cadeaux',
+    buttonText: 'Commencer',
+  }
 ];
 
 const features: FeatureCard[] = [

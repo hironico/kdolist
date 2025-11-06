@@ -16,6 +16,7 @@ import FilterBar, { Filter } from '../FilterBar/FilterBar';
 import { Box } from '@mui/system';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
+import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 
 const GiftListsList: React.FC = () => {
   const [giftLists, setGiftLists] = useState<GiftList[]>([]);
@@ -30,6 +31,8 @@ const GiftListsList: React.FC = () => {
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
 
+  const api = useAuthenticatedApi();
+
   const fetchGiftLists = async () => {
 
     const url = `${apiBaseUrl}/giftlist/all`;
@@ -37,12 +40,7 @@ const GiftListsList: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-        },
-      });
+      const response = await api.get(url);
 
       setLoading(false);
 

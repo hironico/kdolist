@@ -9,7 +9,11 @@ class GiftListController {
 
     const gift = await Gift.create({ name, giftListId, isHidden, selectedAt, selectedById });
 
-    logger.debug(`Created gift: ${JSON.stringify(gift)}`);
+    logger.info(`Created gift: ${JSON.stringify(gift)}`);
+
+    // update the modification date of the list
+    giftList.set('updatedAt', new Date(), {raw: true});
+    await giftList.save();
 
     await Notification.create({
       recipientId: giftList.ownerId,
@@ -202,7 +206,11 @@ class GiftListController {
         return null;
       }
 
-      await list.update({ name: giftList.name});
+      list.set('name', giftList.name);
+      list.set('showTakenToOwner', giftList.showTakenToOwner);
+      list.set('updatedAt', new Date());
+
+      await list.save();
 
       return list;      
     } else {

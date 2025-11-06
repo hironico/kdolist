@@ -97,6 +97,12 @@ GiftList.init({
   name: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  showTakenToOwner: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    comment: 'If true, the owner can see which gifts are marked as taken. Useful for collections/series tracking.'
   }
 }, { sequelize, modelName: 'giftList' });
 
@@ -108,7 +114,7 @@ Gift.init({
     primaryKey: true
   },
   name: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(2048),
     allowNull: false
   },
   isHidden: {

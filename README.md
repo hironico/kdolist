@@ -1,15 +1,22 @@
 
-# K.DO-list application 
+# What is K.DO-list  
+
+k.do-list is a gift list application for your family. You can shre ideas for birthdays, Christmas, any other occasions...
+
+It can even be used as a shopping list app, to keep track of gift ideas and so on...
+
+This application is entirely done with the help of AI to test capabilities of various models and gain experience in prompt engineering and AI agent coding. Even pictures used in this app are produced by AI models.
 
 # Runtime setup 
 
 The following runtimes are needed for kdolist to work.
 
 ## Nodejs
-- Install nodejs
-```
-./server/tools/installnodejs.sh 
-```
+
+Nodejs is the base runtime to get it working. 
+
+- Server : expresjs application
+- Client : MUI typescript application
 
 ## Podman 
 

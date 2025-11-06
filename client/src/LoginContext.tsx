@@ -28,6 +28,7 @@ export interface GiftList {
   updatedAt: Date;
   ownerId: string;
   owner?: LoginInfoProps;
+  showTakenToOwner?: boolean;
 }
 
 export interface Gift {
@@ -65,6 +66,7 @@ export interface AppContext {
   loginInfo: LoginInfoProps;
   setLoginInfo: (info: LoginInfoProps) => void;
   checkToken: () => Promise<boolean>;
+  refreshToken: () => Promise<boolean>;
 
   giftList: GiftList | null;
   setGiftList: (list: GiftList | null) => void;
@@ -103,6 +105,11 @@ const defaultAppContext: AppContext = {
       accept(false);
     });
   },
+  refreshToken: () => {
+    return new Promise<boolean>((accept) => {
+      accept(false);
+    });
+  },
 
   giftList: defaultListInfo,
   setGiftList: (_list: GiftList | null) => {},
@@ -117,12 +124,46 @@ const defaultAppContext: AppContext = {
 export const LoginContext = createContext<AppContext>(defaultAppContext);
 
 export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
-  const [loginInfo, setLoginInfo] = useState<AppContext['loginInfo']>(defaultLoginInfo);
+  // Initialize login info from localStorage if available
+  const [loginInfo, setLoginInfoState] = useState<AppContext['loginInfo']>(() => {
+    try {
+      const stored = localStorage.getItem('kdolist_auth');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return { ...defaultLoginInfo, ...parsed };
+      }
+    } catch (error) {
+      console.error('Error loading stored auth:', error);
+    }
+    return defaultLoginInfo;
+  });
+
   const [giftList, setGiftList] = useState<AppContext['giftList']>(defaultListInfo);
   const [giftListContents, setGiftListContents] = useState<AppContext['giftListContents']>([]);
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
+  // Wrapper to persist login info to localStorage
+  const setLoginInfo = (info: LoginInfoProps) => {
+    setLoginInfoState(info);
+    
+    // Persist to localStorage
+    try {
+      if (info.jwt) {
+        localStorage.setItem('kdolist_auth', JSON.stringify(info));
+      } else {
+        // Clear auth if JWT is empty
+        localStorage.removeItem('kdolist_auth');
+      }
+    } catch (error) {
+      console.error('Error saving auth to localStorage:', error);
+    }
+  };
+
   const checkToken = async () => {
+    if (!loginInfo.jwt) {
+      return false;
+    }
+
     const response = await fetch(`${apiBaseUrl}/auth/whoami`, {
       method: 'GET',
       headers: {
@@ -131,11 +172,49 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
     });
 
     if (!response.ok) {
-      loginInfo.jwt = '';
-      setLoginInfo(loginInfo);
+      // Clear invalid token
+      setLoginInfo({ ...loginInfo, jwt: '' });
     }
 
     return response.ok;
+  };
+
+  const refreshToken = async () => {
+    if (!loginInfo.jwt || !loginInfo.accessToken) {
+      console.error('No JWT or refresh token available');
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${loginInfo.jwt}`,
+        },
+        body: JSON.stringify({ token: loginInfo.accessToken }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const newJwt = data.accessToken;
+
+        // Update login info with new JWT
+        const updatedInfo = { ...loginInfo, jwt: newJwt };
+        setLoginInfo(updatedInfo);
+
+        console.log('Token refreshed successfully');
+        return true;
+      } else {
+        console.error('Token refresh failed:', response.status);
+        // Clear auth on refresh failure
+        setLoginInfo({ ...loginInfo, jwt: '', accessToken: '' });
+        return false;
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      return false;
+    }
   };
 
   return (
@@ -144,6 +223,7 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
         loginInfo,
         setLoginInfo,
         checkToken,
+        refreshToken,
         giftList,
         setGiftList,
         giftListContents,

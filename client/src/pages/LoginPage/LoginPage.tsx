@@ -1,16 +1,21 @@
 import Meta from '@/components/Meta';
 import SignInCard from '@/components/SignInCard';
-import { CenteredFlexBox } from '@/components/styled';
+import { CenteredVerticalFlexBox } from '@/components/styled';
 import { Box, Stack, Typography } from '@mui/material';
 
 function LoginPage() {
+
+  const randomBgImageUrl = `url("./background/kdolist-${Math.floor((Math.random() * 4) + 1)}.jpeg")`;
+
+  console.log(randomBgImageUrl);
+
   return (
     <>
       <Meta title="Welcome" />
       <Box
         sx={{
           backgroundColor: 'transparent', // Set the background color to transparent
-          backgroundImage: 'url(./background/kdolist-1.jpeg)', // Set the background image
+          backgroundImage: randomBgImageUrl, // Set the background image
           backgroundSize: 'cover', // Set the background image size to cover the entire component
           backgroundPosition: 'center',
           height: { xs: '100%', md: '100%' },
@@ -35,11 +40,14 @@ function LoginPage() {
               m: 'auto',
             }}
           >
-            <CenteredFlexBox>
+            <CenteredVerticalFlexBox>
               <Typography variant="h2" color="lightgray">
                 K.DO-List
               </Typography>
-            </CenteredFlexBox>
+              <Typography variant='subtitle2' color="lightgray">
+                Il faut se connecter pour ouvrir K.DO-List.
+              </Typography>
+            </CenteredVerticalFlexBox>
             <SignInCard />
           </Stack>
         </Stack>

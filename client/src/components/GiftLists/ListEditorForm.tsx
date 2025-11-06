@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { FormControl, TextField, Button } from '@mui/material';
+import { FormControl, TextField, Button, FormControlLabel, Switch, Typography, Box, Grid } from '@mui/material';
 import { apiBaseUrl } from '@/config';
 import { GiftList, LoginContext } from '@/LoginContext';
 import useNotifications from '@/store/notifications';
+import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
+import { CenteredVerticalFlexBox, VerticalFlexBox } from '../styled';
 
 
 export interface ListEditorFormProps {
@@ -13,13 +15,16 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({ onListSaved }) => {
   const [listName, setListName] = useState('');
   const [listNameError, setListNameError] = useState(false);
   const [listNameErrorMessage, setListNameErrorMessage] = useState('');
+  const [showTakenToOwner, setShowTakenToOwner] = useState(false);
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
+  const api = useAuthenticatedApi();
 
   // init of the form values and title
   useEffect(() => {
     setListName(appContext.giftList !== null ? appContext.giftList.name : '');
-  }, []);
+    setShowTakenToOwner(appContext.giftList?.showTakenToOwner ?? false);
+  }, [appContext.giftList]);
 
   const newGiftList = (): GiftList => {
     const list: GiftList = {
@@ -41,17 +46,12 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({ onListSaved }) => {
     // if appcontext list is null then we create a new one else we use that list to update
     const giftList = appContext.giftList === null ? newGiftList() : appContext.giftList;
     giftList.name = name;
+    giftList.showTakenToOwner = showTakenToOwner;
 
-    const response = await fetch(`${apiBaseUrl}/giftlist`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-      },
-      body: JSON.stringify({
-        id: appContext.giftList === null ? null : appContext.giftList.id,
-        name: name,
-      }),
+    const response = await api.post(`${apiBaseUrl}/giftlist`, {
+      id: appContext.giftList === null ? null : appContext.giftList.id,
+      name: name,
+      showTakenToOwner: showTakenToOwner,
     });
 
     if (!response.ok) {
@@ -96,6 +96,24 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({ onListSaved }) => {
           helperText={listNameErrorMessage}
         />
       </FormControl>
+      
+      <FormControlLabel
+        sx={{mb: '10px', ml: '0px'}}
+        control={
+          <Switch
+          sx={{height: '42px', width: '64px'}}
+            checked={showTakenToOwner}
+            onChange={(e) => setShowTakenToOwner(e.target.checked)}
+            color="primary"
+          />
+        }
+        label={<VerticalFlexBox sx={{height: 'auto', ml: '5px'}}>
+          <Typography variant='subtitle1'>Voir les cadeaux rayés</Typography>
+          <Typography variant='caption'>Pour les séries et les collections, mais ca gâche la surprise!</Typography>
+        </VerticalFlexBox>
+          
+        }/>            
+      
       <Button type="submit" variant="contained" color="primary" sx={{ width: '100%', mb: '15px' }}>
         Enregistrer
       </Button>
