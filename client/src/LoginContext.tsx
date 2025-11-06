@@ -65,6 +65,7 @@ export interface AppContext {
   loginInfo: LoginInfoProps;
   setLoginInfo: (info: LoginInfoProps) => void;
   checkToken: () => Promise<boolean>;
+  refreshToken: () => Promise<boolean>;
 
   giftList: GiftList | null;
   setGiftList: (list: GiftList | null) => void;
@@ -99,6 +100,11 @@ const defaultAppContext: AppContext = {
   loginInfo: defaultLoginInfo,
   setLoginInfo: (_loginInfo: LoginInfoProps) => {},
   checkToken: () => {
+    return new Promise<boolean>((accept) => {
+      accept(false);
+    });
+  },
+  refreshToken: () => {
     return new Promise<boolean>((accept) => {
       accept(false);
     });
@@ -172,12 +178,51 @@ export const LoginContextProvider: FC<PropsWithChildren> = (props) => {
     return response.ok;
   };
 
+  const refreshToken = async () => {
+    if (!loginInfo.jwt || !loginInfo.accessToken) {
+      console.error('No JWT or refresh token available');
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${loginInfo.jwt}`,
+        },
+        body: JSON.stringify({ token: loginInfo.accessToken }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const newJwt = data.accessToken;
+
+        // Update login info with new JWT
+        const updatedInfo = { ...loginInfo, jwt: newJwt };
+        setLoginInfo(updatedInfo);
+
+        console.log('Token refreshed successfully');
+        return true;
+      } else {
+        console.error('Token refresh failed:', response.status);
+        // Clear auth on refresh failure
+        setLoginInfo({ ...loginInfo, jwt: '', accessToken: '' });
+        return false;
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      return false;
+    }
+  };
+
   return (
     <LoginContext.Provider
       value={{
         loginInfo,
         setLoginInfo,
         checkToken,
+        refreshToken,
         giftList,
         setGiftList,
         giftListContents,

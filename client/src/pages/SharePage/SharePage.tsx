@@ -19,6 +19,7 @@ import { LoginContext, Gift, GiftList, GiftImage, GiftLink } from '@/LoginContex
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import Meta from '@/components/Meta';
+import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 
 function SharePage() {
   const [sharedData, setSharedData] = useState<{
@@ -37,6 +38,7 @@ function SharePage() {
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
   const navigate = useNavigate();
+  const api = useAuthenticatedApi();
 
   // Extract shared data from form on component mount
   useEffect(() => {
@@ -85,7 +87,7 @@ function SharePage() {
     extractSharedData();
   }, []);
 
-  // Fetch user's gift lists
+  // Fetch user's gift lists with automatic token refresh
   useEffect(() => {
     const fetchGiftLists = async () => {
       // Wait a bit for JWT to load from localStorage
@@ -100,11 +102,8 @@ function SharePage() {
       }
 
       try {
-        const response = await fetch(`${apiBaseUrl}/giftlist/`, {
-          headers: {
-            Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-          },
-        });
+        // Use authenticated API - automatically refreshes token on 401
+        const response = await api.get(`${apiBaseUrl}/giftlist/`);
 
         if (response.ok) {
           const lists = await response.json();
@@ -116,7 +115,7 @@ function SharePage() {
           }
         } else {
           if (response.status === 401) {
-            // Token invalid, redirect to login
+            // Token refresh also failed, redirect to login
             sessionStorage.setItem('kdolist_redirect_after_login', window.location.href);
             navigate('/login');
           } else {
@@ -130,7 +129,7 @@ function SharePage() {
     };
 
     fetchGiftLists();
-  }, [appContext.loginInfo.jwt, navigate]);
+  }, [appContext.loginInfo.jwt, navigate, api]);
 
   const handleSave = async () => {
     if (!selectedListId) {
@@ -192,14 +191,8 @@ function SharePage() {
         updatedAt: new Date(),
       };
 
-      const response = await fetch(`${apiBaseUrl}/gift/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-        },
-        body: JSON.stringify(newGift),
-      });
+      // Use authenticated API - automatically refreshes token on 401
+      const response = await api.post(`${apiBaseUrl}/gift/`, newGift);
 
       if (response.ok) {
         notificationsActions.push({
