@@ -184,11 +184,11 @@ const GiftListsList: React.FC = () => {
   });
 
   return (
-    <Box display="grid" gridTemplateColumns="auto" p={2} width="100%">
-      <FilterBar<GiftList> onFiltersChange={onGiftFilterChange} filters={giftListsFilters} />
+    <Box display="grid" gridTemplateColumns="auto" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative">
+        <FilterBar<GiftList> onFiltersChange={onGiftFilterChange} filters={giftListsFilters} />
       {
         filteredLists.length > 0 ? (
-          <List sx={{ m: '0px', mt: '10px' }}>
+          <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start'}}>
             {filteredLists.map((item, index) => {
               const modifDate = new Date(item.updatedAt.toString());
               const secondaryText = (
