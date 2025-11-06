@@ -26,6 +26,16 @@ const FullSizeTopCenteredFlexBox = styled(TopCenteredFlexBox)({
   height: '100%',
 });
 
+const VerticalFlexBox = styled(Box) ({
+  flexDirection: 'column'
+});
+
+const CenteredVerticalFlexBox = styled(VerticalFlexBox) ({
+  justifyContent: 'center',
+  alignItems: 'center',
+  alignContent: 'center'
+})
+
 const StyledFab = styled(Fab)({
   position: 'absolute',
   zIndex: 1,
@@ -41,5 +51,7 @@ export {
   FullSizeCenteredFlexBox,
   TopCenteredFlexBox,
   FullSizeTopCenteredFlexBox,
+  VerticalFlexBox,
+  CenteredVerticalFlexBox,
   StyledFab,
 };

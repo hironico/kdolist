@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import { Key as KeyIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Card from '../Card/Card';
 
 import { apiBaseUrl } from '@/config';
@@ -32,14 +32,16 @@ export default function SignInCard() {
   return (
       <Card variant="outlined">
 
-        <Typography
-          component="h1"
+        <Typography variant="subtitle1"
           sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-        >Nouveau !
+        >Le saviez-vous ?
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: '250px' }}>
-          <Typography>
-            Il faut se connecter pour accéder a cette application.
+          <Typography variant="subtitle2">
+            Le compte hironico.net permet aussi d'utiliser 
+            <Link to="/redirect?url=https://bkp.hironico.net&newTab=true">
+            Nico's Drive !
+            </Link>
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -49,7 +51,7 @@ export default function SignInCard() {
             onClick={handleKeycloakLogin}
             startIcon={<KeyIcon />}
           >
-            <Typography sx={{ color: 'text.primary' }}>Compte hironico.net</Typography>
+            <Typography sx={{ color: 'text.primary' }}>Entrer sur K.DO-List</Typography>
           </Button>
         </Box>
       </Card>
