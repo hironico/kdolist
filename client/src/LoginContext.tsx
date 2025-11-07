@@ -36,6 +36,7 @@ export interface Gift {
   name: string;
   description?: string;
   isHidden?: boolean;
+  isFavorite?: boolean;
   selectedAt?: Date | null;
   selectedById?: string | null;
   createdAt: Date;

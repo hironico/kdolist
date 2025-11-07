@@ -140,6 +140,17 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     });
   };
 
+  const toggleFavorite = (gift: Gift) => {
+    api.post(`${apiBaseUrl}/gift/favorite/${gift.id}`, {}).then((response) => {
+      if (!response.ok) {
+        console.error(JSON.stringify(response));
+        showError(`Impossible de marquer ce cadeau comme favori.`);
+      } else {
+        fetchListContents();
+      }
+    });
+  };
+
   const handleAddGift = () => {
     setGift(newEmptyGift());
     setGiftEditorOpen(true);
@@ -184,7 +195,16 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   } else if (appContext.giftListContents.length === 0) {
     listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'." />;
   } else {
-    listContents = appContext.giftListContents?.filter(g => {
+    // Sort gifts: favorites first, then by update date
+    const sortedGifts = [...appContext.giftListContents].sort((a, b) => {
+      // Favorites come first
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      // If both are favorites or both are not, sort by update date (most recent first)
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+
+    listContents = sortedGifts.filter(g => {
       if (activeFilters.length === 0) {
         return true;
       }
@@ -203,7 +223,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         showTakenToOwner={showTakenToOwner}
         onDelete={() => handleConfirmDeleteGift(oneGift)}
         onTake={() => toggleSelectGift(oneGift)}
-        onEdit={() => handleEditGift(oneGift)} />
+        onEdit={() => handleEditGift(oneGift)}
+        onFavorite={() => toggleFavorite(oneGift)} />
     });
   }
 

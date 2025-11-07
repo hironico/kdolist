@@ -165,6 +165,22 @@ giftApi.post('/untake/:id', authenticateJWT, (req, res) => {
     })
 });
 
+giftApi.post('/favorite/:id', authenticateJWT, async (req, res) => {
+    const giftId = req.params.id;
+    if (!giftId) {
+        res.status(403).send('Invalid gift id').end();
+        return;
+    }
+
+    try {
+        const updatedGift = await giftlistcontroller.toggleFavorite(giftId);
+        res.status(200).json(updatedGift);
+    } catch (error) {
+        logger.error(`Cannot toggle favorite status for gift ${giftId}. Error: ${error}`);
+        res.status(500).send(`Cannot toggle favorite. ${error}`).end();
+    }
+});
+
 giftApi.delete('/image/:id', authenticateJWT, async (req, res) => {
     const imageId = req.params.id;
     if (!imageId) {

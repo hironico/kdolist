@@ -125,6 +125,12 @@ Gift.init({
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },
+  isFavorite: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    comment: 'If true, this gift is marked as a favorite by the list owner'
+  },
   selectedAt: DataTypes.DATE,
 }, { sequelize, modelName: 'gift', onDelete: 'CASCADE' });
 
