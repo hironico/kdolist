@@ -41,13 +41,23 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ key, oneGift, editabl
         <Typography sx={{ textDecoration: decoration }}>{oneGift.name}</Typography>
     );
 
-    // Create favorite icon as rightContent
-    const rightContent = isOwner ? (
+    // Create favorite icon as rightContent - visible to all users
+    // Only clickable for list owners
+    const rightContent = isFavorite || isOwner ? (
         <IconButton 
             size="small" 
             onClick={(e) => {
                 e.stopPropagation();
-                favoriteAction();
+                if (isOwner) {
+                    favoriteAction();
+                }
+            }}
+            disabled={!isOwner}
+            sx={{ 
+                cursor: isOwner ? 'pointer' : 'default',
+                '&.Mui-disabled': {
+                    opacity: 1
+                }
             }}
         >
             {isFavorite ? <FavoriteIcon color="error" fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
