@@ -12,6 +12,7 @@ import useNotifications from '@/store/notifications';
 import { apiBaseUrl } from '@/config';
 import { useNavigate } from 'react-router-dom';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
+import { json } from 'stream/consumers';
 
 interface GiftFormProps {
   gift: Gift;
@@ -77,6 +78,8 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     setIsSaving(true);
     giftToSave.giftListId = appContext.giftList.id;
 
+    console.log(`Saving gift: ${JSON.stringify(giftToSave, null, 2)}`);
+
     try {
       const response = await api.post(`${apiBaseUrl}/gift/`, giftToSave);
 
@@ -92,7 +95,12 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       // only if flag is st
       if (closeDialog) {
         onClose(true);
-      }      
+      } else {
+        // we need to update the updatedGift otherwise we will create duplicates
+        response.json().then(newGift => {
+          setUpdatedGift(newGift);
+        })
+      }
     } catch (error) {
       console.error('Error saving gift:', error);
       showError(`Erreur lors de la sauvegarde.`);
@@ -258,7 +266,6 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
                     }
 
                     handleAddLink(newLink);
-                    handleSaveGift(updatedGift, false);
                   })
 
               } else {
@@ -271,7 +278,6 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
                       console.log(`Data found for ${theType} : ${data}`);
                       if (theType.startsWith('image')) {
                         handleAddImage(data);
-                        handleSaveGift(updatedGift, false);
                       }
                     };
                     if (theType.startsWith('image')) {
