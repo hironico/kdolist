@@ -218,8 +218,6 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       // Remove from local state
       const newImages = updatedGift.images.filter((img) => img.id !== image.id);
       setUpdatedGift({ ...updatedGift, images: newImages });
-
-      handleSaveGift(updatedGift, false);
     } catch (error) {
       console.error('Error deleting image:', error);
       showError(`Erreur lors de la suppression de l'image.`);
