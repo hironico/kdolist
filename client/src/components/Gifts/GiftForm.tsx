@@ -65,7 +65,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     });
   }, []);
 
-  const handleSaveGift = async (giftToSave: Gift) => {
+  const handleSaveGift = async (giftToSave: Gift, closeDialog: boolean) => {
     if (!appContext.giftList || !editable || isSaving) {
       console.error('When calling handleSaveGift, the gift list must be set in app context and the gift must be editable.');
       if (!isSaving) {
@@ -89,7 +89,10 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       }
 
       // close this dialog after save is performed
-      onClose(true);
+      // only if flag is st
+      if (closeDialog) {
+        onClose(true);
+      }      
     } catch (error) {
       console.error('Error saving gift:', error);
       showError(`Erreur lors de la sauvegarde.`);
@@ -208,7 +211,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       const newImages = updatedGift.images.filter((img) => img.id !== image.id);
       setUpdatedGift({ ...updatedGift, images: newImages });
 
-      handleSaveGift(updatedGift);
+      handleSaveGift(updatedGift, false);
     } catch (error) {
       console.error('Error deleting image:', error);
       showError(`Erreur lors de la suppression de l'image.`);
@@ -255,7 +258,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
                     }
 
                     handleAddLink(newLink);
-                    handleSaveGift(updatedGift);
+                    handleSaveGift(updatedGift, false);
                   })
 
               } else {
@@ -268,7 +271,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
                       console.log(`Data found for ${theType} : ${data}`);
                       if (theType.startsWith('image')) {
                         handleAddImage(data);
-                        handleSaveGift(updatedGift);
+                        handleSaveGift(updatedGift, false);
                       }
                     };
                     if (theType.startsWith('image')) {
@@ -304,7 +307,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     {
       icon: isSaving ? <CircularProgress size={24} /> : <CheckIcon />,
       label: 'OK',
-      onClick: () => handleSaveGift(updatedGift),
+      onClick: () => handleSaveGift(updatedGift, true),
       disabled: isSaving
     }
   ];
