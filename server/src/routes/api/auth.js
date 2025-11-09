@@ -225,7 +225,7 @@ authApi.get('/keycloak/callback', async (req, res) => {
         // When serving both API and client from the same server, use relative URL
         const clientRedirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&refresh=${refreshToken}`;
         
-        logger.info(`Redirecting to client callback: ${clientRedirectUrl}`);
+        logger.debug(`Redirecting to client callback: ${clientRedirectUrl}`);
 
         res.redirect(301, clientRedirectUrl);
     } catch (error) {

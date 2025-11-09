@@ -8,7 +8,7 @@ export type GiftListsFABProps = {
 
 const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd }) => {
   return (
-    <FlexBox flexDirection={'row-reverse'} sx={{ position: 'fixed', bottom: 16, right: 16, zIndex: 1000 }}>
+    <FlexBox flexDirection={'row'} justifyContent={'center'} sx={{ position: 'fixed', bottom: 16, left: 0, right: 0, zIndex: 1000 }}>
       <Fab color="primary" aria-label="add" onClick={handleAdd}>
         <AddIcon />
       </Fab>

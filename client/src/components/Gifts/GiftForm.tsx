@@ -11,6 +11,8 @@ import useNotifications from '@/store/notifications';
 
 import { apiBaseUrl } from '@/config';
 import { useNavigate } from 'react-router-dom';
+import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
+import { json } from 'stream/consumers';
 
 interface GiftFormProps {
   gift: Gift;
@@ -49,6 +51,8 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
 
   const navigate = useNavigate();
 
+  const api = useAuthenticatedApi(); 
+
   useEffect(() => {
     setUpdatedGift(gift);
   }, [gift]);
@@ -62,7 +66,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     });
   }, []);
 
-  const handleSaveGift = async (giftToSave: Gift) => {
+  const handleSaveGift = async (giftToSave: Gift, closeDialog: boolean) => {
     if (!appContext.giftList || !editable || isSaving) {
       console.error('When calling handleSaveGift, the gift list must be set in app context and the gift must be editable.');
       if (!isSaving) {
@@ -74,15 +78,10 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     setIsSaving(true);
     giftToSave.giftListId = appContext.giftList.id;
 
+    console.log(`Saving gift: ${JSON.stringify(giftToSave, null, 2)}`);
+
     try {
-      const response = await fetch(`${apiBaseUrl}/gift/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-        },
-        body: JSON.stringify(giftToSave),
-      });
+      const response = await api.post(`${apiBaseUrl}/gift/`, giftToSave);
 
       setIsSaving(false);
 
@@ -93,7 +92,15 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       }
 
       // close this dialog after save is performed
-      onClose(true);
+      // only if flag is st
+      if (closeDialog) {
+        onClose(true);
+      } else {
+        // we need to update the updatedGift otherwise we will create duplicates
+        response.json().then(newGift => {
+          setUpdatedGift(newGift);
+        })
+      }
     } catch (error) {
       console.error('Error saving gift:', error);
       showError(`Erreur lors de la sauvegarde.`);
@@ -200,12 +207,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     }
 
     try {
-      const response = await fetch(`${apiBaseUrl}/gift/image/${image.id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${appContext.loginInfo.jwt}`,
-        },
-      });
+      const response = await api.delete(`${apiBaseUrl}/gift/image/${image.id}`);
 
       if (!response.ok) {
         console.error('Failed to delete image:', response);
@@ -279,14 +281,14 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
                     if (theType.startsWith('image')) {
                       fileReader.readAsDataURL(blob);
                     }
-                  }).catch(error => console.log('Error while reading clipboard type:' + theType + '. Error: ' + error));
+                  }).catch(error => console.error('Error while reading clipboard type:' + theType + '. Error: ' + error));
 
               }
             }
           }
         });
     } catch (error) {
-      console.error('Error pasting image:', error);
+      console.error('Error in magic paste', error);
     }
   };
 
@@ -309,7 +311,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     {
       icon: isSaving ? <CircularProgress size={24} /> : <CheckIcon />,
       label: 'OK',
-      onClick: () => handleSaveGift(updatedGift),
+      onClick: () => handleSaveGift(updatedGift, true),
       disabled: isSaving
     }
   ];
@@ -354,16 +356,6 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       })}
     </Carousel>
 
-    <TextField
-      label="Nom"
-      name="name"
-      value={updatedGift.name}
-      onChange={handleInputChange}
-      margin="normal"
-      fullWidth
-      disabled={!editable}
-    />
-
     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, mt: 2 }}>
       {updatedGift.links?.map((link) => (
         <Chip
@@ -379,6 +371,31 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
         />
       ))}
     </Box>
+
+    <TextField
+      label="Nom"
+      name="name"
+      value={updatedGift.name}
+      onChange={handleInputChange}
+      margin="normal"
+      fullWidth
+      disabled={!editable}
+    />
+
+    <TextField
+      label="Description"
+      name="description"
+      value={updatedGift.description?? ''}
+      onChange={handleInputChange}
+      margin="normal"
+      fullWidth
+      disabled={!editable}
+      placeholder="Nous en dire plus dans cette zone si besoin."
+      multiline
+      rows={2}
+    />
+
+    
   </Box>
 
   return (

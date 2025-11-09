@@ -221,6 +221,20 @@ class GiftListController {
       return newGiftList;
     }
   }
+
+  async toggleFavorite(giftId) {
+    const gift = await Gift.findByPk(giftId, { include: [GiftList] });
+    if (!gift) throw new Error('Gift not found');
+
+    // Toggle the favorite status
+    gift.isFavorite = !gift.isFavorite;
+    gift.updatedAt = new Date();
+    await gift.save();
+
+    logger.info(`Toggled favorite status for gift ${giftId}: ${gift.isFavorite}`);
+
+    return gift;
+  }
 }
 
 module.exports = new GiftListController();

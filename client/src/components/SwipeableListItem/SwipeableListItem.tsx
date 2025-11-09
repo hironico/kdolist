@@ -56,6 +56,7 @@ export interface SwipeableListItemProps {
   onClickMain?: () => void;
   icon?: ReactElement;
   keyId: string;
+  rightContent?: ReactElement;
 }
 
 const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
@@ -67,6 +68,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   onClickMain,
   icon,
   keyId,
+  rightContent,
 }) => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -199,11 +201,14 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
             }
           : {})}
         secondaryAction={
-          !isTouchDevice && (totalSwipeDistance > 0) && (
-            <IconButton onClick={toggleOpen}>
-              <MoreVertIcon />
-            </IconButton>
-          )
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {rightContent}
+            {!isTouchDevice && (totalSwipeDistance > 0) && (
+              <IconButton onClick={toggleOpen}>
+                <MoreVertIcon />
+              </IconButton>
+            )}
+          </Box>
         }
       >
         <ListItemButton
