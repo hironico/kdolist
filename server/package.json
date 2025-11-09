@@ -1,6 +1,6 @@
 {
   "name": "kdolist-server",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "KDoList-server is the backend for the KDoList application. It is in charge of serving pages and the API to authenticate users and manage their gift lists.",
   "main": "index.js",
   "scripts": {
