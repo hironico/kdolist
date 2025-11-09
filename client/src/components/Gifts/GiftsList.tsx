@@ -10,7 +10,6 @@ import { GiftsFAB } from './GiftsFAB';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 import { useNavigate } from 'react-router-dom';
 import GiftsListItem from './GiftsListItem';
-import { FilterBAndW } from '@mui/icons-material';
 import { FilterBar } from '../FilterBar';
 import { Filter } from '../FilterBar/FilterBar';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
