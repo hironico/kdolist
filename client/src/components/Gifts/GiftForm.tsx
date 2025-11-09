@@ -12,7 +12,6 @@ import useNotifications from '@/store/notifications';
 import { apiBaseUrl } from '@/config';
 import { useNavigate } from 'react-router-dom';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
-import { json } from 'stream/consumers';
 
 interface GiftFormProps {
   gift: Gift;
@@ -405,7 +404,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       title={'Editer...'}
       actions={actions}
       contents={contents}
-      disableBackdropClick={isSaving} />
+      disableBackdropClick={true} />
   );
 };
 
