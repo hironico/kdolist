@@ -1,11 +1,30 @@
 
 # What is K.DO-list  
 
-k.do-list is a gift list application for your family. You can shre ideas for birthdays, Christmas, any other occasions...
+k.do-list is a gift list application for your family. You can share ideas for birthdays, Christmas, any other occasions...
 
 It can even be used as a shopping list app, to keep track of gift ideas and so on...
 
 This application is entirely done with the help of AI to test capabilities of various models and gain experience in prompt engineering and AI agent coding. Even pictures used in this app are produced by AI models.
+
+# Installation of the client web app
+
+The user interfqace of K.DO-List is a Progressive Web App (PWA) that can be intalled on your desktop computer or on your home screen for your smartphone.
+
+Installing the app brings the following advantages :
+- sharing links or images directly to the app
+- quick access to the app (no need to remember the URL)
+- the app launches in a dedicated window
+
+## Procedure
+
+- From the browser (regardless you're on mobile or desktop) click the application icon in the address bar. 
+Click install
+
+- MacOS or iPhone : use the share button then use the 'add to dock' command.
+
+Detailed information for MacOS users: 
+https://support.apple.com/en-us/104996
 
 # Runtime setup 
 
