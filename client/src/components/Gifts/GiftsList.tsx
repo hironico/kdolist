@@ -1,4 +1,5 @@
-import { Box, List, Grid, IconButton, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { Box, List, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
@@ -237,10 +238,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'." />;
   } else if (viewMode === 'grid') {
     // Grid view
-    listContents = (
-      <Grid container spacing={2}>
-        {filteredGifts.map((oneGift, index) => (
-          <Grid item xs={12} sm={6} md={4} key={`kdo-grid-${index}`}>
+    listContents = filteredGifts.map((oneGift, index) => (
+          <Grid xs={12} sm={6} md={4} key={`kdo-grid-${index}`}>
             <GiftGridItem
               oneGift={oneGift}
               isOwner={isOwner}
@@ -251,10 +250,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
               onTake={() => toggleSelectGift(oneGift)}
               onFavorite={() => toggleFavorite(oneGift)}
             />
-          </Grid>
-        ))}
       </Grid>
-    );
+    ));
   } else {
     // List view
     listContents = filteredGifts.map((oneGift, index) => (
@@ -324,8 +321,10 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
           {listContents}
         </List>
       ) : (
-        <Box sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
-          {listContents}
+        <Box sx={{ m: '0px', mt: '10px', overflowY: 'auto', minHeight: 0 }}>
+          <Grid container spacing={2}>
+            {listContents}
+          </Grid>
         </Box>
       )}
 
