@@ -8,10 +8,9 @@ mkdir -p $LOG_DIR
 
 LOG_FILE="$LOG_DIR/kdolit_$CURRENT_DATE.log"
 
-nohup node ./src/index.js > $LOG_FILE 2>&1 &
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+# ensure we change the current working directory to script dir
+# so that node can find the config file
+cd ${SCRIPT_DIR}
 
-PID=$!
-
-echo $PID > server.pid
-
-echo "Server started with PID: $PID. Updated server.pid file."
+node ./src/index.js > $LOG_FILE 2>&1
