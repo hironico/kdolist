@@ -12,7 +12,6 @@ import useNotifications from '@/store/notifications';
 import { apiBaseUrl } from '@/config';
 import { useNavigate } from 'react-router-dom';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
-import { json } from 'stream/consumers';
 
 interface GiftFormProps {
   gift: Gift;
@@ -51,7 +50,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
 
   const navigate = useNavigate();
 
-  const api = useAuthenticatedApi(); 
+  const api = useAuthenticatedApi();
 
   useEffect(() => {
     setUpdatedGift(gift);
@@ -87,7 +86,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
 
       if (!response.ok) {
         console.error(JSON.stringify(response));
-        showError(`Impossible de sauvegarder la liste pour le moment.`);        
+        showError(`Impossible de sauvegarder la liste pour le moment.`);
         return;
       }
 
@@ -247,23 +246,41 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
               if (theType.startsWith('text')) {
                 navigator.clipboard.readText()
                   .then((plainData) => {
-                    if (!plainData.startsWith('https')) {
-                      console.log(`Did not received a https url from paste: ${plainData}`);
+                    if (!plainData.includes('https')) {
+                      console.log(`Did not received any https url from paste: ${plainData}`);
                       return;
                     }
 
-                    console.log(`Creating new link...`);
-                    const hostname = new URL(plainData).host;
-                    const newLink: GiftLink = {
-                      id: '',
-                      description: hostname ? hostname : `Lien ${updatedGift.links.length + 1}`,
-                      url: plainData,
-                      giftId: updatedGift.id,
-                      createdAt: new Date(),
-                      updatedAt: new Date()
+                    console.log(`Creating new link from raw paste: ${plainData}`);
+
+                    // Regex robuste
+                    const regex = /\b((?:https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*)/gi;
+
+                    // Extraction
+                    const urls = plainData.match(regex);
+                    if (!urls || urls.length === 0) {
+                      console.log(`Did not received any https url from paste: ${plainData}`);
+                      return;
                     }
 
-                    handleAddLink(newLink);
+                    // sanitize and create links
+                    urls.map(url =>
+                      url.startsWith("www.") ? "http://" + url : url
+                    ).map(oneUrl => {
+                      console.log(`Creating new link from url: ${oneUrl}`);
+                      const hostname = new URL(oneUrl).host;
+                      const newLink: GiftLink = {
+                        id: '',
+                        description: hostname ? hostname : `Lien ${updatedGift.links.length + 1}`,
+                        url: oneUrl,
+                        giftId: updatedGift.id,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                      }
+                      return newLink;
+                    }).forEach((link) => {
+                      handleAddLink(link);
+                    });
                   })
 
               } else {
@@ -297,7 +314,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   }
 
   const images: GiftImage[] = updatedGift.images.length === 0 ? defaultImages : updatedGift.images;
-  
+
   // Force carousel to re-render when images change by using images length as key
   const carouselKey = `carousel-${images.length}-${images.map(img => img.url).join('-').substring(0, 50)}`;
 
@@ -385,7 +402,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     <TextField
       label="Description"
       name="description"
-      value={updatedGift.description?? ''}
+      value={updatedGift.description ?? ''}
       onChange={handleInputChange}
       margin="normal"
       fullWidth
@@ -395,17 +412,17 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       rows={2}
     />
 
-    
+
   </Box>
 
   return (
-    <BottomDialog 
+    <BottomDialog
       open={open}
       handleClose={() => onClose(false)}
       title={'Editer...'}
       actions={actions}
       contents={contents}
-      disableBackdropClick={isSaving} />
+      disableBackdropClick={true} />
   );
 };
 

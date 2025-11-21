@@ -1,5 +1,8 @@
-import { Box, List } from '@mui/material';
+import { Box, List, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
 
 import { Gift, LoginContext } from '@/LoginContext';
 import { apiBaseUrl } from '@/config';
@@ -10,7 +13,7 @@ import { GiftsFAB } from './GiftsFAB';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 import { useNavigate } from 'react-router-dom';
 import GiftsListItem from './GiftsListItem';
-import { FilterBAndW } from '@mui/icons-material';
+import GiftGridItem from './GiftGridItem';
 import { FilterBar } from '../FilterBar';
 import { Filter } from '../FilterBar/FilterBar';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
@@ -42,8 +45,24 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState<Filter<Gift>[]>([]);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
+    // Load view mode from localStorage, default to 'list' if not found
+    const savedViewMode = localStorage.getItem('kdolist_gift_view_mode');
+    return (savedViewMode === 'list' || savedViewMode === 'grid') ? savedViewMode : 'list';
+  });
 
   const api = useAuthenticatedApi();
+
+  const handleViewModeChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newViewMode: 'list' | 'grid' | null,
+  ) => {
+    if (newViewMode !== null) {
+      setViewMode(newViewMode);
+      // Save preference to localStorage
+      localStorage.setItem('kdolist_gift_view_mode', newViewMode);
+    }
+  };
 
   const showError = useCallback((message: string) => {
     notificationsActions.push({
@@ -183,40 +202,61 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     onAction: () => setConfirmDeleteOpen(false),
   };
 
-  let listContents;
-
   // Check if current user owns this list and list settings
   const isOwner = appContext.giftList?.ownerId === appContext.loginInfo.id;
   const showTakenToOwner = appContext.giftList?.showTakenToOwner ?? false;
-  
-    if (loading) {
-    const fbIcon = <FacebookLikeCircularProgress />;
-    listContents = <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
-  } else if (appContext.giftListContents.length === 0) {
-    listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'." />;
-  } else {
-    // Sort gifts: favorites first, then by update date
-    const sortedGifts = [...appContext.giftListContents].sort((a, b) => {
-      // Favorites come first
-      if (a.isFavorite && !b.isFavorite) return -1;
-      if (!a.isFavorite && b.isFavorite) return 1;
-      // If both are favorites or both are not, sort by update date (most recent first)
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+
+  // Sort gifts: favorites first, then by update date
+  const sortedGifts = loading ? [] : [...appContext.giftListContents].sort((a, b) => {
+    // Favorites come first
+    if (a.isFavorite && !b.isFavorite) return -1;
+    if (!a.isFavorite && b.isFavorite) return 1;
+    // If both are favorites or both are not, sort by update date (most recent first)
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
+
+  const filteredGifts = sortedGifts.filter(g => {
+    if (activeFilters.length === 0) {
+      return true;
+    }
+
+    let matching = false;
+    activeFilters.forEach(filter => {
+      matching = matching || filter.filterFn(g);
     });
 
-    listContents = sortedGifts.filter(g => {
-      if (activeFilters.length === 0) {
-        return true;
-      }
+    return matching;
+  });
 
-      let matching = false;
-      activeFilters.forEach(filter => {
-        matching = matching || filter.filterFn(g);
-      });
-
-      return matching;
-    }).map((oneGift, index) => {
-      return <GiftsListItem key={`kdo-${index}`}
+  // Render content based on view mode
+  let listContents;
+  
+  if (loading) {
+    const fbIcon = <FacebookLikeCircularProgress />;
+    listContents = <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
+  } else if (filteredGifts.length === 0) {
+    listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'." />;
+  } else if (viewMode === 'grid') {
+    // Grid view
+    listContents = filteredGifts.map((oneGift, index) => (
+          <Grid xs={12} sm={6} md={4} key={`kdo-grid-${index}`}>
+            <GiftGridItem
+              oneGift={oneGift}
+              isOwner={isOwner}
+              showTakenToOwner={showTakenToOwner}
+              editable={editable}
+              onClick={() => handleEditGift(oneGift)}
+              onDelete={() => handleConfirmDeleteGift(oneGift)}
+              onTake={() => toggleSelectGift(oneGift)}
+              onFavorite={() => toggleFavorite(oneGift)}
+            />
+      </Grid>
+    ));
+  } else {
+    // List view
+    listContents = filteredGifts.map((oneGift, index) => (
+      <GiftsListItem 
+        key={`kdo-list-${index}`}
         oneGift={oneGift}
         editable={editable}
         isOwner={isOwner}
@@ -224,8 +264,9 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         onDelete={() => handleConfirmDeleteGift(oneGift)}
         onTake={() => toggleSelectGift(oneGift)}
         onEdit={() => handleEditGift(oneGift)}
-        onFavorite={() => toggleFavorite(oneGift)} />
-    });
+        onFavorite={() => toggleFavorite(oneGift)} 
+      />
+    ));
   }
 
   // no filters if list is owned by current user and he/she did not force display of taken gifts
@@ -253,10 +294,39 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
   return (
     <Box display="grid" gridTemplateColumns="auto" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative">
-      <FilterBar<Gift> onFiltersChange={onGiftFilterChange} filters={giftFilters} />
-      <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
-        {listContents}
-      </List>
+      {/* Filter bar and view toggle */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+        <Box sx={{ flexGrow: 1 }}>
+          <FilterBar<Gift> onFiltersChange={onGiftFilterChange} filters={giftFilters} />
+        </Box>
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleViewModeChange}
+          aria-label="view mode"
+          size="small"
+        >
+          <ToggleButton value="list" aria-label="list view">
+            <ViewListIcon />
+          </ToggleButton>
+          <ToggleButton value="grid" aria-label="grid view">
+            <ViewModuleIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+
+      {/* Content area */}
+      {viewMode === 'list' ? (
+        <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+          {listContents}
+        </List>
+      ) : (
+        <Box sx={{ m: '0px', mt: '10px', overflowY: 'auto', minHeight: 0 }}>
+          <Grid container spacing={2}>
+            {listContents}
+          </Grid>
+        </Box>
+      )}
 
       <GiftForm gift={gift} editable={editable} open={giftEditorOpen} onClose={handleCloseGiftForm} />
 
