@@ -6,12 +6,12 @@ logger.info(`Connecting to database : ${process.env.DB_NAME} on ${process.env.DB
 
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
   host: process.env.DB_HOSTNAME,
-  port:process.env.DB_PORT,
-  dialect: process.env.DB_DIALECT, 
+  port: process.env.DB_PORT,
+  dialect: process.env.DB_DIALECT,
   logging: (msg) => logger.debug(msg)
 });
 
-class User extends Model {}
+class User extends Model { }
 User.init({
   id: {
     type: DataTypes.UUID,
@@ -42,7 +42,7 @@ User.init({
   }
 }, { sequelize, modelName: 'user' });
 
-class SocialAccount extends Model {}
+class SocialAccount extends Model { }
 SocialAccount.init({
   id: {
     type: DataTypes.UUID,
@@ -59,7 +59,7 @@ SocialAccount.init({
   },
 }, { sequelize, modelName: 'socialAccount' });
 
-class Group extends Model {}
+class Group extends Model { }
 Group.init({
   id: {
     type: DataTypes.UUID,
@@ -72,7 +72,7 @@ Group.init({
   }
 }, { sequelize, modelName: 'group' });
 
-class GroupMembership extends Model {}
+class GroupMembership extends Model { }
 GroupMembership.init({
   id: {
     type: DataTypes.UUID,
@@ -87,7 +87,7 @@ GroupMembership.init({
   lastStatusChange: DataTypes.DATE
 }, { sequelize, modelName: 'groupMembership' });
 
-class GiftList extends Model {}
+class GiftList extends Model { }
 GiftList.init({
   id: {
     type: DataTypes.UUID,
@@ -106,7 +106,7 @@ GiftList.init({
   }
 }, { sequelize, modelName: 'giftList' });
 
-class Gift extends Model {}
+class Gift extends Model { }
 Gift.init({
   id: {
     type: DataTypes.UUID,
@@ -134,7 +134,7 @@ Gift.init({
   selectedAt: DataTypes.DATE,
 }, { sequelize, modelName: 'gift', onDelete: 'CASCADE' });
 
-class Link extends Model {}
+class Link extends Model { }
 Link.init({
   id: {
     type: DataTypes.UUID,
@@ -142,13 +142,13 @@ Link.init({
     primaryKey: true
   },
   url: {
-    type: DataTypes.STRING(1024),
+    type: DataTypes.STRING(4096),
     allowNull: false
   },
   description: DataTypes.TEXT
-}, { sequelize, modelName: 'link', onDelete: 'CASCADE'});
+}, { sequelize, modelName: 'link', onDelete: 'CASCADE' });
 
-class Image extends Model {}
+class Image extends Model { }
 Image.init({
   id: {
     type: DataTypes.UUID,
@@ -156,14 +156,14 @@ Image.init({
     primaryKey: true
   },
   url: {
-    type: DataTypes.TEXT,    
+    type: DataTypes.TEXT,
     allowNull: false,
     comment: 'Base64 representation of the data URL to use when displaying the image in the application.'
   },
   altText: DataTypes.STRING
-}, { sequelize, modelName: 'image', onDelete: 'CASCADE'});
+}, { sequelize, modelName: 'image', onDelete: 'CASCADE' });
 
-class GroupAccess extends Model {}
+class GroupAccess extends Model { }
 GroupAccess.init({
   id: {
     type: DataTypes.UUID,
@@ -172,7 +172,7 @@ GroupAccess.init({
   }
 }, { sequelize, modelName: 'groupAccess' });
 
-class Notification extends Model {}
+class Notification extends Model { }
 Notification.init({
   id: {
     type: DataTypes.UUID,
@@ -218,17 +218,17 @@ GroupMembership.belongsTo(Group);
 Group.hasMany(GroupAccess);
 GroupAccess.belongsTo(Group);
 
-GiftList.hasMany(Gift, {onDelete: 'CASCADE'});
-Gift.belongsTo(GiftList, {onDelete: 'CASCADE'});
+GiftList.hasMany(Gift, { onDelete: 'CASCADE' });
+Gift.belongsTo(GiftList, { onDelete: 'CASCADE' });
 
 GiftList.hasMany(GroupAccess);
 GroupAccess.belongsTo(GiftList);
 
 Gift.hasMany(Link);
-Link.belongsTo(Gift, {as: 'gift', onDelete: 'CASCADE'});
+Link.belongsTo(Gift, { as: 'gift', onDelete: 'CASCADE' });
 
 Gift.hasMany(Image);
-Image.belongsTo(Gift, {onDelete: 'CASCADE'});
+Image.belongsTo(Gift, { onDelete: 'CASCADE' });
 
 // Sync the models with the database
 sequelize.sync({ force: false }).then(() => {
