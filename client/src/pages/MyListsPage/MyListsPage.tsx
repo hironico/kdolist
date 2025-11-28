@@ -4,7 +4,7 @@ import { FullSizeTopCenteredFlexBox } from '@/components/styled';
 import ProtectedRoute from '@/routes/ProtectedRoute';
 import { Slide } from '@mui/material';
 
-function MyListsPage() { 
+export function MyListsPage() {
   return (
     <ProtectedRoute>
       <Meta title="Listes de cadeaux" />
@@ -16,5 +16,3 @@ function MyListsPage() {
     </ProtectedRoute>
   );
 }
-
-export default MyListsPage;

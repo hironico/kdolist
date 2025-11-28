@@ -10,18 +10,18 @@ let codeVerifier = null;
 async function initKeycloakClient() {
     try {
         const keycloakIssuerUrl = process.env.KEYCLOAK_ISSUER_URL;
-        
+
         if (!keycloakIssuerUrl) {
             logger.warn('KEYCLOAK_ISSUER_URL not configured. Keycloak authentication will not be available.');
             return null;
         }
 
         logger.info(`Discovering Keycloak configuration from: ${keycloakIssuerUrl}`);
-        
+
         const keycloakIssuer = await Issuer.discover(keycloakIssuerUrl);
-        
+
         logger.info(`Discovered issuer: ${keycloakIssuer.issuer}`);
-        
+
         keycloakClient = new keycloakIssuer.Client({
             client_id: process.env.KEYCLOAK_CLIENT_ID,
             client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
@@ -79,8 +79,18 @@ function setCodeVerifier(verifier) {
     codeVerifier = verifier;
 }
 
+/**
+ * Refresh the Keycloak client by re-discovering the issuer
+ * This can be useful if the client configuration becomes stale
+ */
+async function refreshKeycloakClient() {
+    logger.info('Refreshing Keycloak client configuration...');
+    return await initKeycloakClient();
+}
+
 module.exports = {
     initKeycloakClient,
+    refreshKeycloakClient,
     getAuthorizationUrl,
     getClient,
     getCodeVerifier,

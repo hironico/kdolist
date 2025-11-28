@@ -21,7 +21,7 @@ class UserController {
     if (!user) throw new Error('User not found');
 
     const ownLists = user.GiftLists;
-    const accessibleLists = user.GroupMemberships.flatMap(membership => 
+    const accessibleLists = user.GroupMemberships.flatMap(membership =>
       membership.Group.GroupAccesses.map(access => access.GiftList)
     );
 
@@ -104,6 +104,20 @@ class UserController {
     gift.isHidden = isHidden;
     gift.selectedAt = new Date();
     return await gift.save();
+  }
+  async searchUsers(query) {
+    const { Op } = require('sequelize');
+    return await User.findAll({
+      where: {
+        [Op.or]: [
+          { username: { [Op.like]: `%${query}%` } },
+          { firstname: { [Op.like]: `%${query}%` } },
+          { lastname: { [Op.like]: `%${query}%` } },
+          { email: { [Op.like]: `%${query}%` } }
+        ]
+      },
+      attributes: ['id', 'username', 'firstname', 'lastname', 'email'] // Return only necessary fields
+    });
   }
 }
 

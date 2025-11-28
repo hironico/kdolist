@@ -201,7 +201,7 @@ SocialAccount.belongsTo(User);
 GiftList.belongsTo(User, { as: 'owner' });
 
 User.hasMany(GroupMembership);
-GroupMembership.belongsTo(User);
+GroupMembership.belongsTo(User, { as: 'user', foreignKey: 'userId' });
 
 User.hasMany(Group, { as: 'adminGroups', foreignKey: 'adminId' });
 Group.belongsTo(User, { as: 'admin' });
@@ -213,7 +213,7 @@ User.hasMany(Gift, { as: 'selectedGifts', foreignKey: 'selectedById' });
 Gift.belongsTo(User, { as: 'selectedBy' });
 
 Group.hasMany(GroupMembership);
-GroupMembership.belongsTo(Group);
+GroupMembership.belongsTo(Group, { as: 'group', foreignKey: 'groupId' });
 
 Group.hasMany(GroupAccess);
 GroupAccess.belongsTo(Group);

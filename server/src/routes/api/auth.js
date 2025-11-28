@@ -5,7 +5,7 @@ const logger = require('../../logger');
 const { User, SocialAccount } = require('../../model/model');
 const usercontroller = require('../../controller/usercontroller');
 const giftlistcontroller = require('../../controller/giftlistcontroller');
-const { getAuthorizationUrl, getClient } = require('../../config/keycloak');
+const { getAuthorizationUrl, getClient, refreshKeycloakClient } = require('../../config/keycloak');
 
 let refreshTokens = [];
 
@@ -25,7 +25,7 @@ const authenticateJWT = (req, res, next) => {
             next();
         });
     } else {
-        res.status(401).send('Expired').end();
+        res.status(401).send('No Authorization header').end();
     }
 };
 
@@ -90,7 +90,7 @@ const loginSocialUser = async (profile, provider) => {
                     email: email
                 }
             });
-            
+
             if (existingUser) {
                 logger.warn('A user attempting to login with a social account but already exsits with another.');
                 user = existingUser;
@@ -98,14 +98,14 @@ const loginSocialUser = async (profile, provider) => {
                 user = await usercontroller.createUser(profile.username, firstLastNames[0], firstLastNames[1], email);
                 await addSampleGiftList(user);
             }
-            
-            await usercontroller.addSocialAccount(user.id, provider, profile.id);           
-            
+
+            await usercontroller.addSocialAccount(user.id, provider, profile.id);
+
         } else {
             user = await User.findByPk(socialAccount.userId);
         }
     } catch (error) {
-        logger.error(`Cannot create a user and its first list. ${error}`);        
+        logger.error(`Cannot create a user and its first list. ${error}`);
         return null;
     }
 
@@ -116,7 +116,9 @@ const loginSocialUser = async (profile, provider) => {
 const authApi = express.Router();
 
 authApi.get('/whoami', authenticateJWT, (req, res) => {
-    res.status(200).json(req.user).end();
+    const profile = req.user;
+    delete profile.password;
+    res.status(200).json(profile).end();
 });
 authApi.post('/refresh', authenticateJWT, (req, res) => {
     const { token } = req.body;
@@ -141,6 +143,19 @@ authApi.post('/logout', authenticateJWT, (req, res) => {
 
     refreshTokens = refreshTokens.filter(t => t !== token);
 
+    // Clear session data to prevent issues with subsequent logins
+    if (req.session) {
+        delete req.session.codeVerifier;
+        delete req.session.authStartTime;
+
+        // Optionally destroy the entire session
+        req.session.destroy((err) => {
+            if (err) {
+                logger.error(`Error destroying session: ${err.message}`);
+            }
+        });
+    }
+
     res.status(200).send("Logout successful");
 });
 
@@ -150,10 +165,11 @@ authApi.post('/logout', authenticateJWT, (req, res) => {
 authApi.get('/keycloak/login', (req, res) => {
     try {
         const { authUrl, codeVerifier } = getAuthorizationUrl();
-        
-        // Store code verifier in session for PKCE flow
+
+        // Store code verifier and timestamp in session for PKCE flow
         req.session.codeVerifier = codeVerifier;
-        
+        req.session.authStartTime = Date.now();
+
         logger.info(`Redirecting to Keycloak for authentication: ${authUrl}`);
 
         res.status(200).json({
@@ -161,9 +177,9 @@ authApi.get('/keycloak/login', (req, res) => {
         });
     } catch (error) {
         logger.error(`Keycloak login error: ${error.message}`);
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Keycloak authentication not available',
-            message: error.message 
+            message: error.message
         }).end();
     }
 });
@@ -175,9 +191,21 @@ authApi.get('/keycloak/callback', async (req, res) => {
     try {
 
         logger.info(`Keycloak call back after login`);
-        
-        const client = getClient();
-        
+
+        // Check if the authorization flow took too long
+        const authStartTime = req.session.authStartTime;
+        if (authStartTime) {
+            const elapsedSeconds = (Date.now() - authStartTime) / 1000;
+            logger.info(`Time elapsed since auth start: ${elapsedSeconds.toFixed(2)} seconds`);
+
+            // Keycloak authorization codes typically expire after 60 seconds
+            if (elapsedSeconds > 50) {
+                logger.warn(`Authorization flow took ${elapsedSeconds.toFixed(2)} seconds - code may be expired`);
+            }
+        }
+
+        let client = getClient();
+
         if (!client) {
             throw new Error('Keycloak client not initialized');
         }
@@ -190,17 +218,85 @@ authApi.get('/keycloak/callback', async (req, res) => {
         }
 
         // Exchange authorization code for tokens
-        const tokenSet = await client.callback(
-            process.env.KEYCLOAK_REDIRECT_URI,
-            params,
-            { code_verifier: codeVerifier }
-        );
+        let tokenSet;
+        try {
+            tokenSet = await client.callback(
+                process.env.KEYCLOAK_REDIRECT_URI,
+                params,
+                { code_verifier: codeVerifier }
+            );
+        } catch (callbackError) {
+            logger.error(`Initial callback failed: ${callbackError.message}`);
+
+            // Check if this looks like an expired code or stale client issue
+            const errorMessage = callbackError.message.toLowerCase();
+            if (errorMessage.includes('expired') || errorMessage.includes('invalid') || errorMessage.includes('code')) {
+                logger.info('Attempting to refresh Keycloak client and retry...');
+
+                try {
+                    // Refresh the client configuration
+                    await refreshKeycloakClient();
+                    client = getClient();
+
+                    if (!client) {
+                        throw new Error('Failed to refresh Keycloak client');
+                    }
+
+                    // reinit the auth workflow
+                    const { authUrl, codeVerifier } = getAuthorizationUrl();
+
+                    // Store code verifier and timestamp in session for PKCE flow
+                    req.session.codeVerifier = codeVerifier;
+                    req.session.authStartTime = Date.now();
+
+                    res.redirect(authUrl);
+
+                } catch (retryError) {
+                    logger.error(`Retry after client refresh failed: ${retryError.message}`);
+
+                    // If it's an expired code, redirect to login with a specific message
+                    if (retryError.message.toLowerCase().includes('expired') ||
+                        retryError.message.toLowerCase().includes('code')) {
+                        const errorRedirectUrl = `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent('Authorization code expired. Please try logging in again.')}&retry=true`;
+                        return res.redirect(errorRedirectUrl);
+                    }
+
+                    throw retryError;
+                }
+            } else {
+                throw callbackError;
+            }
+        }
 
         logger.info('Successfully received tokens from Keycloak');
 
         // Get user info from Keycloak
-        const userInfo = await client.userinfo(tokenSet.access_token);
-        
+        let userInfo;
+        try {
+            userInfo = await client.userinfo(tokenSet.access_token);
+        } catch (userinfoError) {
+            logger.warn(`Failed to get user info with initial access token: ${userinfoError.message}`);
+
+            // Attempt to refresh the token if refresh_token is available
+            if (tokenSet.refresh_token) {
+                logger.info('Attempting to refresh the access token...');
+                try {
+                    tokenSet = await client.refresh(tokenSet.refresh_token);
+                    logger.info('Successfully refreshed the access token');
+
+                    // Retry getting user info with the new access token
+                    userInfo = await client.userinfo(tokenSet.access_token);
+                    logger.info('Successfully retrieved user info with refreshed token');
+                } catch (refreshError) {
+                    logger.error(`Failed to refresh token or get user info: ${refreshError.message}`);
+                    throw new Error(`Token refresh failed: ${refreshError.message}`);
+                }
+            } else {
+                logger.error('No refresh token available to retry');
+                throw new Error(`Failed to get user info and no refresh token available: ${userinfoError.message}`);
+            }
+        }
+
         logger.info(`Keycloak user info: ${JSON.stringify(userInfo, null, 2)}`);
 
         // Find or create user in database
@@ -220,20 +316,40 @@ authApi.get('/keycloak/callback', async (req, res) => {
 
         // Clear session data
         delete req.session.codeVerifier;
+        delete req.session.authStartTime;
 
         // Redirect to client with tokens
         // When serving both API and client from the same server, use relative URL
         const clientRedirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&refresh=${refreshToken}`;
-        
+
         logger.debug(`Redirecting to client callback: ${clientRedirectUrl}`);
 
         res.redirect(301, clientRedirectUrl);
     } catch (error) {
         logger.error(`Keycloak callback error: ${error.message}`);
-        
+
+        // Clear session data on error
+        delete req.session.codeVerifier;
+        delete req.session.authStartTime;
+
         // Redirect to client with error
         const errorRedirectUrl = `/auth/error?message=${encodeURIComponent(error.message)}`;
         res.redirect(errorRedirectUrl);
+    }
+});
+
+authApi.get('/users/search', authenticateJWT, async (req, res) => {
+    try {
+        const { query } = req.query;
+        if (!query) {
+            res.status(400).send('Query parameter is required');
+            return;
+        }
+        const users = await usercontroller.searchUsers(query);
+        res.json(users);
+    } catch (error) {
+        logger.error(error);
+        res.status(500).send(error.message);
     }
 });
 
