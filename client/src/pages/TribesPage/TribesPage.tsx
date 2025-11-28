@@ -1,27 +1,24 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {
-    Box,
     TextField,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Fab,
     Autocomplete,
     CircularProgress,
     Button,
     Typography,
+    Fab,
+    FormControl,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 import { apiBaseUrl } from '@/config';
 import Meta from '@/components/Meta';
 import ProtectedRoute from '@/routes/ProtectedRoute';
-import { FullSizeTopCenteredFlexBox } from '@/components/styled';
+import { FlexBox, FullSizeTopCenteredFlexBox } from '@/components/styled';
 import useNotifications from '@/store/notifications';
 import { LoginContext } from '@/LoginContext';
 import { TribeList, TribeDetails } from '@/components/Tribes';
 import BottomDialog from '@/components/BottomDialog/BottomDialog';
+import ActionSheet, { ActionSheetEntry } from '@/components/ActionSheet/ActionSheet';
+import { GroupAdd, Check, Close, PersonAdd } from '@mui/icons-material';
 
 interface Group {
     id: string;
@@ -52,6 +49,13 @@ export function TribesPage() {
     const api = useAuthenticatedApi();
     const { loginInfo } = useContext(LoginContext);
     const [, notificationsActions] = useNotifications();
+
+    // ActionSheet states
+    const [leaveTribeConfirmOpen, setLeaveTribeConfirmOpen] = useState(false);
+    const [deleteTribeConfirmOpen, setDeleteTribeConfirmOpen] = useState(false);
+    const [deleteInvitationConfirmOpen, setDeleteInvitationConfirmOpen] = useState(false);
+    const [pendingTribeId, setPendingTribeId] = useState<string | null>(null);
+    const [pendingMembershipId, setPendingMembershipId] = useState<string | null>(null);
 
     const fetchMyTribes = async () => {
         try {
@@ -169,10 +173,16 @@ export function TribesPage() {
         }
     };
 
-    const handleLeaveTribe = async (groupId: string) => {
-        if (!confirm('Voulez-vous vraiment quitter cette tribu ?')) return;
+    const handleLeaveTribe = (groupId: string) => {
+        setPendingTribeId(groupId);
+        setLeaveTribeConfirmOpen(true);
+    };
+
+    const confirmLeaveTribe = async () => {
+        if (!pendingTribeId) return;
+        setLeaveTribeConfirmOpen(false);
         try {
-            const response = await api.post(`${apiBaseUrl}/group/${groupId}/leave`, {});
+            const response = await api.post(`${apiBaseUrl}/group/${pendingTribeId}/leave`, {});
             if (response.ok) {
                 notificationsActions.push({
                     options: { variant: 'success' },
@@ -188,6 +198,8 @@ export function TribesPage() {
             }
         } catch (error) {
             console.error('Failed to leave tribe', error);
+        } finally {
+            setPendingTribeId(null);
         }
     };
 
@@ -197,12 +209,25 @@ export function TribesPage() {
     const [isSearchingUsers, setIsSearchingUsers] = useState(false);
     const [selectedUserToInvite, setSelectedUserToInvite] = useState<any | null>(null);
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+    const [selectedGroupDetails, setSelectedGroupDetails] = useState<any | null>(null);
 
-    const handleOpenInvite = (groupId: string) => {
+    const handleOpenInvite = async (groupId: string) => {
         setSelectedGroupId(groupId);
         setInviteUserQuery('');
         setUserSearchResults([]);
         setSelectedUserToInvite(null);
+
+        // Fetch group details to get current members and invited users
+        try {
+            const response = await api.get(`${apiBaseUrl}/group/${groupId}/details`);
+            if (response.ok) {
+                const data = await response.json();
+                setSelectedGroupDetails(data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch group details for invite', error);
+        }
+
         setInviteDialogOpen(true);
     };
 
@@ -217,7 +242,29 @@ export function TribesPage() {
             const response = await api.get(`${apiBaseUrl}/auth/users/search?query=${encodeURIComponent(query)}`);
             if (response.ok) {
                 const data = await response.json();
-                setUserSearchResults(data);
+
+                // Filter out current user, existing members, and invited users
+                const filteredResults = data.filter((user: any) => {
+                    // Don't show current user
+                    if (user.id === loginInfo?.id) {
+                        return false;
+                    }
+
+                    // Don't show if already a member or admin
+                    if (selectedGroupDetails) {
+                        const isMember = selectedGroupDetails.members?.some((m: any) => m.id === user.id);
+                        const isAdmin = selectedGroupDetails.admins?.some((a: any) => a.id === user.id);
+                        const isInvited = selectedGroupDetails.invited?.some((i: any) => i.id === user.id);
+
+                        if (isMember || isAdmin || isInvited) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
+
+                setUserSearchResults(filteredResults);
             }
         } catch (error) {
             console.error('Failed to search users', error);
@@ -248,10 +295,16 @@ export function TribesPage() {
         }
     };
 
-    const handleDeleteInvitation = async (membershipId: string) => {
-        if (!confirm('Voulez-vous vraiment supprimer cette invitation ?')) return;
+    const handleDeleteInvitation = (membershipId: string) => {
+        setPendingMembershipId(membershipId);
+        setDeleteInvitationConfirmOpen(true);
+    };
+
+    const confirmDeleteInvitation = async () => {
+        if (!pendingMembershipId) return;
+        setDeleteInvitationConfirmOpen(false);
         try {
-            const response = await api.delete(`${apiBaseUrl}/group/membership/${membershipId}`);
+            const response = await api.delete(`${apiBaseUrl}/group/membership/${pendingMembershipId}`);
             if (response.ok) {
                 notificationsActions.push({
                     options: { variant: 'success' },
@@ -275,20 +328,28 @@ export function TribesPage() {
             }
         } catch (error) {
             console.error('Failed to delete invitation', error);
+        } finally {
+            setPendingMembershipId(null);
         }
     };
 
-    const handleDeleteTribe = async (groupId: string) => {
-        if (!confirm('Voulez-vous vraiment supprimer cette tribu ? Tous les membres seront retirés et cette action est irréversible.')) return;
+    const handleDeleteTribe = (groupId: string) => {
+        setPendingTribeId(groupId);
+        setDeleteTribeConfirmOpen(true);
+    };
+
+    const confirmDeleteTribe = async () => {
+        if (!pendingTribeId) return;
+        setDeleteTribeConfirmOpen(false);
         try {
-            const response = await api.delete(`${apiBaseUrl}/group/${groupId}`);
+            const response = await api.delete(`${apiBaseUrl}/group/${pendingTribeId}`);
             if (response.ok) {
                 notificationsActions.push({
                     options: { variant: 'success' },
                     message: 'Tribu supprimée avec succès !'
                 });
                 // Close details dialog if the deleted tribe was being viewed
-                if (selectedTribeDetails?.id === groupId) {
+                if (selectedTribeDetails?.id === pendingTribeId) {
                     setDetailsDialogOpen(false);
                     setSelectedTribeDetails(null);
                 }
@@ -303,6 +364,8 @@ export function TribesPage() {
             }
         } catch (error) {
             console.error('Failed to delete tribe', error);
+        } finally {
+            setPendingTribeId(null);
         }
     };
 
@@ -320,75 +383,105 @@ export function TribesPage() {
                     onDeleteTribe={handleDeleteTribe}
                     onViewDetails={handleViewDetails}
                 />
-                <Fab
-                    color="primary"
-                    aria-label="add"
-                    sx={{ position: 'absolute', bottom: 16, right: 16 }}
-                    onClick={() => setCreateDialogOpen(true)}
-                >
-                    <AddIcon />
-                </Fab>
+                <FlexBox flexDirection={'row'} justifyContent={'center'} sx={{ position: 'fixed', bottom: 16, left: 0, right: 0, zIndex: 1000 }}>
+                    <Fab
+                        color="primary"
+                        aria-label="add"
+                        onClick={() => setCreateDialogOpen(true)}
+                    >
+                        <GroupAdd />
+                    </Fab>
+                </FlexBox>
 
-                <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)}>
-                    <DialogTitle>Créer une nouvelle tribu</DialogTitle>
-                    <DialogContent>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            label="Nom de la tribu"
-                            fullWidth
-                            variant="standard"
-                            value={newTribeName}
-                            onChange={(e) => setNewTribeName(e.target.value)}
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setCreateDialogOpen(false)}>Annuler</Button>
-                        <Button onClick={handleCreateTribe}>Créer</Button>
-                    </DialogActions>
-                </Dialog>
+                <BottomDialog
+                    open={createDialogOpen}
+                    handleClose={() => setCreateDialogOpen(false)}
+                    title="Créer une nouvelle tribu"
+                    contents={
+                        <FormControl fullWidth margin="normal" sx={{ mb: 2 }}>
+                            <TextField
+                                autoFocus
+                                label="Nom de la tribu"
+                                fullWidth
+                                value={newTribeName}
+                                onChange={(e) => setNewTribeName(e.target.value)}
+                                onKeyUp={(e) => {
+                                    if (e.key === 'Enter' && newTribeName.trim()) {
+                                        handleCreateTribe();
+                                    }
+                                }}
+                            />
+                        </FormControl>
+                    }
+                    actions={[
+                        {
+                            icon: <Close />,
+                            label: 'Annuler',
+                            onClick: () => setCreateDialogOpen(false),
+                        },
+                        {
+                            icon: <Check />,
+                            label: 'Créer',
+                            onClick: handleCreateTribe,
+                            disabled: !newTribeName.trim(),
+                        },
+                    ]}
+                />
 
-                <Dialog open={inviteDialogOpen} onClose={() => setInviteDialogOpen(false)} fullWidth maxWidth="sm">
-                    <DialogTitle>Inviter un utilisateur</DialogTitle>
-                    <DialogContent>
-                        <Typography variant="caption" gutterBottom>
-                            Recherchez un utilisateur par nom, prénom, email ou nom d'utilisateur.
-                        </Typography>
-                        <Autocomplete
-                            options={userSearchResults}
-                            getOptionLabel={(option) => `${option.firstname} ${option.lastname} (${option.username})`}
-                            loading={isSearchingUsers}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="Rechercher un utilisateur"
-                                    variant="standard"
-                                    InputProps={{
-                                        ...params.InputProps,
-                                        endAdornment: (
-                                            <React.Fragment>
-                                                {isSearchingUsers ? <CircularProgress color="inherit" size={20} /> : null}
-                                                {params.InputProps.endAdornment}
-                                            </React.Fragment>
-                                        ),
-                                    }}
-                                />
-                            )}
-                            onInputChange={(_, newInputValue) => {
-                                handleSearchUsers(newInputValue);
-                            }}
-                            onChange={(_, newValue) => {
-                                setSelectedUserToInvite(newValue);
-                            }}
-                            filterOptions={(x) => x}
-                            noOptionsText="Aucun utilisateur trouvé"
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setInviteDialogOpen(false)}>Annuler</Button>
-                        <Button onClick={handleInviteUser} disabled={!selectedUserToInvite || isSearchingUsers}>Inviter</Button>
-                    </DialogActions>
-                </Dialog>
+                <BottomDialog
+                    open={inviteDialogOpen}
+                    handleClose={() => setInviteDialogOpen(false)}
+                    title="Inviter un utilisateur"
+                    contents={
+                        <>
+                            <Typography variant="caption" gutterBottom sx={{ display: 'block', mb: 2 }}>
+                                Recherchez un utilisateur par nom, prénom, email ou nom d'utilisateur.
+                            </Typography>
+                            <Autocomplete
+                                sx={{ mb: 2 }}
+                                options={userSearchResults}
+                                getOptionLabel={(option) => `${option.firstname} ${option.lastname} (${option.username})`}
+                                loading={isSearchingUsers}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Rechercher un utilisateur"
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {isSearchingUsers ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                                onInputChange={(_, newInputValue) => {
+                                    handleSearchUsers(newInputValue);
+                                }}
+                                onChange={(_, newValue) => {
+                                    setSelectedUserToInvite(newValue);
+                                }}
+                                filterOptions={(x) => x}
+                                noOptionsText="Aucun utilisateur trouvé"
+                            />
+                        </>
+                    }
+                    actions={[
+                        {
+                            icon: <Close />,
+                            label: 'Annuler',
+                            onClick: () => setInviteDialogOpen(false),
+                        },
+                        {
+                            icon: <PersonAdd />,
+                            label: 'Inviter',
+                            onClick: handleInviteUser,
+                            disabled: !selectedUserToInvite || isSearchingUsers,
+                        },
+                    ]}
+                />
 
                 <BottomDialog
                     open={detailsDialogOpen}
@@ -401,6 +494,63 @@ export function TribesPage() {
                             onDeleteInvitation={handleDeleteInvitation}
                         />
                     }
+                />
+
+                {/* Leave Tribe Confirmation */}
+                <ActionSheet
+                    open={leaveTribeConfirmOpen}
+                    handleClose={() => setLeaveTribeConfirmOpen(false)}
+                    entries={[
+                        {
+                            label: 'Oui, quitter la tribu',
+                            color: 'error',
+                            onAction: confirmLeaveTribe,
+                        },
+                    ]}
+                    defaultEntry={{
+                        label: 'En fait, non',
+                        color: 'primary',
+                        onAction: () => setLeaveTribeConfirmOpen(false),
+                    }}
+                    message="Vraiment quitter cette tribu ?"
+                />
+
+                {/* Delete Invitation Confirmation */}
+                <ActionSheet
+                    open={deleteInvitationConfirmOpen}
+                    handleClose={() => setDeleteInvitationConfirmOpen(false)}
+                    entries={[
+                        {
+                            label: 'Oui, supprimer l\'invitation',
+                            color: 'error',
+                            onAction: confirmDeleteInvitation,
+                        },
+                    ]}
+                    defaultEntry={{
+                        label: 'Oublie ça',
+                        color: 'primary',
+                        onAction: () => setDeleteInvitationConfirmOpen(false),
+                    }}
+                    message="Vraiment supprimer cette invitation ?"
+                />
+
+                {/* Delete Tribe Confirmation */}
+                <ActionSheet
+                    open={deleteTribeConfirmOpen}
+                    handleClose={() => setDeleteTribeConfirmOpen(false)}
+                    entries={[
+                        {
+                            label: 'Oui, supprimer la tribu',
+                            color: 'error',
+                            onAction: confirmDeleteTribe,
+                        },
+                    ]}
+                    defaultEntry={{
+                        label: 'Laisses tomber',
+                        color: 'primary',
+                        onAction: () => setDeleteTribeConfirmOpen(false),
+                    }}
+                    message="Vaiment supprimer cette tribu ? Tous les membres seront retirés et cette action est irréversible."
                 />
 
             </FullSizeTopCenteredFlexBox>
