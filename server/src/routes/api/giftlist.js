@@ -1,5 +1,5 @@
 const express = require('express');
-const {Op} = require('sequelize');
+const { Op } = require('sequelize');
 
 const { authenticateJWT } = require('./auth');
 
@@ -16,22 +16,6 @@ giftListApi.get('/', authenticateJWT, async (req, res) => {
     const allMyLists = await GiftList.findAll({
         where: {
             ownerId: req.user.id
-        }, 
-        include : 'owner'
-    });
-
-    res.json(allMyLists);
-});
-
-/**
- * Get the lists that are SHARED with the current logged in user.
- */
-giftListApi.get('/shared', authenticateJWT, async (req, res) => {
-    const allMyLists = await GiftList.findAll({
-        where: {
-            ownerId: {
-                [Op.not]: req.user.id
-            }
         },
         include: 'owner'
     });
@@ -39,15 +23,69 @@ giftListApi.get('/shared', authenticateJWT, async (req, res) => {
     res.json(allMyLists);
 });
 
+
+
 /**
- * Get all lists regardless the owner
+ * Get user's own lists and lists from tribes they are members of
  */
 giftListApi.get('/all', authenticateJWT, async (req, res) => {
-    const allLists = await GiftList.findAll({
+    const { Group, GroupMembership } = require('../../model/model');
+
+    // Get user's tribes (where they are admin or member, not invited)
+    const userTribes = await Group.findAll({
+        include: [{
+            model: GroupMembership,
+            where: {
+                userId: req.user.id,
+                status: {
+                    [Op.in]: ['MEMBER', 'ADMIN']
+                }
+            }
+        }],
+        attributes: ['id', 'name']
+    });
+
+    // For each tribe, get all confirmed members and their lists
+    const tribeListsMap = {};
+    for (const tribe of userTribes) {
+        const confirmedMemberships = await GroupMembership.findAll({
+            where: {
+                groupId: tribe.id,
+                status: {
+                    [Op.in]: ['MEMBER', 'ADMIN']
+                }
+            },
+            attributes: ['userId']
+        });
+
+        const memberIds = confirmedMemberships.map(m => m.userId);
+
+        // Get all lists owned by these members
+        const tribeLists = await GiftList.findAll({
+            where: {
+                ownerId: {
+                    [Op.in]: memberIds
+                }
+            },
+            include: 'owner'
+        });
+
+        tribeListsMap[tribe.id] = tribeLists;
+    }
+
+    // Get user's own lists
+    const myLists = await GiftList.findAll({
+        where: {
+            ownerId: req.user.id
+        },
         include: 'owner'
     });
 
-    res.json(allLists);
+    res.json({
+        myLists: myLists,
+        userTribes: userTribes,
+        tribeListsMap: tribeListsMap
+    });
 });
 
 /**

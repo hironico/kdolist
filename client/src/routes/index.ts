@@ -6,8 +6,37 @@ import asyncComponentLoader from '@/utils/loader';
 
 import { Pages, Routes } from './types';
 import { Notifications } from '@mui/icons-material';
+import GroupIcon from '@mui/icons-material/Group';
 
 const routes: Routes = {
+  [Pages.MyLists]: {
+    component: asyncComponentLoader(() => import('@/pages/MyListsPage').then(m => ({ default: m.MyListsPage }))),
+    path: '/mylists',
+    title: 'Listes',
+    icon: HomeIcon,
+    inSideBar: true,
+  },
+  [Pages.Tribes]: {
+    component: asyncComponentLoader(() => import('@/pages/TribesPage').then(m => ({ default: m.TribesPage }))),
+    path: '/tribes',
+    title: 'Tribus',
+    icon: GroupIcon,
+    inSideBar: true,
+  },
+  [Pages.PrivacyPage]: {
+    component: asyncComponentLoader(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage }))),
+    path: '/privacy',
+    title: 'Confidentialité',
+    icon: PrivacyTipIcon,
+    inSideBar: true,
+  },
+  [Pages.CheckUpdates]: {
+    component: asyncComponentLoader(() => import('@/pages/CheckUpdates').then(m => ({ default: m.CheckUpdates }))),
+    path: '/checkupdates',
+    title: 'Vérif. MAJ',
+    icon: Notifications,
+    inSideBar: true,
+  },
   [Pages.Welcome]: {
     component: asyncComponentLoader(() => import('@/pages/Welcome')),
     path: '/',
@@ -22,13 +51,6 @@ const routes: Routes = {
     icon: VpnKeyIcon,
     inSideBar: false,
   },
-  [Pages.MyLists]: {
-    component: asyncComponentLoader(() => import('@/pages/MyListsPage')),
-    path: '/mylists',
-    title: 'Listes',
-    icon: HomeIcon,
-    inSideBar: true,
-  },
   [Pages.ListContentsPage]: {
     component: asyncComponentLoader(() => import('@/pages/ListContentsPage')),
     path: '/listcontents',
@@ -40,13 +62,6 @@ const routes: Routes = {
     path: '/share',
     icon: CardGiftcardIcon,
     inSideBar: false,
-  },
-  [Pages.PrivacyPage]: {
-    component: asyncComponentLoader(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage }))),
-    path: '/privacy',
-    title: 'Confidentialité',
-    icon: PrivacyTipIcon,
-    inSideBar: true,
   },
   [Pages.KeycloakCallback]: {
     component: asyncComponentLoader(() => import('@/pages/KeycloakCallback').then(m => ({ default: m.KeycloakCallback }))),
@@ -62,13 +77,6 @@ const routes: Routes = {
     component: asyncComponentLoader(() => import('@/pages/ExternalRedirect').then(m => ({ default: m.ExternalRedirect }))),
     path: '/redirect',
     inSideBar: false,
-  },
-  [Pages.CheckUpdates]: {
-    component: asyncComponentLoader(() => import('@/pages/CheckUpdates').then(m => ({ default: m.CheckUpdates }))),
-    path: '/checkupdates',
-    title: 'Vérif. MAJ',
-    icon: Notifications,
-    inSideBar: true,
   },
   [Pages.NotFound]: {
     component: asyncComponentLoader(() => import('@/pages/NotFound')),
