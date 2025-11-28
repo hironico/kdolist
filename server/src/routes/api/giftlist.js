@@ -3,7 +3,7 @@ const { Op } = require('sequelize');
 
 const { authenticateJWT } = require('./auth');
 
-const { GiftList, Gift, User } = require('../../model/model');
+const { GiftList, Gift, User } = require('../../model');
 const logger = require('../../logger');
 const giftlistcontroller = require('../../controller/giftlistcontroller');
 
@@ -29,7 +29,7 @@ giftListApi.get('/', authenticateJWT, async (req, res) => {
  * Get user's own lists and lists from tribes they are members of
  */
 giftListApi.get('/all', authenticateJWT, async (req, res) => {
-    const { Group, GroupMembership } = require('../../model/model');
+    const { Group, GroupMembership } = require('../../model');
 
     // Get user's tribes (where they are admin or member, not invited)
     const userTribes = await Group.findAll({

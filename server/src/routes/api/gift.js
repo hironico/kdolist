@@ -2,7 +2,7 @@ const express = require('express');
 
 const { authenticateJWT } = require('./auth');
 
-const { GiftList, Link, Gift, Image } = require('../../model/model');
+const { GiftList, Link, Gift, Image } = require('../../model');
 const logger = require('../../logger');
 const giftlistcontroller = require('../../controller/giftlistcontroller');
 
@@ -132,24 +132,24 @@ giftApi.post('/take/:id', authenticateJWT, (req, res) => {
     }
 
     Gift.findByPk(giftId)
-    .then(theGift => {
-        if (theGift === null) {
-            res.status(400).send('Cannot find gift to mark as taken.').end();
-            return;
-        }
-        if (theGift.selectedById !== null && theGift.selectedById !== '') {
-            res.status(400).send('Gift is already taken by someone. Cannot take it for you.').end();
-        } else {
-            giftlistcontroller.updateGift(giftId, {selectedById: req.user.id, selectedAt: new Date()})
-            .then(theGift => {
-                res.status(200).json(theGift);
-            }).catch(error => {
-                res.status(500).send('Cannot mark gift as taken.' + error).end();
-            })
-        }
-    }).catch(error => {
-        res.status(500).send(`Cannot find gift to mark as taken. ${error}`).end();
-    });
+        .then(theGift => {
+            if (theGift === null) {
+                res.status(400).send('Cannot find gift to mark as taken.').end();
+                return;
+            }
+            if (theGift.selectedById !== null && theGift.selectedById !== '') {
+                res.status(400).send('Gift is already taken by someone. Cannot take it for you.').end();
+            } else {
+                giftlistcontroller.updateGift(giftId, { selectedById: req.user.id, selectedAt: new Date() })
+                    .then(theGift => {
+                        res.status(200).json(theGift);
+                    }).catch(error => {
+                        res.status(500).send('Cannot mark gift as taken.' + error).end();
+                    })
+            }
+        }).catch(error => {
+            res.status(500).send(`Cannot find gift to mark as taken. ${error}`).end();
+        });
 });
 
 giftApi.post('/untake/:id', authenticateJWT, (req, res) => {
@@ -159,10 +159,10 @@ giftApi.post('/untake/:id', authenticateJWT, (req, res) => {
         return;
     }
 
-    giftlistcontroller.updateGift(giftId, {selectedById: null, selectedAt: null})
-    .then(theGift => {
-        res.status(200).json(theGift);
-    })
+    giftlistcontroller.updateGift(giftId, { selectedById: null, selectedAt: null })
+        .then(theGift => {
+            res.status(200).json(theGift);
+        })
 });
 
 giftApi.post('/favorite/:id', authenticateJWT, async (req, res) => {

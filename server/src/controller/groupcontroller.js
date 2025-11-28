@@ -1,4 +1,4 @@
-const { Group, User, GroupMembership, Notification } = require('../model/model');
+const { Group, User, GroupMembership, Notification } = require('../model');
 const { Op } = require('sequelize');
 
 class GroupController {
@@ -99,7 +99,7 @@ class GroupController {
   }
 
   async getGroupDetails(groupId, userId) {
-    const { GiftList, GroupAccess } = require('../model/model');
+    const { GiftList, GroupAccess } = require('../model');
 
     // Get the group with admin info
     const group = await Group.findByPk(groupId, {
@@ -177,9 +177,20 @@ class GroupController {
       throw new Error('Only the group admin can invite users.');
     }
 
+    // Prevent self-invitation
+    if (userId === invitedByUserId) {
+      throw new Error('You cannot invite yourself to a group.');
+    }
+
+    // Check if user is the group admin
+    if (userId === group.adminId) {
+      throw new Error('User is already the admin of this group.');
+    }
+
     // Check if already member or invited
     const existing = await GroupMembership.findOne({ where: { groupId, userId } });
     if (existing) {
+      if (existing.status === 'ADMIN') throw new Error('User is already an admin of this group');
       if (existing.status === 'MEMBER') throw new Error('User is already a member');
       if (existing.status === 'INVITED') throw new Error('User is already invited');
       // If REJECTED or REQUESTED, we might want to reset to INVITED

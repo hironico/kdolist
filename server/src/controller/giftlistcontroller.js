@@ -1,5 +1,5 @@
 const { DataTypes, where } = require('sequelize');
-const { GiftList, Gift, GroupAccess, Notification, Link, Image, sequelize } = require('../model/model');
+const { GiftList, Gift, GroupAccess, Notification, Link, Image, sequelize } = require('../model');
 const logger = require('../logger');
 
 class GiftListController {
@@ -12,7 +12,7 @@ class GiftListController {
     logger.info(`Created gift: ${JSON.stringify(gift)}`);
 
     // update the modification date of the list
-    giftList.set('updatedAt', new Date(), {raw: true});
+    giftList.set('updatedAt', new Date(), { raw: true });
     await giftList.save();
 
     await Notification.create({
@@ -59,9 +59,9 @@ class GiftListController {
     return newGift;
   }
 
-  async addGiftLink({url, description, giftId}) {
-      logger.debug(`Adding link: ${url} to gift id ${giftId}`);
-      return Link.create({url, description, giftId});
+  async addGiftLink({ url, description, giftId }) {
+    logger.debug(`Adding link: ${url} to gift id ${giftId}`);
+    return Link.create({ url, description, giftId });
   }
 
   async removeGiftLink(giftLinkId) {
@@ -94,9 +94,9 @@ class GiftListController {
     return Promise.all(allPromises);
   }
 
-  async addGiftImage({giftId, url}) {
+  async addGiftImage({ giftId, url }) {
     logger.debug(`Adding image to gift id: ${giftId}`);
-    return Image.create({giftId, url});
+    return Image.create({ giftId, url });
   }
 
   async removeGiftImage(giftImageId) {
@@ -212,7 +212,7 @@ class GiftListController {
 
       await list.save();
 
-      return list;      
+      return list;
     } else {
       const newGiftList = await GiftList.create({
         name: giftList.name,
