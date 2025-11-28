@@ -54,6 +54,9 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
       open={open}
       onClose={handleClose}
       aria-label="action sheet"
+      sx={{
+        zIndex: 1400, // Higher than Dialog's default z-index (1300)
+      }}
       PaperProps={{
         style: {
           backgroundColor: 'transparent',
