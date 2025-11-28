@@ -2,6 +2,7 @@ import React from 'react';
 import { List, Typography, Box } from '@mui/material';
 import TribeListItem from './TribeListItem';
 import { EmptyStateCard } from '../EmptyStateCard';
+import { SentimentDissatisfied } from '@mui/icons-material';
 
 interface Group {
     id: string;
@@ -69,7 +70,7 @@ const TribeList: React.FC<TribeListProps> = ({
                     <Typography variant="h6" sx={{ mt: 2, mb: 1, px: 2 }}>
                         Invitations reçues
                     </Typography>
-                    <List sx={{ p: 0, marginRight: "15px" }}>
+                    <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
                         {invitedTribes.map((tribe) => (
                             <TribeListItem
                                 key={`invited-${tribe.id}`}
@@ -90,7 +91,7 @@ const TribeList: React.FC<TribeListProps> = ({
                     <Typography variant="h6" sx={{ mt: 2, mb: 1, px: 2 }}>
                         Mes tribus
                     </Typography>
-                    <List sx={{ p: 0, marginRight: "15px" }}>
+                    <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
                         {ownedTribes.map((tribe) => (
                             <TribeListItem
                                 key={`owned-${tribe.id}`}
@@ -111,7 +112,7 @@ const TribeList: React.FC<TribeListProps> = ({
                     <Typography variant="h6" sx={{ mt: 2, mb: 1, px: 2 }}>
                         Tribus dont je suis membre
                     </Typography>
-                    <List sx={{ p: 0, marginRight: "15px" }}>
+                    <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
                         {joinedTribes.map((tribe) => (
                             <TribeListItem
                                 key={`joined-${tribe.id}`}
@@ -128,8 +129,9 @@ const TribeList: React.FC<TribeListProps> = ({
             {/* Empty State */}
             {invitedTribes.length === 0 && joinedTribes.length === 0 && ownedTribes.length === 0 && (
                 <EmptyStateCard
-                    title="Tu n'es pas dans une tribu"
-                    caption="Crées en une avec le bouton '+' en bas et invite du monde !"
+                    title="Tu n'es pas dans une tribu."
+                    caption="Les membres d'une tribu voient les listes de cadeaux des autres membres. Crées une tribu avec le bouton '+' en bas et invite du monde ! Tu peux être dans autant de tribus que tu le souhaites."
+                    icon={<SentimentDissatisfied />}
                 />
             )}
         </Box>

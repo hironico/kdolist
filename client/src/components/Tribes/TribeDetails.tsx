@@ -166,10 +166,10 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     <GroupIcon sx={{ mr: 1 }} color="primary" />
                     Membres ({totalMembers})
                 </Typography>
-                <List sx={{ p: 0 }}>
+                <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
                     {/* Admins First */}
                     {admins.map((admin) => (
-                        <ListItem key={`admin - ${admin.id} `} sx={{ px: 0 }}>
+                        <ListItem key={`admin - ${admin.id} `} sx={{ px: 0, borderBottom: 'none' }} >
                             <ListItemAvatar>
                                 <Avatar sx={{ bgcolor: 'primary.main' }}>
                                     <PersonIcon />
@@ -179,7 +179,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                                 primary={
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Typography variant="body1">
-                                            {admin.username}
+                                            {admin.firstname} {admin.lastname}
                                         </Typography>
                                         <Chip label="Admin" size="small" color="primary" />
                                     </Box>
@@ -193,7 +193,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     {invited.map((invitation) => (
                         <ListItem
                             key={`invited - ${invitation.membershipId} `}
-                            sx={{ px: 0 }}
+                            sx={{ px: 0, borderBottom: 'none' }}
                             secondaryAction={
                                 isAdmin && onDeleteInvitation ? (
                                     <IconButton
@@ -230,7 +230,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     {declined.map((invitation) => (
                         <ListItem
                             key={`declined - ${invitation.membershipId} `}
-                            sx={{ px: 0 }}
+                            sx={{ px: 0, borderBottom: 'none' }}
                             secondaryAction={
                                 isAdmin && onDeleteInvitation ? (
                                     <IconButton
