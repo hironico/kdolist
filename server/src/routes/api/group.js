@@ -193,7 +193,7 @@ groupApi.post('/membership/:id/reject-invite', authenticateJWT, async (req, res)
 groupApi.delete('/membership/:id', authenticateJWT, async (req, res) => {
     try {
         const membershipId = req.params.id;
-        const { GroupMembership, Group } = require('../../model/model');
+        const { GroupMembership, Group } = require('../../model');
 
         // Get the membership to check permissions
         const membership = await GroupMembership.findByPk(membershipId);

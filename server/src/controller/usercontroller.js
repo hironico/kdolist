@@ -1,4 +1,4 @@
-const { User, Group, GiftList, Gift, Notification, GroupMembership, SocialAccount } = require('../model/model');
+const { User, Group, GiftList, Gift, Notification, GroupMembership, SocialAccount } = require('../model');
 
 class UserController {
   async createUser(username, firstname, lastname, email) {
