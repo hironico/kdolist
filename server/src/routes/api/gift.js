@@ -2,7 +2,7 @@ const express = require('express');
 
 const { authenticateJWT } = require('./auth');
 
-const { GiftList, Link, Gift, Image } = require('../../model');
+const { GiftList, Link, Gift, Image, Notification } = require('../../model');
 const logger = require('../../logger');
 const giftlistcontroller = require('../../controller/giftlistcontroller');
 
@@ -27,7 +27,7 @@ giftApi.post('/', authenticateJWT, async (req, res) => {
             return;
         }
 
-        const gift = req.body.id ? await giftlistcontroller.updateGift(req.body.id, req.body) : await giftlistcontroller.addGift(req.body);
+        const gift = req.body.id ? await giftlistcontroller.updateGift(req.body.id, req.body, req.user.id) : await giftlistcontroller.addGift(req.body, req.user.id);
 
         if (gift === null) {
             res.status(400).send(`Cannot create or update gift. Invalid gift ID`).end();
@@ -62,6 +62,16 @@ giftApi.post('/', authenticateJWT, async (req, res) => {
         // return newly created gift with links and images
         const newGift = await Gift.findByPk(gift.id, {
             include: [{ model: Link }, { model: Image }]
+        });
+
+        // Create notification based on whether this was a new gift or an update
+        const notificationType = req.body.id ? 'GIFT_LIST_UPDATED' : 'GIFT_ADDED';
+        await Notification.create({
+            recipientId: null,
+            senderId: req.user.id,
+            objectId: req.body.giftListId,
+            type: notificationType,
+            createdAt: new Date()
         });
 
         res.status(200).json(newGift);
@@ -140,8 +150,16 @@ giftApi.post('/take/:id', authenticateJWT, (req, res) => {
             if (theGift.selectedById !== null && theGift.selectedById !== '') {
                 res.status(400).send('Gift is already taken by someone. Cannot take it for you.').end();
             } else {
-                giftlistcontroller.updateGift(giftId, { selectedById: req.user.id, selectedAt: new Date() })
-                    .then(theGift => {
+                giftlistcontroller.updateGift(giftId, { selectedById: req.user.id, selectedAt: new Date() }, req.user.id)
+                    .then(async theGift => {
+                        // Create GIFT_TAKEN notification
+                        await Notification.create({
+                            recipientId: null,
+                            senderId: req.user.id,
+                            objectId: theGift.giftListId,
+                            type: 'GIFT_TAKEN',
+                            createdAt: new Date()
+                        });
                         res.status(200).json(theGift);
                     }).catch(error => {
                         res.status(500).send('Cannot mark gift as taken.' + error).end();
@@ -159,8 +177,16 @@ giftApi.post('/untake/:id', authenticateJWT, (req, res) => {
         return;
     }
 
-    giftlistcontroller.updateGift(giftId, { selectedById: null, selectedAt: null })
-        .then(theGift => {
+    giftlistcontroller.updateGift(giftId, { selectedById: null, selectedAt: null }, req.user.id)
+        .then(async theGift => {
+            // Create GIFT_UNTAKEN notification
+            await Notification.create({
+                recipientId: null,
+                senderId: req.user.id,
+                objectId: theGift.giftListId,
+                type: 'GIFT_UNTAKEN',
+                createdAt: new Date()
+            });
             res.status(200).json(theGift);
         })
 });

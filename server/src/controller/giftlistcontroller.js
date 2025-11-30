@@ -3,7 +3,7 @@ const { GiftList, Gift, GroupAccess, Notification, Link, Image, sequelize } = re
 const logger = require('../logger');
 
 class GiftListController {
-  async addGift({ giftListId, name, isHidden, selectedAt, selectedById }) {
+  async addGift({ giftListId, name, isHidden, selectedAt, selectedById }, userId = null) {
     const giftList = await GiftList.findByPk(giftListId);
     if (!giftList) throw new Error(`Cannot add Gift to list. List not found ${giftListId}`);
 
@@ -15,46 +15,25 @@ class GiftListController {
     giftList.set('updatedAt', new Date(), { raw: true });
     await giftList.save();
 
-    await Notification.create({
-      recipientId: giftList.ownerId,
-      type: 'GIFT_ADDED',
-      message: `A new gift "${name}" has been added to your list "${giftList.name}"`,
-      createdAt: new Date()
-    });
-
     return gift;
   }
 
-  async removeGift(giftId) {
+  async removeGift(giftId, userId = null) {
     const gift = await Gift.findByPk(giftId, { include: [GiftList] });
     if (!gift) throw new Error('Gift not found');
 
     await gift.destroy();
 
-    await Notification.create({
-      recipientId: gift.giftList.ownerId,
-      type: 'GIFT_REMOVED',
-      message: `The gift "${gift.name}" has been removed from your list "${gift.giftList.name}"`,
-      createdAt: new Date()
-    });
-
     return { message: 'Gift removed successfully' };
   }
 
-  async updateGift(giftId, updates) {
+  async updateGift(giftId, updates, userId = null) {
     const gift = await Gift.findByPk(giftId, { include: [GiftList, Link, Image] });
     if (!gift) throw new Error('Gift not found');
 
     logger.debug(`Found gift for update: ${JSON.stringify(gift, null, 2)}`);
 
     const newGift = await gift.update(updates);
-
-    await Notification.create({
-      recipientId: gift.giftList.ownerId,
-      type: 'GIFT_LIST_UPDATED',
-      message: `The gift "${gift.name}" in your list "${gift.giftList.name}" has been updated`,
-      createdAt: new Date()
-    });
 
     return newGift;
   }
@@ -138,12 +117,14 @@ class GiftListController {
 
     const groupAccess = await GroupAccess.create({ giftListId, groupId });
 
-    await Notification.create({
-      recipientId: giftList.ownerId,
-      type: 'GIFT_LIST_SHARED',
-      message: `Your gift list "${giftList.name}" has been shared with a group`,
-      createdAt: new Date()
-    });
+    // Note: GIFT_LIST_SHARED is not in the notification enum, commenting out
+    // await Notification.create({
+    //   recipientId: giftList.ownerId,
+    //   senderId: null,
+    //   objectId: giftListId,
+    //   type: 'GIFT_LIST_SHARED',
+    //   createdAt: new Date()
+    // });
 
     return groupAccess;
   }
@@ -156,8 +137,9 @@ class GiftListController {
       access.Group.GroupMemberships.map(membership =>
         Notification.create({
           recipientId: membership.userId,
+          senderId: giftList.ownerId,
+          objectId: giftListId,
           type: 'GIFT_LIST_UPDATED',
-          message: `The gift list "${giftList.name}" has been updated`,
           createdAt: new Date()
         })
       )

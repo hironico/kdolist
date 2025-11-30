@@ -34,6 +34,9 @@ Group.belongsTo(User, { as: 'admin' });
 User.hasMany(Notification, { as: 'receivedNotifications', foreignKey: 'recipientId' });
 Notification.belongsTo(User, { as: 'recipient' });
 
+User.hasMany(Notification, { as: 'sentNotifications', foreignKey: 'senderId' });
+Notification.belongsTo(User, { as: 'sender' });
+
 // User <-> Gift (selected by relationship)
 User.hasMany(Gift, { as: 'selectedGifts', foreignKey: 'selectedById' });
 Gift.belongsTo(User, { as: 'selectedBy' });
