@@ -59,8 +59,9 @@ class GroupController {
     if (group && group.adminId) {
       await Notification.create({
         recipientId: group.adminId,
+        senderId: userId,
+        objectId: groupId,
         type: 'GROUP_JOIN_REQUEST',
-        message: `User requested to join group ${group.name}`,
         createdAt: new Date()
       });
     }
@@ -211,8 +212,9 @@ class GroupController {
 
     await Notification.create({
       recipientId: userId,
+      senderId: invitedByUserId,
+      objectId: groupId,
       type: 'GROUP_INVITE',
-      message: `You've been invited to join the group ${group.name}`,
       createdAt: new Date()
     });
 
@@ -239,8 +241,9 @@ class GroupController {
 
     await Notification.create({
       recipientId: newAdminId,
+      senderId: group.adminId,
+      objectId: groupId,
       type: 'ADMIN_CHANGED',
-      message: `You are now the admin of the group ${group.name}`,
       createdAt: new Date()
     });
 
@@ -266,7 +269,12 @@ class GroupController {
   }
 
   async acceptInvite(membershipId, userId) {
-    const membership = await GroupMembership.findByPk(membershipId);
+    const membership = await GroupMembership.findByPk(membershipId, {
+      include: [
+        { model: Group, as: 'group' },
+        { model: User, as: 'user' }
+      ]
+    });
     if (!membership) throw new Error('Membership not found');
     if (membership.userId !== userId) throw new Error('Not authorized');
     if (membership.status !== 'INVITED') throw new Error('No pending invitation');
@@ -274,11 +282,26 @@ class GroupController {
     membership.status = 'MEMBER';
     membership.lastStatusChange = new Date();
     await membership.save();
+
+    // Notify the group admin that the user accepted the invitation
+    await Notification.create({
+      recipientId: membership.group.adminId,
+      senderId: userId,
+      objectId: membership.groupId,
+      type: 'GROUP_JOIN_ACCEPTED',
+      createdAt: new Date()
+    });
+
     return membership;
   }
 
   async rejectInvite(membershipId, userId) {
-    const membership = await GroupMembership.findByPk(membershipId);
+    const membership = await GroupMembership.findByPk(membershipId, {
+      include: [
+        { model: Group, as: 'group' },
+        { model: User, as: 'user' }
+      ]
+    });
     if (!membership) throw new Error('Membership not found');
     if (membership.userId !== userId) throw new Error('Not authorized');
     if (membership.status !== 'INVITED') throw new Error('No pending invitation');
@@ -286,6 +309,16 @@ class GroupController {
     membership.status = 'REJECTED';
     membership.lastStatusChange = new Date();
     await membership.save();
+
+    // Notify the group admin that the user rejected the invitation
+    await Notification.create({
+      recipientId: membership.group.adminId,
+      senderId: userId,
+      objectId: membership.groupId,
+      type: 'GROUP_JOIN_REJECTED',
+      createdAt: new Date()
+    });
+
     return membership;
   }
 
@@ -300,8 +333,9 @@ class GroupController {
 
     await Notification.create({
       recipientId: membership.userId,
+      senderId: null,
+      objectId: membership.groupId,
       type: 'GROUP_JOIN_ACCEPTED',
-      message: `Your request to join the group has been accepted`,
       createdAt: new Date()
     });
 
@@ -318,23 +352,25 @@ class GroupController {
 
     await Notification.create({
       recipientId: membership.userId,
+      senderId: null,
+      objectId: membership.groupId,
       type: 'GROUP_JOIN_REJECTED',
-      message: `Your request to join the group has been rejected`,
       createdAt: new Date()
     });
 
     return membership;
   }
 
-  async notifyMembers(groupId, message) {
+  async notifyMembers(groupId, type, senderId = null) {
     const group = await Group.findByPk(groupId, { include: [{ model: GroupMembership, where: { status: 'MEMBER' } }] });
     if (!group) throw new Error('Group not found');
 
     const notifications = await Promise.all(group.GroupMemberships.map(membership =>
       Notification.create({
         recipientId: membership.userId,
-        type: 'GROUP_NOTIFICATION',
-        message,
+        senderId,
+        objectId: groupId,
+        type,
         createdAt: new Date()
       })
     ));
