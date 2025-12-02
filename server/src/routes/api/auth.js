@@ -39,16 +39,6 @@ const generateRefreshToken = (user) => {
     return refreshToken;
 }
 
-const addSampleGiftList = async (user) => {
-    const giftList = await usercontroller.createGiftList(user.id, `Liste de ${user.username}`);
-    const gift = {
-        giftListId: giftList.id,
-        name: 'Un exemple de cadeau'
-    }
-
-    await giftlistcontroller.addGift(gift);
-}
-
 /**
  * This function will find the corresponding user for the social account this user is logged into. 
  * If the user is already present (same email) but with qnother social network, then this function fails
@@ -71,34 +61,42 @@ const loginSocialUser = async (profile, provider) => {
         return null;
     }
 
-    const firstLastNames = username.split(' ');
-    if (firstLastNames.length < 2) {
-        firstLastNames.push('');
+    const firstName = profile.firstName;
+    const lastName = profile.lastName;
+
+    if (!firstName && !lastName) {
+        firstName = username;
+    }
+
+    // check if the user already exists and create or update it with profile
+    const existingUser = await User.findOne({
+        where: {
+            email: email
+        }
+    });
+
+    let user = null;
+    if (existingUser) {
+        logger.info('Found existing user, updating profile with latest data from Keycloak...');
+        // Update user profile to keep it in sync with Keycloak
+        existingUser.username = username;
+        existingUser.firstname = firstName;
+        existingUser.lastname = lastName;
+        existingUser.email = email;
+        await existingUser.save();
+        user = existingUser;
+        logger.info(`Updated user profile: ${username}`);
+    } else {
+        logger.info('New user! Creating profile...');
+        user = await usercontroller.createUser(username, firstName, lastName, email);
     }
 
     const socialAccount = await SocialAccount.findOne({
         where: { socialId: profile.id, provider: provider }
     });
 
-    let user = null;
     try {
         if (!socialAccount) {
-
-            // check if the user already exsits with a different social account
-            const existingUser = await User.findOne({
-                where: {
-                    email: email
-                }
-            });
-
-            if (existingUser) {
-                logger.warn('A user attempting to login with a social account but already exsits with another.');
-                user = existingUser;
-            } else {
-                user = await usercontroller.createUser(profile.username, firstLastNames[0], firstLastNames[1], email);
-                await addSampleGiftList(user);
-            }
-
             await usercontroller.addSocialAccount(user.id, provider, profile.id);
 
         } else {
@@ -121,7 +119,7 @@ authApi.get('/whoami', authenticateJWT, (req, res) => {
     res.status(200).json(profile).end();
 });
 
-authApi.post('/refresh', authenticateJWT, (req, res) => {
+authApi.post('/refresh', authenticateJWT, async (req, res) => {
     const { token } = req.body;
 
     if (!token) {
@@ -132,7 +130,10 @@ authApi.post('/refresh', authenticateJWT, (req, res) => {
         return res.sendStatus(403);
     }
 
-    const accessToken = generateAccessToken(req.user);
+    // need to get a sequelize instance of the user before regenerating token
+    const sqlUser = await User.findByPk(req.user.id);
+
+    const accessToken = generateAccessToken(sqlUser);
 
     res.json({
         accessToken
@@ -304,7 +305,9 @@ authApi.get('/keycloak/callback', async (req, res) => {
         const user = await loginSocialUser({
             id: userInfo.sub,
             email: userInfo.email,
-            username: userInfo.preferred_username || userInfo.email || `user_${userInfo.sub}`
+            username: userInfo.preferred_username || userInfo.email || `user_${userInfo.sub}`,
+            firstName: userInfo.given_name,
+            lastName: userInfo.family_name,
         }, 'KEYCLOAK');
 
         if (!user) {
