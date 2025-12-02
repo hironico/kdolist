@@ -239,4 +239,65 @@ groupApi.post('/:id/leave', authenticateJWT, async (req, res) => {
     }
 });
 
+/**
+ * Update membership status (admin only)
+ * Can promote members to admin or demote admins to members
+ */
+groupApi.patch('/membership/:id/status', authenticateJWT, async (req, res) => {
+    try {
+        const membershipId = req.params.id;
+        const { status } = req.body;
+        const { GroupMembership, Group } = require('../../model');
+
+        // Validate status
+        if (!status || !['ADMIN', 'MEMBER'].includes(status)) {
+            return res.status(400).send('Invalid status. Must be ADMIN or MEMBER');
+        }
+
+        // Get the membership to update
+        const membership = await GroupMembership.findByPk(membershipId);
+        if (!membership) {
+            return res.status(404).send('Membership not found');
+        }
+
+        // Get the group to verify admin status
+        const group = await Group.findByPk(membership.groupId);
+        if (!group) {
+            return res.status(404).send('Group not found');
+        }
+
+        // Check if the current user is an admin of the group
+        const currentUserMembership = await GroupMembership.findOne({
+            where: {
+                groupId: membership.groupId,
+                userId: req.user.id
+            }
+        });
+
+        if (!currentUserMembership || currentUserMembership.status !== 'ADMIN') {
+            return res.status(403).send('Only group admins can change membership status');
+        }
+
+        // Prevent changing status of non-active members
+        if (membership.status !== 'MEMBER' && membership.status !== 'ADMIN') {
+            return res.status(400).send('Can only change status of active members and admins');
+        }
+
+        // Prevent changing the owner's status
+        if (membership.userId === group.adminId) {
+            return res.status(400).send('Cannot change the status of the tribe owner');
+        }
+
+        // Update the status
+        membership.status = status;
+        membership.lastStatusChange = new Date();
+        await membership.save();
+
+        res.json(membership);
+    } catch (error) {
+        logger.error(error);
+        res.status(500).send(error.message);
+    }
+});
+
 module.exports = { groupApi };
