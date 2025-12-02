@@ -62,7 +62,6 @@ export function TribesPage() {
             const response = await api.get(`${apiBaseUrl}/group`);
             if (response.ok) {
                 const data = await response.json();
-                console.log(JSON.stringify(data, null, 4));
                 setMyTribes(data);
             }
         } catch (error) {
