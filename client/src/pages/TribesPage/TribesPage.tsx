@@ -17,7 +17,7 @@ import useNotifications from '@/store/notifications';
 import { LoginContext } from '@/LoginContext';
 import { TribeList, TribeDetails } from '@/components/Tribes';
 import BottomDialog from '@/components/BottomDialog/BottomDialog';
-import ActionSheet, { ActionSheetEntry } from '@/components/ActionSheet/ActionSheet';
+import ActionSheet from '@/components/ActionSheet/ActionSheet';
 import { GroupAdd, Check, Close, PersonAdd } from '@mui/icons-material';
 
 interface Group {
@@ -62,7 +62,6 @@ export function TribesPage() {
             const response = await api.get(`${apiBaseUrl}/group`);
             if (response.ok) {
                 const data = await response.json();
-                console.log(JSON.stringify(data, null, 4));
                 setMyTribes(data);
             }
         } catch (error) {
