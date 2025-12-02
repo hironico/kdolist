@@ -3,28 +3,7 @@ import { List, Typography, Box } from '@mui/material';
 import TribeListItem from './TribeListItem';
 import { EmptyStateCard } from '../EmptyStateCard';
 import { SentimentDissatisfied } from '@mui/icons-material';
-
-interface Group {
-    id: string;
-    name: string;
-    adminId: string;
-    admin?: {
-        id: string;
-        username: string;
-        firstname: string;
-        lastname: string;
-    };
-    createdAt: Date;
-    updatedAt: Date;
-    groupMemberships?: GroupMembership[];
-}
-
-interface GroupMembership {
-    id: string;
-    groupId: string;
-    userId: string;
-    status: 'INVITED' | 'REQUESTED' | 'MEMBER' | 'REJECTED';
-}
+import { Group } from './types';
 
 interface TribeListProps {
     tribes: Group[];
@@ -56,7 +35,10 @@ const TribeList: React.FC<TribeListProps> = ({
         (tribe) => tribe.groupMemberships?.[0]?.status === 'INVITED'
     );
     const joinedTribes = tribes.filter(
-        (tribe) => tribe.groupMemberships?.[0]?.status === 'MEMBER'
+        (tribe) => (tribe.groupMemberships?.[0]?.status === 'MEMBER')
+    );
+    const adminTribes = tribes.filter(
+        (tribe) => (tribe.groupMemberships?.[0]?.status === 'ADMIN')
     );
     const ownedTribes = tribes.filter(
         (tribe) => tribe.adminId === currentUserId
@@ -107,12 +89,23 @@ const TribeList: React.FC<TribeListProps> = ({
             )}
 
             {/* Joined Tribes Section */}
-            {joinedTribes.length > 0 && (
+            {(joinedTribes.length > 0 || adminTribes.length > 0) && (
                 <>
                     <Typography variant="h6" sx={{ mt: 2, mb: 1, px: 2 }}>
                         Tribus dont je suis membre
                     </Typography>
                     <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+                        {adminTribes.map((tribe) => (
+                            <TribeListItem
+                                key={`joined-${tribe.id}`}
+                                tribe={tribe}
+                                currentUserId={currentUserId}
+                                onLeaveTribe={onLeaveTribe}
+                                onInviteUser={onInviteUser}
+                                onViewDetails={onViewDetails}
+                            />
+                        ))}
+                        
                         {joinedTribes.map((tribe) => (
                             <TribeListItem
                                 key={`joined-${tribe.id}`}
@@ -127,7 +120,7 @@ const TribeList: React.FC<TribeListProps> = ({
             )}
 
             {/* Empty State */}
-            {invitedTribes.length === 0 && joinedTribes.length === 0 && ownedTribes.length === 0 && (
+            {invitedTribes.length === 0 && joinedTribes.length === 0 && ownedTribes.length === 0 && adminTribes.length === 0 && (
                 <EmptyStateCard
                     title="Tu n'es pas dans une tribu."
                     caption="Les membres d'une tribu voient les listes de cadeaux des autres membres. Crées une tribu avec le bouton '+' en bas et invite du monde ! Tu peux être dans autant de tribus que tu le souhaites."

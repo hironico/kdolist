@@ -7,28 +7,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import GroupIcon from '@mui/icons-material/Group';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
-
-interface Group {
-    id: string;
-    name: string;
-    adminId: string;
-    admin?: {
-        id: string;
-        username: string;
-        firstname: string;
-        lastname: string;
-    };
-    createdAt: Date;
-    updatedAt: Date;
-    groupMemberships?: GroupMembership[];
-}
-
-interface GroupMembership {
-    id: string;
-    groupId: string;
-    userId: string;
-    status: 'INVITED' | 'REQUESTED' | 'MEMBER' | 'REJECTED';
-}
+import { Group } from './types';
 
 interface TribeListItemProps {
     tribe: Group;
@@ -107,12 +86,20 @@ const TribeListItem: React.FC<TribeListItemProps> = ({
                 onAction: () => onDeleteTribe?.(tribe.id),
             };
         } else {
-            // Regular members can leave
+            // Regular members can leave but if admin member (not owner) can invite too !
             action1 = {
                 icon: <ExitToAppIcon />,
                 color: 'error',
                 onAction: () => onLeaveTribe?.(tribe.id),
             };
+
+            if (membership?.status === 'ADMIN') {
+                action2 = {
+                icon: <PersonAddIcon />,
+                color: 'primary',
+                onAction: () => onInviteUser?.(tribe.id),
+            };
+            }
         }
     }
 

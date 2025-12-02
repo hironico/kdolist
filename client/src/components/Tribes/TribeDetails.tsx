@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Typography,
@@ -10,50 +10,33 @@ import {
     Divider,
     Chip,
     IconButton,
+    Menu,
+    MenuItem,
+    ListItemIcon,
 } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
-
-interface User {
-    id: string;
-    username: string;
-    firstname: string;
-    lastname: string;
-}
-
-interface InvitedUser extends User {
-    membershipId: string;
-}
-
-interface TribeDetailsData {
-    id: string;
-    name: string;
-    adminId: string;
-    admin: User;
-    createdAt: Date;
-    updatedAt: Date;
-    admins: User[];
-    members: User[];
-    invited: InvitedUser[];
-    declined: InvitedUser[];
-    totalMembers: number;
-    totalLists: number;
-}
+import SettingsIcon from '@mui/icons-material/Settings';
+import CheckIcon from '@mui/icons-material/Check';
+import { TribeDetailsData } from './types';
 
 interface TribeDetailsProps {
     tribeDetails: TribeDetailsData | null;
     currentUserId?: string;
     onDeleteInvitation?: (membershipId: string) => void;
+    onChangeMembershipStatus?: (membershipId: string, newStatus: 'ADMIN' | 'MEMBER') => void;
 }
 
 /**
  * TribeDetails component displays comprehensive information about a tribe
  * including picture, name, member counts, admins, and members.
  */
-const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId, onDeleteInvitation }) => {
+const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId, onDeleteInvitation, onChangeMembershipStatus }) => {
+    const [statusMenuAnchor, setStatusMenuAnchor] = useState<{ element: HTMLElement; membershipId: string; currentStatus: string } | null>(null);
+
     if (!tribeDetails) {
         return (
             <Box sx={{ p: 2, textAlign: 'center' }}>
@@ -66,8 +49,24 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
 
     const { name, admins, members, invited, declined, totalMembers, totalLists, adminId } = tribeDetails;
 
-    // Check if current user is an admin
-    const isAdmin = currentUserId === adminId;
+    // Check if current user is an admin (any admin, not just the owner)
+    const isCurrentUserAdmin = admins.some(admin => admin.id === currentUserId);
+
+    const handleOpenStatusMenu = (event: React.MouseEvent<HTMLElement>, membershipId: string, currentStatus: string) => {
+        event.stopPropagation();
+        setStatusMenuAnchor({ element: event.currentTarget, membershipId, currentStatus });
+    };
+
+    const handleCloseStatusMenu = () => {
+        setStatusMenuAnchor(null);
+    };
+
+    const handleChangeStatus = (newStatus: 'ADMIN' | 'MEMBER') => {
+        if (statusMenuAnchor && onChangeMembershipStatus) {
+            onChangeMembershipStatus(statusMenuAnchor.membershipId, newStatus);
+        }
+        handleCloseStatusMenu();
+    };
 
     // Generate initials for tribe avatar
     const getInitials = (name: string) => {
@@ -169,7 +168,19 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                 <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
                     {/* Admins First */}
                     {admins.map((admin) => (
-                        <ListItem key={`admin - ${admin.id} `} sx={{ px: 0, borderBottom: 'none' }} >
+                        <ListItem key={`admin - ${admin.id} `} 
+                            sx={{ px: 0, borderBottom: 'none' }} 
+                            secondaryAction={isCurrentUserAdmin && onChangeMembershipStatus && admin.id !== adminId && (
+                                            <IconButton
+                                                edge="end"
+                                                size="small"
+                                                onClick={(e) => handleOpenStatusMenu(e, admin.membershipId, 'ADMIN')}
+                                                color="default"
+                                            >
+                                                <SettingsIcon fontSize="small" />
+                                            </IconButton>
+                                        )}
+                        >
                             <ListItemAvatar>
                                 <Avatar sx={{ bgcolor: 'primary.main' }}>
                                     <PersonIcon />
@@ -181,7 +192,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                                         <Typography variant="body1">
                                             {admin.firstname} {admin.lastname}
                                         </Typography>
-                                        <Chip label="Admin" size="small" color="primary" />
+                                        <Chip label="Admin" size="small" color="primary" />                                        
                                     </Box>
                                 }
                                 secondary={`@${admin.username} `}
@@ -195,10 +206,10 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             key={`invited - ${invitation.membershipId} `}
                             sx={{ px: 0, borderBottom: 'none' }}
                             secondaryAction={
-                                isAdmin && onDeleteInvitation ? (
+                                isCurrentUserAdmin && onDeleteInvitation ? (
                                     <IconButton
                                         edge="end"
-                                        aria-label="delete"
+                                        size="small"
                                         onClick={() => onDeleteInvitation(invitation.membershipId)}
                                         color="error"
                                     >
@@ -232,7 +243,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             key={`declined - ${invitation.membershipId} `}
                             sx={{ px: 0, borderBottom: 'none' }}
                             secondaryAction={
-                                isAdmin && onDeleteInvitation ? (
+                                isCurrentUserAdmin && onDeleteInvitation ? (
                                     <IconButton
                                         edge="end"
                                         aria-label="delete"
@@ -265,7 +276,19 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
 
                     {/* Regular Members */}
                     {members.map((member) => (
-                        <ListItem key={`member - ${member.id} `} sx={{ px: 0 }}>
+                        <ListItem key={`member - ${member.id} `} 
+                            sx={{ px: 0 }}
+                            secondaryAction={isCurrentUserAdmin && onChangeMembershipStatus && member.id !== adminId && (
+                                            <IconButton
+                                                edge="end"
+                                                size="small"
+                                                onClick={(e) => handleOpenStatusMenu(e, member.membershipId, 'MEMBER')}
+                                                color="default"
+                                            >
+                                                <SettingsIcon fontSize="small" />
+                                            </IconButton>
+                                        )}
+                        >
                             <ListItemAvatar>
                                 <Avatar sx={{ bgcolor: 'secondary.main' }}>
                                     <PersonIcon />
@@ -286,6 +309,33 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     ))}
                 </List>
             </Box>
+
+            {/* Status Change Menu */}
+            <Menu
+                anchorEl={statusMenuAnchor?.element}
+                open={Boolean(statusMenuAnchor)}
+                onClose={handleCloseStatusMenu}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <MenuItem 
+                    onClick={() => handleChangeStatus('ADMIN')}
+                    selected={statusMenuAnchor?.currentStatus === 'ADMIN'}
+                >
+                    <ListItemIcon>
+                        {statusMenuAnchor?.currentStatus === 'ADMIN' && <CheckIcon fontSize="small" />}
+                    </ListItemIcon>
+                    <ListItemText>Admin</ListItemText>
+                </MenuItem>
+                <MenuItem 
+                    onClick={() => handleChangeStatus('MEMBER')}
+                    selected={statusMenuAnchor?.currentStatus === 'MEMBER'}
+                >
+                    <ListItemIcon>
+                        {statusMenuAnchor?.currentStatus === 'MEMBER' && <CheckIcon fontSize="small" />}
+                    </ListItemIcon>
+                    <ListItemText>Membre</ListItemText>
+                </MenuItem>
+            </Menu>
         </Box>
     );
 };

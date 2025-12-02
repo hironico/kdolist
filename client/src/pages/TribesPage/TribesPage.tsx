@@ -15,32 +15,10 @@ import ProtectedRoute from '@/routes/ProtectedRoute';
 import { FlexBox, FullSizeTopCenteredFlexBox } from '@/components/styled';
 import useNotifications from '@/store/notifications';
 import { LoginContext } from '@/LoginContext';
-import { TribeList, TribeDetails } from '@/components/Tribes';
+import { TribeList, TribeDetails, Group, GroupMembership } from '@/components/Tribes';
 import BottomDialog from '@/components/BottomDialog/BottomDialog';
 import ActionSheet from '@/components/ActionSheet/ActionSheet';
 import { GroupAdd, Check, Close, PersonAdd } from '@mui/icons-material';
-
-interface Group {
-    id: string;
-    name: string;
-    adminId: string;
-    admin?: {
-        id: string;
-        username: string;
-        firstname: string;
-        lastname: string;
-    };
-    createdAt: Date;
-    updatedAt: Date;
-    groupMemberships?: GroupMembership[];
-}
-
-interface GroupMembership {
-    id: string;
-    groupId: string;
-    userId: string;
-    status: 'INVITED' | 'REQUESTED' | 'MEMBER' | 'REJECTED';
-}
 
 export function TribesPage() {
     const [myTribes, setMyTribes] = useState<Group[]>([]);
@@ -78,9 +56,6 @@ export function TribesPage() {
             const response = await api.get(`${apiBaseUrl}/group/${groupId}/details`);
             if (response.ok) {
                 const data = await response.json();
-
-                console.log(JSON.stringify(data, null, 4));
-
                 setSelectedTribeDetails(data);
                 setDetailsDialogOpen(true);
             } else {
@@ -332,6 +307,40 @@ export function TribesPage() {
         }
     };
 
+    const handleChangeMembershipStatus = async (membershipId: string, newStatus: 'ADMIN' | 'MEMBER') => {
+        try {
+            const response = await api.patch(`${apiBaseUrl}/group/membership/${membershipId}/status`, { status: newStatus });
+            if (response.ok) {
+                notificationsActions.push({
+                    options: { variant: 'success' },
+                    message: newStatus === 'ADMIN' ? 'Membre promu administrateur !' : 'Administrateur rétrogradé en membre.'
+                });
+                // Refresh the tribe details
+                if (selectedTribeDetails) {
+                    const detailsResponse = await api.get(`${apiBaseUrl}/group/${selectedTribeDetails.id}/details`);
+                    if (detailsResponse.ok) {
+                        const data = await detailsResponse.json();
+                        setSelectedTribeDetails(data);
+                    }
+                }
+                // Also refresh the tribe list
+                fetchMyTribes();
+            } else {
+                const errorText = await response.text();
+                notificationsActions.push({
+                    options: { variant: 'error' },
+                    message: `Erreur: ${errorText}`
+                });
+            }
+        } catch (error) {
+            console.error('Failed to change membership status', error);
+            notificationsActions.push({
+                options: { variant: 'error' },
+                message: 'Erreur lors du changement de statut.'
+            });
+        }
+    };
+
     const handleDeleteTribe = (groupId: string) => {
         setPendingTribeId(groupId);
         setDeleteTribeConfirmOpen(true);
@@ -491,6 +500,7 @@ export function TribesPage() {
                             tribeDetails={selectedTribeDetails}
                             currentUserId={loginInfo?.id}
                             onDeleteInvitation={handleDeleteInvitation}
+                            onChangeMembershipStatus={handleChangeMembershipStatus}
                         />
                     }
                 />
