@@ -239,7 +239,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   } else if (viewMode === 'grid') {
     // Grid view
     listContents = filteredGifts.map((oneGift, index) => (
-          <Grid xs={12} sm={6} md={4} key={`kdo-grid-${index}`}>
+          <Grid xs={6} sm={4} md={3} lg={2.4} key={`kdo-grid-${index}`}>
             <GiftGridItem
               oneGift={oneGift}
               isOwner={isOwner}

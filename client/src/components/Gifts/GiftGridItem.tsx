@@ -81,7 +81,7 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
       sx={{ 
         cursor: 'pointer',
         position: 'relative',
-        height: '100%',
+        aspectRatio: '1 / 1',
         display: 'flex',
         flexDirection: 'column',
         transition: 'transform 0.2s, box-shadow 0.2s',
@@ -93,15 +93,16 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
       onClick={onClick}
     >
       {/* Image section */}
-      <Box sx={{ position: 'relative' }}>
+      <Box sx={{ position: 'relative', height: '65%' }}>
         <CardMedia
           component="img"
-          height="200"
           image={imageUrl}
           alt={oneGift.name}
           sx={{
             objectFit: 'cover',
             opacity: shouldShowTaken ? 0.5 : 1,
+            width: '100%',
+            height: '100%',
           }}
         />
         
@@ -206,7 +207,14 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
       </Box>
 
       {/* Content section */}
-      <CardContent sx={{ flexGrow: 1, pb: 2 }}>
+      <CardContent sx={{ 
+        height: '35%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        pb: 1.5,
+        pt: 1.5,
+      }}>
         <Typography 
           variant="h6" 
           component="div" 

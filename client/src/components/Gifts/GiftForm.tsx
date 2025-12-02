@@ -22,19 +22,7 @@ interface GiftFormProps {
 
 const defaultImages: GiftImage[] = [
   {
-    url: 'https://images.unsplash.com/photo-1482175828271-d793f8c731b2',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    giftId: ''
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1634038036367-7c0e7a95fa4c',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    giftId: ''
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1511895654441-f6a0e1db5cbd',
+    url: '/logo_kdolist-192.png',
     createdAt: new Date(),
     updatedAt: new Date(),
     giftId: ''
