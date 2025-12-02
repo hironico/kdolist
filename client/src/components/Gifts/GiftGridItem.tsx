@@ -212,8 +212,8 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        pb: 1.5,
-        pt: 1.5,
+        pb: 0.25,
+        pt: 0.25,
       }}>
         <Typography 
           variant="h6" 
@@ -233,23 +233,6 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
         >
           {oneGift.name}
         </Typography>
-        
-        {oneGift.description && (
-          <Typography 
-            variant="body2" 
-            color="text.secondary"
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              fontSize: '0.875rem',
-            }}
-          >
-            {oneGift.description}
-          </Typography>
-        )}
       </CardContent>
     </Card>
   );
