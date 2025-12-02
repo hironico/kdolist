@@ -63,7 +63,7 @@ const carouselItems: CarouselItem[] = [
   {
     image: './background/kdolist-1.jpeg',
     title: 'K.DO-List!',
-    description: 'Notre nouvelle façon de partager nos listes de cadeaux.',
+    description: 'Bienvenue sur K.DO-List ! Notre nouvelle façon de partager nos listes de cadeaux.',
   },
   {
     image: './background/kdolist-2.jpeg',
