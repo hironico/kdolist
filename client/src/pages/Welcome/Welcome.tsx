@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Box, Button, Container, Typography, Paper } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import { styled } from '@mui/material/styles';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { LoginButton } from '@/components/SignInCard';
 import { StatsCard } from '@/components/StatsCard';
 import theme from '@/store/theme';
+import { LoginContext } from '@/LoginContext';
 
 interface CarouselItem {
   image: string;
@@ -89,6 +90,23 @@ const carouselItems: CarouselItem[] = [
 
 const Welcome: React.FC = () => {
   const navigate = useNavigate();
+  const appContext = useContext(LoginContext);
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    const checkAuthentication = async () => {
+      if (appContext.loginInfo.jwt) {
+        const isValid = await appContext.checkToken();
+        if (isValid) {
+          // User is authenticated, redirect to mylists
+          navigate('/mylists', { replace: true });
+        }
+      }
+    };
+
+    checkAuthentication();
+  }, [appContext, navigate]);
+
   const onLetsGo = () => {
     navigate('/login', { replace: true });
   };
