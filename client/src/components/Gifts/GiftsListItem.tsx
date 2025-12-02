@@ -1,6 +1,6 @@
 import React from 'react';
 import { Gift } from "@/LoginContext";
-import { Typography, IconButton } from '@mui/material';
+import { Typography, IconButton, Avatar } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -83,6 +83,27 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ key, oneGift, editabl
         onAction: takeAction
     }
 
+    // Get first image or use default
+    const imageUrl = oneGift.images && oneGift.images.length > 0 
+        ? oneGift.images[0].url 
+        : '/logo_kdolist-192.png';
+
+    const giftIcon = (
+        <Avatar
+            src={imageUrl}
+            alt={oneGift.name}
+            variant="rounded"   
+            sx={{
+                width: 40,
+                height: 40,
+                backgroundColor: 'white',
+                filter: shouldShowStrikethrough ? 'grayscale(100%)' : 'none'
+                
+            }}
+        >
+        </Avatar>
+    );
+
     return (
         <SwipeableListItem
             key={key}
@@ -92,7 +113,7 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ key, oneGift, editabl
             secondaryText={secondaryText}
             action1={editable ? deleteActionSwipe : undefined}
             action2={takeActionSwipe}
-            icon={<Redeem />}
+            icon={giftIcon}
             rightContent={rightContent}
         />
     );
