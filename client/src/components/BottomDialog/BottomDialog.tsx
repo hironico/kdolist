@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
-import { ChevronLeft } from '@mui/icons-material';
+import { ArrowBackIos } from '@mui/icons-material';
 import { Box } from '@mui/system';
 
 export type BottomDialogAction = {
@@ -70,7 +70,7 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
       <DialogTitle sx={{pt: '0px', pb: '0px', pl: '10px', pr: '10px' }}>
         <Toolbar sx={{padding: '0px', margin: '0px'}}>
           <IconButton color="primary" aria-label="open drawer" onClick={() => handleClose()} sx={{padding: '0px', marginLeft: '0px'}}>
-            <ChevronLeft />
+            <ArrowBackIos />
           </IconButton>
           <Typography fontSize={16}>{title}</Typography>
           <Box sx={{ flexGrow: 1 }} />

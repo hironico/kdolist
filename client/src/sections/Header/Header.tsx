@@ -13,7 +13,7 @@ import routes from '@/routes';
 import { PathRouteProps, useLocation, useNavigate } from 'react-router-dom';
 import { PathRouteCustomProps, Routes } from '@/routes/types';
 import { ReactNode, useContext, useState, useEffect } from 'react';
-import { ChevronLeft, Notifications as NotificationsIcon } from '@mui/icons-material';
+import { ArrowBackIos, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { LoginContext } from '@/LoginContext';
 import UserAvatar from '@/components/UserAvatar/UserAvatar';
 import { UpdateDialog } from '@/components/UpdateDialog';
@@ -131,7 +131,7 @@ function Header() {
         aria-label="backward"
         sx={{ mr: 1 }}
       >
-        <ChevronLeft />
+        <ArrowBackIos />
       </IconButton>
     );
   };

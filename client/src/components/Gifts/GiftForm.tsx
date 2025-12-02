@@ -318,7 +318,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   // Force carousel to re-render when images change by using images length as key
   const carouselKey = `carousel-${images.length}-${images.map(img => img.url).join('-').substring(0, 50)}`;
 
-  const actions: BottomDialogAction[] = [
+  const actions: BottomDialogAction[] = editable ? [
     {
       icon: <AutoFixHighIcon />,
       label: 'Coller',
@@ -331,7 +331,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       onClick: () => handleSaveGift(updatedGift, true),
       disabled: isSaving
     }
-  ];
+  ] : [];
 
   const contents = <Box component="form" sx={{ marginBottom: '20px' }}>
     <Carousel key={carouselKey} sx={{ width: '100%' }}>
@@ -419,10 +419,10 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     <BottomDialog
       open={open}
       handleClose={() => onClose(false)}
-      title={'Editer...'}
+      title={editable ? 'Editer' : 'Détails'}
       actions={actions}
       contents={contents}
-      disableBackdropClick={true} />
+      disableBackdropClick={editable} />
   );
 };
 
