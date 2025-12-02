@@ -120,6 +120,7 @@ authApi.get('/whoami', authenticateJWT, (req, res) => {
     delete profile.password;
     res.status(200).json(profile).end();
 });
+
 authApi.post('/refresh', authenticateJWT, (req, res) => {
     const { token } = req.body;
 

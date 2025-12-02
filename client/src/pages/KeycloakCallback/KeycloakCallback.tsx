@@ -18,7 +18,7 @@ export function KeycloakCallback() {
         // Extract tokens from URL parameters
         const token = searchParams.get('token');
         const refreshToken = searchParams.get('refresh');
-        
+
         if (!token) {
           throw new Error('No authentication token received');
         }
@@ -32,10 +32,10 @@ export function KeycloakCallback() {
             .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
             .join('')
         );
-        
+
         const payload = JSON.parse(jsonPayload);
 
-        console.log(`Login callback with user: ${JSON.stringify(payload, null, 4)}`);
+        // console.log(`Login callback with user: ${JSON.stringify(payload, null, 4)}`);
 
         // Update login context with user information
         setLoginInfo({
@@ -73,10 +73,10 @@ export function KeycloakCallback() {
         }
       } catch (error) {
         console.error('Authentication callback error:', error);
-        navigate('/auth/error', { 
-          state: { 
-            message: error instanceof Error ? error.message : 'Authentication failed' 
-          } 
+        navigate('/auth/error', {
+          state: {
+            message: error instanceof Error ? error.message : 'Authentication failed'
+          }
         });
       }
     };
@@ -127,9 +127,9 @@ export function KeycloakError() {
           {errorMessage}
         </Typography>
       </Alert>
-      <Typography 
-        variant="body2" 
-        color="primary" 
+      <Typography
+        variant="body2"
+        color="primary"
         sx={{ cursor: 'pointer', textDecoration: 'underline' }}
         onClick={() => navigate('/login')}
       >
