@@ -1,59 +1,27 @@
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-
-import { Key as KeyIcon } from '@mui/icons-material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Card from '../Card/Card';
-
-import { apiBaseUrl } from '@/config';
+import LoginButton from './LoginButton';
 
 export default function SignInCard() {
-
-  const navigate = useNavigate();
-
-  const handleKeycloakLogin = () => {
-    // Navigate to the redirect route with the Keycloak login URL as a parameter
-    const keycloakLoginUrl = `${apiBaseUrl}/auth/keycloak/login`;
-
-    fetch(keycloakLoginUrl, {
-        method: 'GET',
-      }).then((response) => {
-        if (response.ok) {
-          response.json().then((data) => {
-            navigate(`/redirect?url=${encodeURIComponent(data.authUrl)}`);
-          });
-        } else {
-          console.error('Failed to fetch auth url for KeyCloak.', JSON.stringify(response, null, 2));
-        }
-      });
-  };
-
   return (
-      <Card variant="outlined">
-
-        <Typography variant="subtitle1"
-          sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-        >Le saviez-vous ?
-        </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: '250px' }}>
-          <Typography variant="subtitle2">
-            Le compte hironico.net permet aussi d'utiliser 
-            <Link to="/redirect?url=https://bkp.hironico.net&newTab=true">
+    <Card variant="outlined">
+      <Typography variant="subtitle1"
+        sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+      >Le saviez-vous ?
+      </Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: '250px' }}>
+        <Typography variant="subtitle2">
+          Le compte hironico.net permet aussi d'utiliser
+          <Link to="/redirect?url=https://bkp.hironico.net&newTab=true">
             Nico's Drive !
-            </Link>
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={handleKeycloakLogin}
-            startIcon={<KeyIcon />}
-          >
-            <Typography sx={{ color: 'text.primary' }}>Entrer sur K.DO-List</Typography>
-          </Button>
-        </Box>
-      </Card>
-    );
+          </Link>
+        </Typography>
+      </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <LoginButton text="Se connecter" />
+      </Box>
+    </Card>
+  );
 }
