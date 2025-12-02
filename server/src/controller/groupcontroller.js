@@ -156,8 +156,8 @@ class GroupController {
       admin: group.admin,
       createdAt: group.createdAt,
       updatedAt: group.updatedAt,
-      admins: admins.map(a => a.user),
-      members: members.map(m => m.user),
+      admins: admins.map(a => ({ ...a.user.get({ plain: true }), membershipId: a.id })),
+      members: members.map(m => ({ ...m.user.get({ plain: true }), membershipId: m.id })),
       invited: invited.map(i => ({ ...i.user.get({ plain: true }), membershipId: i.id })),
       declined: declined.map(d => ({ ...d.user.get({ plain: true }), membershipId: d.id })),
       totalMembers: memberships.length,
@@ -168,13 +168,20 @@ class GroupController {
 
   async inviteUser(groupId, userId, invitedByUserId) {
     const [group, user] = await Promise.all([
-      Group.findByPk(groupId),
+      Group.findByPk(groupId, {
+        include: [GroupMembership]
+      }),
       User.findByPk(userId)
     ]);
 
     if (!group || !user) throw new Error('Group or User not found');
 
-    if (group.adminId !== invitedByUserId) {
+    const isOwner = group.adminId !== invitedByUserId;
+
+    const userMemberShip = group.groupMemberships.filter(gm => gm.userId = userId)[0];
+    const isAdmin = userMemberShip.status === 'ADMIN';
+
+    if (!isOwner && !isAdmin) {
       throw new Error('Only the group admin can invite users.');
     }
 
