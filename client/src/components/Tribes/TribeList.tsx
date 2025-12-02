@@ -38,7 +38,7 @@ const TribeList: React.FC<TribeListProps> = ({
         (tribe) => (tribe.groupMemberships?.[0]?.status === 'MEMBER')
     );
     const adminTribes = tribes.filter(
-        (tribe) => (tribe.groupMemberships?.[0]?.status === 'ADMIN')
+        (tribe) => (tribe.groupMemberships?.[0]?.status === 'ADMIN' && tribe.adminId !== currentUserId)
     );
     const ownedTribes = tribes.filter(
         (tribe) => tribe.adminId === currentUserId
