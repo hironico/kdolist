@@ -252,7 +252,6 @@ export function TribesPage() {
         try {
             const response = await api.post(`${apiBaseUrl}/group/${selectedGroupId}/invite`, { userId: selectedUserToInvite.id });
             if (response.ok) {
-                setInviteDialogOpen(false);
                 notificationsActions.push({
                     options: { variant: 'success' },
                     message: 'Invitation envoyée !'
@@ -478,15 +477,15 @@ export function TribesPage() {
                     }
                     actions={[
                         {
-                            icon: <Close />,
-                            label: 'Annuler',
-                            onClick: () => setInviteDialogOpen(false),
-                        },
-                        {
                             icon: <PersonAdd />,
                             label: 'Inviter',
                             onClick: handleInviteUser,
                             disabled: !selectedUserToInvite || isSearchingUsers,
+                        },
+                        {
+                            icon: <Close />,
+                            label: 'Annuler',
+                            onClick: () => setInviteDialogOpen(false),
                         },
                     ]}
                 />
