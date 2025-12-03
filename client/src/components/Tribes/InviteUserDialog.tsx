@@ -115,7 +115,6 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                     options: { variant: 'success' },
                     message: 'Invitation envoyée !'
                 });
-                onClose();
                 if (onUserInvited) {
                     onUserInvited();
                 }
