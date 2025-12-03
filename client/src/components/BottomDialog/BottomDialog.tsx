@@ -90,7 +90,7 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
           }) : <></>}
         </Toolbar>
       </DialogTitle>
-      <DialogContent sx={{ overflowY: 'auto' }}>{contents}</DialogContent>
+      <DialogContent sx={{ overflowY: 'auto', px: 0 }}>{contents}</DialogContent>
     </Dialog>
   );
 };

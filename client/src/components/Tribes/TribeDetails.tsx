@@ -1,26 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Box,
     Typography,
     Avatar,
     List,
-    ListItem,
-    ListItemAvatar,
-    ListItemText,
     Divider,
     Chip,
-    IconButton,
-    Menu,
-    MenuItem,
-    ListItemIcon,
 } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
-import SettingsIcon from '@mui/icons-material/Settings';
-import CheckIcon from '@mui/icons-material/Check';
+import BoltIcon from '@mui/icons-material/Bolt';
+import SwipeableListItem from '@/components/SwipeableListItem/SwipeableListItem';
 import { TribeDetailsData } from './types';
 
 interface TribeDetailsProps {
@@ -35,8 +28,6 @@ interface TribeDetailsProps {
  * including picture, name, member counts, admins, and members.
  */
 const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId, onDeleteInvitation, onChangeMembershipStatus }) => {
-    const [statusMenuAnchor, setStatusMenuAnchor] = useState<{ element: HTMLElement; membershipId: string; currentStatus: string } | null>(null);
-
     if (!tribeDetails) {
         return (
             <Box sx={{ p: 2, textAlign: 'center' }}>
@@ -51,22 +42,6 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
 
     // Check if current user is an admin (any admin, not just the owner)
     const isCurrentUserAdmin = admins.some(admin => admin.id === currentUserId);
-
-    const handleOpenStatusMenu = (event: React.MouseEvent<HTMLElement>, membershipId: string, currentStatus: string) => {
-        event.stopPropagation();
-        setStatusMenuAnchor({ element: event.currentTarget, membershipId, currentStatus });
-    };
-
-    const handleCloseStatusMenu = () => {
-        setStatusMenuAnchor(null);
-    };
-
-    const handleChangeStatus = (newStatus: 'ADMIN' | 'MEMBER') => {
-        if (statusMenuAnchor && onChangeMembershipStatus) {
-            onChangeMembershipStatus(statusMenuAnchor.membershipId, newStatus);
-        }
-        handleCloseStatusMenu();
-    };
 
     // Generate initials for tribe avatar
     const getInitials = (name: string) => {
@@ -160,8 +135,8 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
             <Divider />
 
             {/* All Members Section - Unified List */}
-            <Box sx={{ px: 2, pt: 2 }}>
-                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ pt: 2 }}>
+                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, px: 2, display: 'flex', alignItems: 'center' }}>
                     <GroupIcon sx={{ mr: 1 }} color="primary" />
                     Membres ({totalMembers})
                 </Typography>
@@ -174,174 +149,89 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                 }}>
                     {/* Admins First */}
                     {admins.map((admin) => (
-                        <ListItem key={`admin-${admin.id}`}
-                            sx={{ px: 0, borderBottom: 'none' }}
-                            secondaryAction={isCurrentUserAdmin && onChangeMembershipStatus && admin.id !== adminId && (
-                                <IconButton
-                                    edge="end"
-                                    size="small"
-                                    onClick={(e) => handleOpenStatusMenu(e, admin.membershipId, 'ADMIN')}
-                                    color="default"
-                                >
-                                    <SettingsIcon fontSize="small" />
-                                </IconButton>
-                            )}
-                        >
-                            <ListItemAvatar>
-                                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                                    <PersonIcon />
-                                </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Typography variant="body1">
-                                            {admin.firstname} {admin.lastname}
-                                        </Typography>
-                                        <Chip label="Admin" size="small" color="primary" />
-                                    </Box>
-                                }
-                                secondary={`@${admin.username}`}
-                            />
-                        </ListItem>
+                        <SwipeableListItem
+                            key={`admin-${admin.id}`}
+                            keyId={`admin-${admin.id}`}
+                            icon={<PersonIcon />}
+                            primaryText={`${admin.firstname} ${admin.lastname}`}
+                            secondaryText={`@${admin.username}`}
+                            rightContent={<Chip label="Admin" size="small" color="primary" />}
+                            action1={
+                                isCurrentUserAdmin && onChangeMembershipStatus && admin.id !== adminId
+                                    ? {
+                                        icon: <BoltIcon sx={{ color: '#FFA500' }} />,
+                                        color: 'default' as const,
+                                        onAction: () => onChangeMembershipStatus(admin.membershipId, 'MEMBER'),
+                                    }
+                                    : undefined
+                            }
+                        />
                     ))}
 
                     {/* Invited Members */}
                     {invited.map((invitation) => (
-                        <ListItem
+                        <SwipeableListItem
                             key={`invited-${invitation.membershipId}`}
-                            sx={{ px: 0, borderBottom: 'none' }}
-                            secondaryAction={
-                                isCurrentUserAdmin && onDeleteInvitation ? (
-                                    <IconButton
-                                        edge="end"
-                                        size="small"
-                                        onClick={() => onDeleteInvitation(invitation.membershipId)}
-                                        color="error"
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                ) : null
+                            keyId={`invited-${invitation.membershipId}`}
+                            icon={<PersonIcon />}
+                            primaryText={`${invitation.firstname} ${invitation.lastname}`}
+                            secondaryText={`@${invitation.username}`}
+                            rightContent={<Chip label="Invité" size="small" color="info" />}
+                            action1={
+                                isCurrentUserAdmin && onDeleteInvitation
+                                    ? {
+                                        icon: <DeleteIcon />,
+                                        color: 'error' as const,
+                                        onAction: () => onDeleteInvitation(invitation.membershipId),
+                                    }
+                                    : undefined
                             }
-                        >
-                            <ListItemAvatar>
-                                <Avatar sx={{ bgcolor: 'info.light' }}>
-                                    <PersonIcon />
-                                </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Typography variant="body1">
-                                            {`${invitation.firstname} ${invitation.lastname}`}
-                                        </Typography>
-                                        <Chip label="Invité" size="small" color="info" />
-                                    </Box>
-                                }
-                                secondary={`@${invitation.username}`}
-                            />
-                        </ListItem>
+                        />
                     ))}
 
                     {/* Declined Invitations */}
                     {declined.map((invitation) => (
-                        <ListItem
+                        <SwipeableListItem
                             key={`declined-${invitation.membershipId}`}
-                            sx={{ px: 0, borderBottom: 'none' }}
-                            secondaryAction={
-                                isCurrentUserAdmin && onDeleteInvitation ? (
-                                    <IconButton
-                                        edge="end"
-                                        aria-label="delete"
-                                        onClick={() => onDeleteInvitation(invitation.membershipId)}
-                                        color="error"
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                ) : null
+                            keyId={`declined-${invitation.membershipId}`}
+                            icon={<PersonIcon />}
+                            primaryText={`${invitation.firstname} ${invitation.lastname}`}
+                            secondaryText={`@${invitation.username}`}
+                            rightContent={<Chip label="Refusé" size="small" color="error" />}
+                            action1={
+                                isCurrentUserAdmin && onDeleteInvitation
+                                    ? {
+                                        icon: <DeleteIcon />,
+                                        color: 'error' as const,
+                                        onAction: () => onDeleteInvitation(invitation.membershipId),
+                                    }
+                                    : undefined
                             }
-                        >
-                            <ListItemAvatar>
-                                <Avatar sx={{ bgcolor: 'error.light' }}>
-                                    <PersonIcon />
-                                </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Typography variant="body1">
-                                            {`${invitation.firstname} ${invitation.lastname}`}
-                                        </Typography>
-                                        <Chip label="Refusé" size="small" color="error" />
-                                    </Box>
-                                }
-                                secondary={`@${invitation.username}`}
-                            />
-                        </ListItem>
+                        />
                     ))}
 
                     {/* Regular Members */}
                     {members.map((member) => (
-                        <ListItem key={`member-${member.id}`}
-                            sx={{ px: 0 }}
-                            secondaryAction={isCurrentUserAdmin && onChangeMembershipStatus && member.id !== adminId && (
-                                <IconButton
-                                    edge="end"
-                                    size="small"
-                                    onClick={(e) => handleOpenStatusMenu(e, member.membershipId, 'MEMBER')}
-                                    color="default"
-                                >
-                                    <SettingsIcon fontSize="small" />
-                                </IconButton>
-                            )}
-                        >
-                            <ListItemAvatar>
-                                <Avatar sx={{ bgcolor: 'secondary.main' }}>
-                                    <PersonIcon />
-                                </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Typography variant="body1">
-                                            {`${member.firstname} ${member.lastname}`}
-                                        </Typography>
-                                        <Chip label="Membre" size="small" color="default" />
-                                    </Box>
-                                }
-                                secondary={`@${member.username}`}
-                            />
-                        </ListItem>
+                        <SwipeableListItem
+                            key={`member-${member.id}`}
+                            keyId={`member-${member.id}`}
+                            icon={<PersonIcon />}
+                            primaryText={`${member.firstname} ${member.lastname}`}
+                            secondaryText={`@${member.username}`}
+                            rightContent={<Chip label="Membre" size="small" color="default" />}
+                            action1={
+                                isCurrentUserAdmin && onChangeMembershipStatus && member.id !== adminId
+                                    ? {
+                                        icon: <BoltIcon sx={{ color: '#D3D3D3' }} />,
+                                        color: 'default' as const,
+                                        onAction: () => onChangeMembershipStatus(member.membershipId, 'ADMIN'),
+                                    }
+                                    : undefined
+                            }
+                        />
                     ))}
                 </List>
             </Box>
-
-            {/* Status Change Menu */}
-            <Menu
-                anchorEl={statusMenuAnchor?.element}
-                open={Boolean(statusMenuAnchor)}
-                onClose={handleCloseStatusMenu}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <MenuItem
-                    onClick={() => handleChangeStatus('ADMIN')}
-                    selected={statusMenuAnchor?.currentStatus === 'ADMIN'}
-                >
-                    <ListItemIcon>
-                        {statusMenuAnchor?.currentStatus === 'ADMIN' && <CheckIcon fontSize="small" />}
-                    </ListItemIcon>
-                    <ListItemText>Admin</ListItemText>
-                </MenuItem>
-                <MenuItem
-                    onClick={() => handleChangeStatus('MEMBER')}
-                    selected={statusMenuAnchor?.currentStatus === 'MEMBER'}
-                >
-                    <ListItemIcon>
-                        {statusMenuAnchor?.currentStatus === 'MEMBER' && <CheckIcon fontSize="small" />}
-                    </ListItemIcon>
-                    <ListItemText>Membre</ListItemText>
-                </MenuItem>
-            </Menu>
         </Box>
     );
 };

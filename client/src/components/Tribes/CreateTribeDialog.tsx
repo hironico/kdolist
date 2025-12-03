@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, FormControl } from '@mui/material';
+import { TextField, FormControl, Box } from '@mui/material';
 import BottomDialog from '@/components/BottomDialog/BottomDialog';
 import { Check, Close } from '@mui/icons-material';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
@@ -62,20 +62,22 @@ const CreateTribeDialog: React.FC<CreateTribeDialogProps> = ({
             handleClose={handleClose}
             title="Créer une nouvelle tribu"
             contents={
-                <FormControl fullWidth margin="normal" sx={{ mb: 2 }}>
-                    <TextField
-                        autoFocus
-                        label="Nom de la tribu"
-                        fullWidth
-                        value={tribeName}
-                        onChange={(e) => setTribeName(e.target.value)}
-                        onKeyUp={(e) => {
-                            if (e.key === 'Enter' && tribeName.trim()) {
-                                handleCreateTribe();
-                            }
-                        }}
-                    />
-                </FormControl>
+                <Box sx={{ px: 2 }}>
+                    <FormControl fullWidth margin="normal" sx={{ mb: 2 }}>
+                        <TextField
+                            autoFocus
+                            label="Nom de la tribu"
+                            fullWidth
+                            value={tribeName}
+                            onChange={(e) => setTribeName(e.target.value)}
+                            onKeyUp={(e) => {
+                                if (e.key === 'Enter' && tribeName.trim()) {
+                                    handleCreateTribe();
+                                }
+                            }}
+                        />
+                    </FormControl>
+                </Box>
             }
             actions={[
                 {

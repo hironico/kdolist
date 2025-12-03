@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { TextField, Autocomplete, CircularProgress, Typography } from '@mui/material';
+import { TextField, Autocomplete, CircularProgress, Typography, Box } from '@mui/material';
 import BottomDialog from '@/components/BottomDialog/BottomDialog';
 import { PersonAdd, Close } from '@mui/icons-material';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
@@ -140,7 +140,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
             handleClose={onClose}
             title="Inviter un utilisateur"
             contents={
-                <>
+                <Box sx={{ px: 2 }}>
                     <Typography variant="caption" gutterBottom sx={{ display: 'block', mb: 2 }}>
                         Recherchez un utilisateur par nom, prénom, email ou nom d'utilisateur.
                     </Typography>
@@ -173,7 +173,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                         filterOptions={(x) => x}
                         noOptionsText="Aucun utilisateur trouvé"
                     />
-                </>
+                </Box>
             }
             actions={[
                 {
