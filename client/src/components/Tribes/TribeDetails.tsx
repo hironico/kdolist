@@ -165,21 +165,27 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     <GroupIcon sx={{ mr: 1 }} color="primary" />
                     Membres ({totalMembers})
                 </Typography>
-                <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+                <List sx={{
+                    m: '0px',
+                    mt: '10px',
+                    maxHeight: '50vh',
+                    overflowY: 'auto',
+                    alignSelf: 'start'
+                }}>
                     {/* Admins First */}
                     {admins.map((admin) => (
-                        <ListItem key={`admin - ${admin.id} `} 
-                            sx={{ px: 0, borderBottom: 'none' }} 
+                        <ListItem key={`admin-${admin.id}`}
+                            sx={{ px: 0, borderBottom: 'none' }}
                             secondaryAction={isCurrentUserAdmin && onChangeMembershipStatus && admin.id !== adminId && (
-                                            <IconButton
-                                                edge="end"
-                                                size="small"
-                                                onClick={(e) => handleOpenStatusMenu(e, admin.membershipId, 'ADMIN')}
-                                                color="default"
-                                            >
-                                                <SettingsIcon fontSize="small" />
-                                            </IconButton>
-                                        )}
+                                <IconButton
+                                    edge="end"
+                                    size="small"
+                                    onClick={(e) => handleOpenStatusMenu(e, admin.membershipId, 'ADMIN')}
+                                    color="default"
+                                >
+                                    <SettingsIcon fontSize="small" />
+                                </IconButton>
+                            )}
                         >
                             <ListItemAvatar>
                                 <Avatar sx={{ bgcolor: 'primary.main' }}>
@@ -192,10 +198,10 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                                         <Typography variant="body1">
                                             {admin.firstname} {admin.lastname}
                                         </Typography>
-                                        <Chip label="Admin" size="small" color="primary" />                                        
+                                        <Chip label="Admin" size="small" color="primary" />
                                     </Box>
                                 }
-                                secondary={`@${admin.username} `}
+                                secondary={`@${admin.username}`}
                             />
                         </ListItem>
                     ))}
@@ -203,7 +209,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     {/* Invited Members */}
                     {invited.map((invitation) => (
                         <ListItem
-                            key={`invited - ${invitation.membershipId} `}
+                            key={`invited-${invitation.membershipId}`}
                             sx={{ px: 0, borderBottom: 'none' }}
                             secondaryAction={
                                 isCurrentUserAdmin && onDeleteInvitation ? (
@@ -227,12 +233,12 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                                 primary={
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Typography variant="body1">
-                                            {`${invitation.firstname} ${invitation.lastname} `}
+                                            {`${invitation.firstname} ${invitation.lastname}`}
                                         </Typography>
                                         <Chip label="Invité" size="small" color="info" />
                                     </Box>
                                 }
-                                secondary={`@${invitation.username} `}
+                                secondary={`@${invitation.username}`}
                             />
                         </ListItem>
                     ))}
@@ -240,7 +246,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     {/* Declined Invitations */}
                     {declined.map((invitation) => (
                         <ListItem
-                            key={`declined - ${invitation.membershipId} `}
+                            key={`declined-${invitation.membershipId}`}
                             sx={{ px: 0, borderBottom: 'none' }}
                             secondaryAction={
                                 isCurrentUserAdmin && onDeleteInvitation ? (
@@ -264,30 +270,30 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                                 primary={
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Typography variant="body1">
-                                            {`${invitation.firstname} ${invitation.lastname} `}
+                                            {`${invitation.firstname} ${invitation.lastname}`}
                                         </Typography>
                                         <Chip label="Refusé" size="small" color="error" />
                                     </Box>
                                 }
-                                secondary={`@${invitation.username} `}
+                                secondary={`@${invitation.username}`}
                             />
                         </ListItem>
                     ))}
 
                     {/* Regular Members */}
                     {members.map((member) => (
-                        <ListItem key={`member - ${member.id} `} 
+                        <ListItem key={`member-${member.id}`}
                             sx={{ px: 0 }}
                             secondaryAction={isCurrentUserAdmin && onChangeMembershipStatus && member.id !== adminId && (
-                                            <IconButton
-                                                edge="end"
-                                                size="small"
-                                                onClick={(e) => handleOpenStatusMenu(e, member.membershipId, 'MEMBER')}
-                                                color="default"
-                                            >
-                                                <SettingsIcon fontSize="small" />
-                                            </IconButton>
-                                        )}
+                                <IconButton
+                                    edge="end"
+                                    size="small"
+                                    onClick={(e) => handleOpenStatusMenu(e, member.membershipId, 'MEMBER')}
+                                    color="default"
+                                >
+                                    <SettingsIcon fontSize="small" />
+                                </IconButton>
+                            )}
                         >
                             <ListItemAvatar>
                                 <Avatar sx={{ bgcolor: 'secondary.main' }}>
@@ -298,12 +304,12 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                                 primary={
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Typography variant="body1">
-                                            {`${member.firstname} ${member.lastname} `}
+                                            {`${member.firstname} ${member.lastname}`}
                                         </Typography>
                                         <Chip label="Membre" size="small" color="default" />
                                     </Box>
                                 }
-                                secondary={`@${member.username} `}
+                                secondary={`@${member.username}`}
                             />
                         </ListItem>
                     ))}
@@ -317,7 +323,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                 onClose={handleCloseStatusMenu}
                 onClick={(e) => e.stopPropagation()}
             >
-                <MenuItem 
+                <MenuItem
                     onClick={() => handleChangeStatus('ADMIN')}
                     selected={statusMenuAnchor?.currentStatus === 'ADMIN'}
                 >
@@ -326,7 +332,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     </ListItemIcon>
                     <ListItemText>Admin</ListItemText>
                 </MenuItem>
-                <MenuItem 
+                <MenuItem
                     onClick={() => handleChangeStatus('MEMBER')}
                     selected={statusMenuAnchor?.currentStatus === 'MEMBER'}
                 >
