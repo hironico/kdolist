@@ -65,29 +65,32 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
         marginLeft: '-45px',
         marginRight: '-45px',
         marginBottom: '-35px',
+        '& .MuiDialog-paper': {
+          maxHeight: '95vh',
+        },
       }}
     >
-      <DialogTitle sx={{pt: '0px', pb: '0px', pl: '10px', pr: '10px' }}>
-        <Toolbar sx={{padding: '0px', margin: '0px'}}>
-          <IconButton color="primary" aria-label="open drawer" onClick={() => handleClose()} sx={{padding: '0px', marginLeft: '0px'}}>
+      <DialogTitle sx={{ pt: '0px', pb: '0px', pl: '10px', pr: '10px' }}>
+        <Toolbar sx={{ padding: '0px', margin: '0px' }}>
+          <IconButton color="primary" aria-label="open drawer" onClick={() => handleClose()} sx={{ padding: '0px', marginLeft: '0px' }}>
             <ArrowBackIos />
           </IconButton>
           <Typography fontSize={16}>{title}</Typography>
           <Box sx={{ flexGrow: 1 }} />
-          {actions ? actions.map( (a,index) => {
-            return <IconButton 
-                    key={`bottom-dlg-key-${a.label}-${index}`} 
-                    color="primary" 
-                    aria-label="open drawer" 
-                    onClick={a.onClick} 
-                    disabled={a.disabled}
-                    sx={{ml: '10px', mr: '10px', padding: '0px'}}>
-                    {a.icon}
-                  </IconButton>
-          }): <></>}
+          {actions ? actions.map((a, index) => {
+            return <IconButton
+              key={`bottom-dlg-key-${a.label}-${index}`}
+              color="primary"
+              aria-label="open drawer"
+              onClick={a.onClick}
+              disabled={a.disabled}
+              sx={{ ml: '10px', mr: '10px', padding: '0px' }}>
+              {a.icon}
+            </IconButton>
+          }) : <></>}
         </Toolbar>
-      </DialogTitle>            
-      <DialogContent>{contents}</DialogContent>
+      </DialogTitle>
+      <DialogContent sx={{ overflowY: 'auto' }}>{contents}</DialogContent>
     </Dialog>
   );
 };
