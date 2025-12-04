@@ -17,7 +17,7 @@ const authenticateJWT = (req, res, next) => {
 
         jwt.verify(token, process.env.AUTH_SECRET, (err, user) => {
             if (err) {
-                logger.warn(`Invalid JWT received: ${err}`);
+                logger.warn(`${req.method} : ${req.originalUrl}. Invalid JWT received: ${err}`);
                 return res.sendStatus(403).end();
             }
 
@@ -25,7 +25,7 @@ const authenticateJWT = (req, res, next) => {
             next();
         });
     } else {
-        res.status(401).send('No Authorization header').end();
+        res.status(401).send(`No Authorization header`).end();
     }
 };
 
@@ -57,8 +57,9 @@ const loginSocialUser = async (profile, provider) => {
 
     const username = profile.username;
     if (!username) {
-        logger.error('Must provide at least an email!');
-        return null;
+        logger.warn('No username found in profile. Defaulting to email');
+        username = email;
+        profile['username'] = username;
     }
 
     const firstName = profile.firstName;
@@ -66,12 +67,13 @@ const loginSocialUser = async (profile, provider) => {
 
     if (!firstName && !lastName) {
         firstName = username;
+        profile['firstName'] = firstName;
     }
 
     // check if the user already exists and create or update it with profile
     const existingUser = await User.findOne({
         where: {
-            email: email
+            username: username
         }
     });
 
@@ -97,13 +99,13 @@ const loginSocialUser = async (profile, provider) => {
 
     try {
         if (!socialAccount) {
+            logger.info(`Adding social ${provider} account for user ${user.username}`);
             await usercontroller.addSocialAccount(user.id, provider, profile.id);
-
         } else {
             user = await User.findByPk(socialAccount.userId);
         }
     } catch (error) {
-        logger.error(`Cannot create a user and its first list. ${error}`);
+        logger.error(`Cannot create a user.${error}`);
         return null;
     }
 
