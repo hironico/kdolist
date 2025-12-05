@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Typography,
@@ -14,6 +14,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BoltIcon from '@mui/icons-material/Bolt';
 import SwipeableListItem from '@/components/SwipeableListItem/SwipeableListItem';
+import ActionSheet, { ActionSheetEntry } from '@/components/ActionSheet/ActionSheet';
 import { TribeDetailsData } from './types';
 
 interface TribeDetailsProps {
@@ -28,6 +29,34 @@ interface TribeDetailsProps {
  * including picture, name, member counts, admins, and members.
  */
 const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId, onDeleteInvitation, onChangeMembershipStatus }) => {
+    // State for confirmation ActionSheet
+    const [confirmActionSheetOpen, setConfirmActionSheetOpen] = useState(false);
+    const [pendingAction, setPendingAction] = useState<{
+        membershipId: string;
+        memberName: string;
+        action: 'REMOVE_ADMIN' | 'ADD_ADMIN';
+    } | null>(null);
+
+    // Handlers for admin rights confirmation
+    const handleRequestAdminChange = (membershipId: string, memberName: string, action: 'REMOVE_ADMIN' | 'ADD_ADMIN') => {
+        setPendingAction({ membershipId, memberName, action });
+        setConfirmActionSheetOpen(true);
+    };
+
+    const handleConfirmAdminChange = () => {
+        if (pendingAction && onChangeMembershipStatus) {
+            const newStatus = pendingAction.action === 'REMOVE_ADMIN' ? 'MEMBER' : 'ADMIN';
+            onChangeMembershipStatus(pendingAction.membershipId, newStatus);
+        }
+        setConfirmActionSheetOpen(false);
+        setPendingAction(null);
+    };
+
+    const handleCancelAdminChange = () => {
+        setConfirmActionSheetOpen(false);
+        setPendingAction(null);
+    };
+
     if (!tribeDetails) {
         return (
             <Box sx={{ p: 2, textAlign: 'center' }}>
@@ -161,7 +190,11 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                                     ? {
                                         icon: <BoltIcon sx={{ color: '#FFA500' }} />,
                                         color: 'default' as const,
-                                        onAction: () => onChangeMembershipStatus(admin.membershipId, 'MEMBER'),
+                                        onAction: () => handleRequestAdminChange(
+                                            admin.membershipId,
+                                            `${admin.firstname} ${admin.lastname}`,
+                                            'REMOVE_ADMIN'
+                                        ),
                                     }
                                     : undefined
                             }
@@ -224,7 +257,11 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                                     ? {
                                         icon: <BoltIcon sx={{ color: '#D3D3D3' }} />,
                                         color: 'default' as const,
-                                        onAction: () => onChangeMembershipStatus(member.membershipId, 'ADMIN'),
+                                        onAction: () => handleRequestAdminChange(
+                                            member.membershipId,
+                                            `${member.firstname} ${member.lastname}`,
+                                            'ADD_ADMIN'
+                                        ),
                                     }
                                     : undefined
                             }
@@ -232,6 +269,29 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     ))}
                 </List>
             </Box>
+
+            {/* Confirmation ActionSheet */}
+            <ActionSheet
+                open={confirmActionSheetOpen}
+                handleClose={handleCancelAdminChange}
+                message={
+                    pendingAction?.action === 'REMOVE_ADMIN'
+                        ? `Retirer les droits d'administrateur à ${pendingAction.memberName} ?`
+                        : `Promouvoir ${pendingAction?.memberName} en tant qu'administrateur ?`
+                }
+                entries={[
+                    {
+                        label: pendingAction?.action === 'REMOVE_ADMIN' ? 'Retirer les droits' : 'Promouvoir',
+                        color: pendingAction?.action === 'REMOVE_ADMIN' ? 'error' : 'primary',
+                        onAction: handleConfirmAdminChange,
+                    },
+                ]}
+                defaultEntry={{
+                    label: 'Annuler',
+                    color: 'primary',
+                    onAction: handleCancelAdminChange,
+                }}
+            />
         </Box>
     );
 };

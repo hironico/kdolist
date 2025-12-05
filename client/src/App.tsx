@@ -11,20 +11,23 @@ import Notifications from '@/sections/Notifications';
 import Sidebar from '@/sections/Sidebar';
 import { LoginContextProvider } from './LoginContext';
 import { UpdateNotifier } from '@/components/UpdateNotifier';
+import { SwipeableListProvider } from '@/components/SwipeableListItem';
 
 function App() {
   return (
     <>
       <LoginContextProvider>
-        <CssBaseline />
-        <Notifications />
-        <HotKeys />
-        <UpdateNotifier />
-        <BrowserRouter>
-          <Header />
-          <Sidebar />
-          <Pages />
-        </BrowserRouter>
+        <SwipeableListProvider>
+          <CssBaseline />
+          <Notifications />
+          <HotKeys />
+          <UpdateNotifier />
+          <BrowserRouter>
+            <Header />
+            <Sidebar />
+            <Pages />
+          </BrowserRouter>
+        </SwipeableListProvider>
       </LoginContextProvider>
     </>
   );
