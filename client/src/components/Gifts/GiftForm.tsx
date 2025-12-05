@@ -385,7 +385,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
         onChange={handleInputChange}
         margin="normal"
         fullWidth
-        disabled={!editable}
+        InputProps={{ readOnly: !editable }}
       />
 
       <TextField
@@ -395,7 +395,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
         onChange={handleInputChange}
         margin="normal"
         fullWidth
-        disabled={!editable}
+        InputProps={{ readOnly: !editable }}
         placeholder="Nous en dire plus dans cette zone si besoin."
         multiline
         rows={2}
