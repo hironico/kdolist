@@ -109,6 +109,17 @@ export function KeycloakError() {
   const [searchParams] = useSearchParams();
   const errorMessage = searchParams.get('message') || 'An authentication error occurred';
 
+  useEffect(() => {
+    // If authentication failed, automatically redirect to login page after a short delay
+    if (errorMessage.toLowerCase().includes('authentication failed')) {
+      const timer = setTimeout(() => {
+        navigate('/login');
+      }, 2000); // 2 second delay to show the error message
+
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage, navigate]);
+
   return (
     <Box
       display="flex"
@@ -126,6 +137,11 @@ export function KeycloakError() {
         <Typography variant="body2">
           {errorMessage}
         </Typography>
+        {errorMessage.toLowerCase().includes('authentication failed') && (
+          <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic' }}>
+            Redirecting to login page...
+          </Typography>
+        )}
       </Alert>
       <Typography
         variant="body2"

@@ -29,7 +29,12 @@ async function initKeycloakClient() {
             response_types: ['code'],
         });
 
-        logger.info('Keycloak OIDC client initialized successfully');
+        // Set clock tolerance to handle time synchronization issues
+        // IMPORTANT: This is set to 900s (15 min) due to clock skew between server and Keycloak
+        // TODO: Fix server clock synchronization and reduce this to 60s
+        keycloakClient[Symbol.for('openid-client.clock_tolerance')] = 900;
+
+        logger.info('Keycloak OIDC client initialized successfully with 900s clock tolerance');
         return keycloakClient;
     } catch (error) {
         logger.error(`Failed to initialize Keycloak client: ${error.message}`);

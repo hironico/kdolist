@@ -5,7 +5,7 @@ const logger = require('../../logger');
 const { User, SocialAccount } = require('../../model');
 const usercontroller = require('../../controller/usercontroller');
 const giftlistcontroller = require('../../controller/giftlistcontroller');
-const { getAuthorizationUrl, getClient, refreshKeycloakClient } = require('../../config/keycloak');
+const { getAuthorizationUrl, getClient } = require('../../config/keycloak');
 
 let refreshTokens = [];
 
@@ -196,19 +196,7 @@ authApi.get('/keycloak/callback', async (req, res) => {
 
         logger.info(`Keycloak call back after login`);
 
-        // Check if the authorization flow took too long
-        const authStartTime = req.session.authStartTime;
-        if (authStartTime) {
-            const elapsedSeconds = (Date.now() - authStartTime) / 1000;
-            logger.info(`Time elapsed since auth start: ${elapsedSeconds.toFixed(2)} seconds`);
-
-            // Keycloak authorization codes typically expire after 60 seconds
-            if (elapsedSeconds > 50) {
-                logger.warn(`Authorization flow took ${elapsedSeconds.toFixed(2)} seconds - code may be expired`);
-            }
-        }
-
-        let client = getClient();
+        const client = getClient();
 
         if (!client) {
             throw new Error('Keycloak client not initialized');
@@ -230,76 +218,38 @@ authApi.get('/keycloak/callback', async (req, res) => {
                 { code_verifier: codeVerifier }
             );
         } catch (callbackError) {
-            logger.error(`Initial callback failed: ${callbackError.message}`);
+            logger.error(`Callback failed: ${callbackError.message}`);
+            logger.error(`Error name: ${callbackError.name}`);
+            logger.error(`Error details: ${JSON.stringify(callbackError, null, 2)}`);
 
-            // Check if this looks like an expired code or stale client issue
-            const errorMessage = callbackError.message.toLowerCase();
-            if (errorMessage.includes('expired') || errorMessage.includes('invalid') || errorMessage.includes('code')) {
-                logger.info('Attempting to refresh Keycloak client and retry...');
-
-                try {
-                    // Refresh the client configuration
-                    await refreshKeycloakClient();
-                    client = getClient();
-
-                    if (!client) {
-                        throw new Error('Failed to refresh Keycloak client');
-                    }
-
-                    // reinit the auth workflow
-                    const { authUrl, codeVerifier } = getAuthorizationUrl();
-
-                    // Store code verifier and timestamp in session for PKCE flow
-                    req.session.codeVerifier = codeVerifier;
-                    req.session.authStartTime = Date.now();
-
-                    res.redirect(authUrl);
-
-                } catch (retryError) {
-                    logger.error(`Retry after client refresh failed: ${retryError.message}`);
-
-                    // If it's an expired code, redirect to login with a specific message
-                    if (retryError.message.toLowerCase().includes('expired') ||
-                        retryError.message.toLowerCase().includes('code')) {
-                        const errorRedirectUrl = `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent('Authorization code expired. Please try logging in again.')}&retry=true`;
-                        return res.redirect(errorRedirectUrl);
-                    }
-
-                    throw retryError;
-                }
-            } else {
-                throw callbackError;
+            // Log additional error information if available
+            if (callbackError.error) {
+                logger.error(`OAuth error: ${callbackError.error}`);
             }
+            if (callbackError.error_description) {
+                logger.error(`OAuth error description: ${callbackError.error_description}`);
+            }
+            if (callbackError.response) {
+                logger.error(`Response status: ${callbackError.response.statusCode}`);
+                logger.error(`Response body: ${JSON.stringify(callbackError.response.body)}`);
+            }
+
+            // Completely destroy the session to start fresh
+            req.session.destroy((err) => {
+                if (err) {
+                    logger.error(`Failed to destroy session: ${err.message}`);
+                }
+            });
+
+            // Redirect to client error page to start over
+            const errorRedirectUrl = `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent('Authentication failed. Please try again.')}`;
+            return res.redirect(errorRedirectUrl);
         }
 
         logger.info('Successfully received tokens from Keycloak');
 
         // Get user info from Keycloak
-        let userInfo;
-        try {
-            userInfo = await client.userinfo(tokenSet.access_token);
-        } catch (userinfoError) {
-            logger.warn(`Failed to get user info with initial access token: ${userinfoError.message}`);
-
-            // Attempt to refresh the token if refresh_token is available
-            if (tokenSet.refresh_token) {
-                logger.info('Attempting to refresh the access token...');
-                try {
-                    tokenSet = await client.refresh(tokenSet.refresh_token);
-                    logger.info('Successfully refreshed the access token');
-
-                    // Retry getting user info with the new access token
-                    userInfo = await client.userinfo(tokenSet.access_token);
-                    logger.info('Successfully retrieved user info with refreshed token');
-                } catch (refreshError) {
-                    logger.error(`Failed to refresh token or get user info: ${refreshError.message}`);
-                    throw new Error(`Token refresh failed: ${refreshError.message}`);
-                }
-            } else {
-                logger.error('No refresh token available to retry');
-                throw new Error(`Failed to get user info and no refresh token available: ${userinfoError.message}`);
-            }
-        }
+        const userInfo = await client.userinfo(tokenSet.access_token);
 
         logger.info(`Keycloak user info: ${JSON.stringify(userInfo, null, 2)}`);
 
