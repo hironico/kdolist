@@ -212,8 +212,11 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        pb: '5px',
-        pt: '5px',
+        pt: '0px', pl: '5px', pr: '5px', pb: '5px',
+        m: '0px',
+        '&:last-child': {
+          pb: '0px'
+        }
       }}>
         <Typography
           variant="h6"
