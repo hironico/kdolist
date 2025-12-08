@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Fab } from '@mui/material';
+import { Fab, Slide } from '@mui/material';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 import { apiBaseUrl } from '@/config';
 import Meta from '@/components/Meta';
@@ -179,87 +179,89 @@ export function TribesPage() {
     return (
         <ProtectedRoute>
             <Meta title="Tribus" />
-            <FullSizeTopCenteredFlexBox>
-                <TribeList
-                    tribes={myTribes}
-                    currentUserId={loginInfo?.id}
-                    onAcceptInvite={handleAcceptInvite}
-                    onRejectInvite={handleRejectInvite}
-                    onLeaveTribe={handleLeaveTribe}
-                    onInviteUser={handleOpenInvite}
-                    onDeleteTribe={handleDeleteTribe}
-                    onViewDetails={handleViewDetails}
-                />
-                <FlexBox flexDirection={'row'} justifyContent={'center'} sx={{ position: 'fixed', bottom: 16, left: 0, right: 0, zIndex: 1000 }}>
-                    <Fab
-                        color="primary"
-                        aria-label="add"
-                        onClick={() => setCreateDialogOpen(true)}
-                    >
-                        <GroupAdd />
-                    </Fab>
-                </FlexBox>
+            <Slide direction="left" in={true} timeout={500}>
+                <FullSizeTopCenteredFlexBox>
+                    <TribeList
+                        tribes={myTribes}
+                        currentUserId={loginInfo?.id}
+                        onAcceptInvite={handleAcceptInvite}
+                        onRejectInvite={handleRejectInvite}
+                        onLeaveTribe={handleLeaveTribe}
+                        onInviteUser={handleOpenInvite}
+                        onDeleteTribe={handleDeleteTribe}
+                        onViewDetails={handleViewDetails}
+                    />
+                    <FlexBox flexDirection={'row'} justifyContent={'center'} sx={{ position: 'fixed', bottom: 16, left: 0, right: 0, zIndex: 1000 }}>
+                        <Fab
+                            color="primary"
+                            aria-label="add"
+                            onClick={() => setCreateDialogOpen(true)}
+                        >
+                            <GroupAdd />
+                        </Fab>
+                    </FlexBox>
 
-                <CreateTribeDialog
-                    open={createDialogOpen}
-                    onClose={() => setCreateDialogOpen(false)}
-                    onTribeCreated={fetchMyTribes}
-                />
+                    <CreateTribeDialog
+                        open={createDialogOpen}
+                        onClose={() => setCreateDialogOpen(false)}
+                        onTribeCreated={fetchMyTribes}
+                    />
 
-                <InviteUserDialog
-                    open={inviteDialogOpen}
-                    groupId={inviteGroupId}
-                    onClose={() => setInviteDialogOpen(false)}
-                    onUserInvited={fetchMyTribes}
-                />
+                    <InviteUserDialog
+                        open={inviteDialogOpen}
+                        groupId={inviteGroupId}
+                        onClose={() => setInviteDialogOpen(false)}
+                        onUserInvited={fetchMyTribes}
+                    />
 
-                <TribeDetailsDialog
-                    open={detailsDialogOpen}
-                    groupId={selectedGroupId}
-                    currentUserId={loginInfo?.id}
-                    onClose={handleCloseDetails}
-                    onDetailsChanged={fetchMyTribes}
-                />
+                    <TribeDetailsDialog
+                        open={detailsDialogOpen}
+                        groupId={selectedGroupId}
+                        currentUserId={loginInfo?.id}
+                        onClose={handleCloseDetails}
+                        onDetailsChanged={fetchMyTribes}
+                    />
 
-                {/* Leave Tribe Confirmation */}
-                <ActionSheet
-                    open={leaveTribeConfirmOpen}
-                    handleClose={() => setLeaveTribeConfirmOpen(false)}
-                    entries={[
-                        {
-                            label: 'Oui, quitter la tribu',
-                            color: 'error',
-                            onAction: confirmLeaveTribe,
-                        },
-                    ]}
-                    defaultEntry={{
-                        label: 'En fait, non',
-                        color: 'primary',
-                        onAction: () => setLeaveTribeConfirmOpen(false),
-                    }}
-                    message="Vraiment quitter cette tribu ?"
-                />
+                    {/* Leave Tribe Confirmation */}
+                    <ActionSheet
+                        open={leaveTribeConfirmOpen}
+                        handleClose={() => setLeaveTribeConfirmOpen(false)}
+                        entries={[
+                            {
+                                label: 'Oui, quitter la tribu',
+                                color: 'error',
+                                onAction: confirmLeaveTribe,
+                            },
+                        ]}
+                        defaultEntry={{
+                            label: 'En fait, non',
+                            color: 'primary',
+                            onAction: () => setLeaveTribeConfirmOpen(false),
+                        }}
+                        message="Vraiment quitter cette tribu ?"
+                    />
 
-                {/* Delete Tribe Confirmation */}
-                <ActionSheet
-                    open={deleteTribeConfirmOpen}
-                    handleClose={() => setDeleteTribeConfirmOpen(false)}
-                    entries={[
-                        {
-                            label: 'Oui, supprimer la tribu',
-                            color: 'error',
-                            onAction: confirmDeleteTribe,
-                        },
-                    ]}
-                    defaultEntry={{
-                        label: 'Laisses tomber',
-                        color: 'primary',
-                        onAction: () => setDeleteTribeConfirmOpen(false),
-                    }}
-                    message="Vaiment supprimer cette tribu ? Tous les membres seront retirés et cette action est irréversible."
-                />
+                    {/* Delete Tribe Confirmation */}
+                    <ActionSheet
+                        open={deleteTribeConfirmOpen}
+                        handleClose={() => setDeleteTribeConfirmOpen(false)}
+                        entries={[
+                            {
+                                label: 'Oui, supprimer la tribu',
+                                color: 'error',
+                                onAction: confirmDeleteTribe,
+                            },
+                        ]}
+                        defaultEntry={{
+                            label: 'Laisses tomber',
+                            color: 'primary',
+                            onAction: () => setDeleteTribeConfirmOpen(false),
+                        }}
+                        message="Vaiment supprimer cette tribu ? Tous les membres seront retirés et cette action est irréversible."
+                    />
 
-            </FullSizeTopCenteredFlexBox>
+                </FullSizeTopCenteredFlexBox>
+            </Slide>
         </ProtectedRoute>
     );
 };
