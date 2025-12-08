@@ -165,7 +165,11 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         console.error(JSON.stringify(response));
         showError(`Impossible de marquer ce cadeau comme favori.`);
       } else {
-        fetchListContents();
+        // Update local state instead of reloading entire list
+        const updatedContents = appContext.giftListContents.map(g =>
+          g.id === gift.id ? { ...g, isFavorite: !g.isFavorite } : g
+        );
+        appContext.setGiftListContents(updatedContents);
       }
     });
   };
