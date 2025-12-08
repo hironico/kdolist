@@ -86,18 +86,18 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
       const url = `${apiBaseUrl}/giftlist/contents/${appContext.giftList.id}`;
 
       api.get(url)
-      .then((response) => {
-        if (response.ok) {
-          response.json().then((data) => {
-            appContext.setGiftListContents(data);
-          }).finally(() => setLoading(false));
-        } else {
-          showError('Impossible de récupérer le contenu de la liste.');
-          console.error('Failed to fetch details', JSON.stringify(response, null, 2));
-          navigate('/login');
-          setLoading(false);
-        }
-      });
+        .then((response) => {
+          if (response.ok) {
+            response.json().then((data) => {
+              appContext.setGiftListContents(data);
+            }).finally(() => setLoading(false));
+          } else {
+            showError('Impossible de récupérer le contenu de la liste.');
+            console.error('Failed to fetch details', JSON.stringify(response, null, 2));
+            navigate('/login');
+            setLoading(false);
+          }
+        });
     } catch (error) {
       showError(`Erreur technique: ${error}`);
       console.error('Error fetching details:', error);
@@ -119,20 +119,20 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
   const deleteGift = () => {
     api.delete(`${apiBaseUrl}/gift/${gift.id}`)
-    .then((response) => {
-      if (!response.ok) {
-        console.error(JSON.stringify(response));
+      .then((response) => {
+        if (!response.ok) {
+          console.error(JSON.stringify(response));
+          showError(`Impossible de supprimer l'entrée dans la liste.`);
+        } else {
+          fetchListContents();
+          setGift(newEmptyGift);
+        }
+      }).catch(error => {
+        console.error(`Cannot delete gift item from the list: ${error}`);
         showError(`Impossible de supprimer l'entrée dans la liste.`);
-      } else {
-        fetchListContents();
-        setGift(newEmptyGift);
-      }
-    }).catch(error => {
-      console.error(`Cannot delete gift item from the list: ${error}`);
-      showError(`Impossible de supprimer l'entrée dans la liste.`);
-    }).finally(() => {
-      setConfirmDeleteOpen(false);
-    });
+      }).finally(() => {
+        setConfirmDeleteOpen(false);
+      });
   };
 
   const handleDeleteGift = () => {
@@ -165,7 +165,11 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         console.error(JSON.stringify(response));
         showError(`Impossible de marquer ce cadeau comme favori.`);
       } else {
-        fetchListContents();
+        // Update local state instead of reloading entire list
+        const updatedContents = appContext.giftListContents.map(g =>
+          g.id === gift.id ? { ...g, isFavorite: !g.isFavorite } : g
+        );
+        appContext.setGiftListContents(updatedContents);
       }
     });
   };
@@ -185,7 +189,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
     if (refresh) {
       fetchListContents();
-    }    
+    }
   }
 
   const actions: ActionSheetEntry[] = [
@@ -230,33 +234,33 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
   // Render content based on view mode
   let listContents;
-  
+
   if (loading) {
     const fbIcon = <FacebookLikeCircularProgress />;
     listContents = <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
   } else if (filteredGifts.length === 0) {
-    listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+'." />;
+    listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+' ou retire des filtres" />;
   } else if (viewMode === 'grid') {
     // Grid view
     listContents = filteredGifts.map((oneGift, index) => (
-          <Grid xs={12} sm={6} md={4} key={`kdo-grid-${index}`}>
-            <GiftGridItem
-              oneGift={oneGift}
-              isOwner={isOwner}
-              showTakenToOwner={showTakenToOwner}
-              editable={editable}
-              onClick={() => handleEditGift(oneGift)}
-              onDelete={() => handleConfirmDeleteGift(oneGift)}
-              onTake={() => toggleSelectGift(oneGift)}
-              onFavorite={() => toggleFavorite(oneGift)}
-            />
+      <Grid xs={6} sm={4} md={3} lg={2.4} key={`kdo-grid-${index}`}>
+        <GiftGridItem
+          oneGift={oneGift}
+          isOwner={isOwner}
+          showTakenToOwner={showTakenToOwner}
+          editable={editable}
+          onClick={() => handleEditGift(oneGift)}
+          onDelete={() => handleConfirmDeleteGift(oneGift)}
+          onTake={() => toggleSelectGift(oneGift)}
+          onFavorite={() => toggleFavorite(oneGift)}
+        />
       </Grid>
     ));
   } else {
     // List view
-    listContents = filteredGifts.map((oneGift, index) => (
-      <GiftsListItem 
-        key={`kdo-list-${index}`}
+    listContents = filteredGifts.map((oneGift) => (
+      <GiftsListItem
+        key={`gift-${oneGift.id}`}
         oneGift={oneGift}
         editable={editable}
         isOwner={isOwner}
@@ -264,33 +268,45 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         onDelete={() => handleConfirmDeleteGift(oneGift)}
         onTake={() => toggleSelectGift(oneGift)}
         onEdit={() => handleEditGift(oneGift)}
-        onFavorite={() => toggleFavorite(oneGift)} 
+        onFavorite={() => toggleFavorite(oneGift)}
       />
     ));
   }
 
-  // no filters if list is owned by current user and he/she did not force display of taken gifts
-  const giftFilters: Filter<Gift>[] = isOwner && !showTakenToOwner ? [] : [
-    {
+  // Build filters based on user role
+  const giftFilters: Filter<Gift>[] = [];
+
+  // Favorites filter - available for everyone
+  giftFilters.push({
+    id: 'gifts-favorites',
+    label: 'Favoris',
+    filterFn: function (item: Gift): boolean {
+      return item.isFavorite === true;
+    }
+  });
+
+  // Taken/non-taken filters - only if not owner or owner wants to see taken gifts
+  if (!isOwner || showTakenToOwner) {
+    giftFilters.push({
       id: 'gifts-non-taken',
       label: 'Non rayés',
       filterFn: function (item: Gift): boolean {
         return item.selectedById === null;
       }
-    },  
-    {
-        id: 'gifts-taken',
-        label: 'Rayés',
-        filterFn: function (item: Gift): boolean {
-          return item.selectedById !== null;
-        }
+    });
+    giftFilters.push({
+      id: 'gifts-taken',
+      label: 'Rayés',
+      filterFn: function (item: Gift): boolean {
+        return item.selectedById !== null;
       }
-    ];
+    });
+  }
 
   const onGiftFilterChange = useCallback((activeFilterIds: string[]) => {
-      const newActiveFilters = giftFilters.filter(f => activeFilterIds.includes(f.id));
-      setActiveFilters(newActiveFilters);
-    }, []);
+    const newActiveFilters = giftFilters.filter(f => activeFilterIds.includes(f.id));
+    setActiveFilters(newActiveFilters);
+  }, []);
 
   return (
     <Box display="grid" gridTemplateColumns="auto" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative">

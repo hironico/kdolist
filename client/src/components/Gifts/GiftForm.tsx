@@ -22,19 +22,7 @@ interface GiftFormProps {
 
 const defaultImages: GiftImage[] = [
   {
-    url: 'https://images.unsplash.com/photo-1482175828271-d793f8c731b2',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    giftId: ''
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1634038036367-7c0e7a95fa4c',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    giftId: ''
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1511895654441-f6a0e1db5cbd',
+    url: '/logo_kdolist-192.png',
     createdAt: new Date(),
     updatedAt: new Date(),
     giftId: ''
@@ -318,7 +306,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   // Force carousel to re-render when images change by using images length as key
   const carouselKey = `carousel-${images.length}-${images.map(img => img.url).join('-').substring(0, 50)}`;
 
-  const actions: BottomDialogAction[] = [
+  const actions: BottomDialogAction[] = editable ? [
     {
       icon: <AutoFixHighIcon />,
       label: 'Coller',
@@ -331,98 +319,98 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       onClick: () => handleSaveGift(updatedGift, true),
       disabled: isSaving
     }
-  ];
+  ] : [];
 
-  const contents = <Box component="form" sx={{ marginBottom: '20px' }}>
-    <Carousel key={carouselKey} sx={{ width: '100%' }}>
-      {images.map((oneImg, index) => {
-        const isDefaultImage = !oneImg.id && defaultImages.some(defImg => defImg.url === oneImg.url);
-        return (
-          <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>
-            <Box sx={{ position: 'relative', width: '250px', height: '250px' }}>
-              <Box
-                sx={{
-                  background: `url('${oneImg.url}')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  width: '100%',
-                  height: '100%',
-                }}
-                key={`gift-img-key-${index}`}
-              />
-              {editable && !isDefaultImage && (
-                <IconButton
-                  onClick={() => handleDeleteImage(oneImg)}
+  const contents = <Box sx={{ px: 2 }}>
+    <Box component="form" sx={{ marginBottom: '20px' }}>
+      <Carousel key={carouselKey} sx={{ width: '100%' }}>
+        {images.map((oneImg, index) => {
+          const isDefaultImage = !oneImg.id && defaultImages.some(defImg => defImg.url === oneImg.url);
+          return (
+            <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>
+              <Box sx={{ position: 'relative', width: '250px', height: '250px' }}>
+                <Box
                   sx={{
-                    position: 'absolute',
-                    bottom: 8,
-                    left: 8,
-                    bgcolor: 'rgba(255, 255, 255, 0.8)',
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.95)',
-                    },
+                    background: `url('${oneImg.url}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    width: '100%',
+                    height: '100%',
                   }}
-                  size="small"
-                >
-                  <HideImageIcon color="error" />
-                </IconButton>
-              )}
-            </Box>
-          </FullSizeCenteredFlexBox>
-        );
-      })}
-    </Carousel>
+                  key={`gift-img-key-${index}`}
+                />
+                {editable && !isDefaultImage && (
+                  <IconButton
+                    onClick={() => handleDeleteImage(oneImg)}
+                    sx={{
+                      position: 'absolute',
+                      bottom: 8,
+                      left: 8,
+                      bgcolor: 'rgba(255, 255, 255, 0.8)',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.95)',
+                      },
+                    }}
+                    size="small"
+                  >
+                    <HideImageIcon color="error" />
+                  </IconButton>
+                )}
+              </Box>
+            </FullSizeCenteredFlexBox>
+          );
+        })}
+      </Carousel>
 
-    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, mt: 2 }}>
-      {updatedGift.links?.map((link) => (
-        <Chip
-          key={link.id}
-          label={link.description}
-          onDelete={() => handleRemoveLink(link)}
-          onClick={() => handleRedirect(link.url)}
-          color='primary'
-          variant='filled'
-          sx={{
-            '&:hover': 'rgba(0, 0, 0, 0.04)'
-          }}
-        />
-      ))}
+      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, mt: 2 }}>
+        {updatedGift.links?.map((link) => (
+          <Chip
+            key={link.id}
+            label={link.description}
+            onDelete={() => handleRemoveLink(link)}
+            onClick={() => handleRedirect(link.url)}
+            color='primary'
+            variant='filled'
+            sx={{
+              '&:hover': 'rgba(0, 0, 0, 0.04)'
+            }}
+          />
+        ))}
+      </Box>
+
+      <TextField
+        label="Nom"
+        name="name"
+        value={updatedGift.name}
+        onChange={handleInputChange}
+        margin="normal"
+        fullWidth
+        InputProps={{ readOnly: !editable }}
+      />
+
+      <TextField
+        label="Description"
+        name="description"
+        value={updatedGift.description ?? ''}
+        onChange={handleInputChange}
+        margin="normal"
+        fullWidth
+        InputProps={{ readOnly: !editable }}
+        placeholder="Nous en dire plus dans cette zone si besoin."
+        multiline
+        rows={2}
+      />
     </Box>
-
-    <TextField
-      label="Nom"
-      name="name"
-      value={updatedGift.name}
-      onChange={handleInputChange}
-      margin="normal"
-      fullWidth
-      disabled={!editable}
-    />
-
-    <TextField
-      label="Description"
-      name="description"
-      value={updatedGift.description ?? ''}
-      onChange={handleInputChange}
-      margin="normal"
-      fullWidth
-      disabled={!editable}
-      placeholder="Nous en dire plus dans cette zone si besoin."
-      multiline
-      rows={2}
-    />
-
-
   </Box>
 
   return (
     <BottomDialog
       open={open}
       handleClose={() => onClose(false)}
-      title={'Editer...'}
+      title={editable ? 'Editer' : 'Détails'}
       actions={actions}
       contents={contents}
-      disableBackdropClick={true} />
+      disableBackdropClick={editable} />
   );
 };
 

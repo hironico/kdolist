@@ -7,13 +7,14 @@ enum Pages {
   Welcome,
   LoginPage,
   MyLists,
+  Tribes,
+  CheckUpdates,
+  PrivacyPage,
   ListContentsPage,
   SharePage,
-  PrivacyPage,
   KeycloakCallback,
   KeycloakError,
   ExternalRedirect,
-  CheckUpdates,
   NotFound,
 }
 

@@ -20,30 +20,30 @@ type GiftGridItemProps = {
   onFavorite: () => void;
 };
 
-const GiftGridItem: React.FC<GiftGridItemProps> = ({ 
-  oneGift, 
-  isOwner, 
-  showTakenToOwner, 
+const GiftGridItem: React.FC<GiftGridItemProps> = ({
+  oneGift,
+  isOwner,
+  showTakenToOwner,
   editable,
-  onClick, 
+  onClick,
   onDelete,
   onTake,
-  onFavorite 
+  onFavorite
 }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(menuAnchorEl);
 
   const isTaken = oneGift.selectedById !== null;
   const isFavorite = oneGift.isFavorite || false;
-  
+
   // Show taken indicator if:
   // - Gift is taken AND user is NOT the owner, OR
   // - Gift is taken AND user IS the owner AND showTakenToOwner is enabled
   const shouldShowTaken = isTaken && (!isOwner || showTakenToOwner);
 
   // Get first image or use default
-  const imageUrl = oneGift.images && oneGift.images.length > 0 
-    ? oneGift.images[0].url 
+  const imageUrl = oneGift.images && oneGift.images.length > 0
+    ? oneGift.images[0].url
     : '/logo_kdolist-192.png'; // Default image
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -77,11 +77,11 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
   };
 
   return (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         cursor: 'pointer',
         position: 'relative',
-        height: '100%',
+        aspectRatio: '1 / 1',
         display: 'flex',
         flexDirection: 'column',
         transition: 'transform 0.2s, box-shadow 0.2s',
@@ -93,25 +93,26 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
       onClick={onClick}
     >
       {/* Image section */}
-      <Box sx={{ position: 'relative' }}>
+      <Box sx={{ position: 'relative', height: '65%' }}>
         <CardMedia
           component="img"
-          height="200"
           image={imageUrl}
           alt={oneGift.name}
           sx={{
             objectFit: 'cover',
             opacity: shouldShowTaken ? 0.5 : 1,
+            width: '100%',
+            height: '100%',
           }}
         />
-        
+
         {/* Top-left: Taken and Favorite indicators */}
         {(shouldShowTaken || isFavorite) && (
           <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 0.5 }}>
             {shouldShowTaken && (
-              <IconButton 
+              <IconButton
                 size="small"
-                sx={{ 
+                sx={{
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' }
                 }}
@@ -120,9 +121,9 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
               </IconButton>
             )}
             {isFavorite && (
-              <IconButton 
+              <IconButton
                 size="small"
-                sx={{ 
+                sx={{
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' }
                 }}
@@ -135,10 +136,10 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
 
         {/* Top-right: Menu button */}
         <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }}>
-          <IconButton 
+          <IconButton
             size="small"
             onClick={handleMenuOpen}
-            sx={{ 
+            sx={{
               backgroundColor: 'rgba(255, 255, 255, 0.9)',
               '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' }
             }}
@@ -206,15 +207,25 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
       </Box>
 
       {/* Content section */}
-      <CardContent sx={{ flexGrow: 1, pb: 2 }}>
-        <Typography 
-          variant="h6" 
-          component="div" 
-          sx={{ 
+      <CardContent sx={{
+        height: '35%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        pt: '0px', pl: '5px', pr: '5px', pb: '5px',
+        m: '0px',
+        '&:last-child': {
+          pb: '0px'
+        }
+      }}>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{
             fontSize: '1rem',
             fontWeight: 500,
             textDecoration: shouldShowTaken ? 'line-through' : 'none',
-            mb: 0.5,
+            mb: '0px',
             lineHeight: 1.3,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -225,23 +236,6 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
         >
           {oneGift.name}
         </Typography>
-        
-        {oneGift.description && (
-          <Typography 
-            variant="body2" 
-            color="text.secondary"
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              fontSize: '0.875rem',
-            }}
-          >
-            {oneGift.description}
-          </Typography>
-        )}
       </CardContent>
     </Card>
   );

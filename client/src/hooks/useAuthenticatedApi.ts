@@ -4,6 +4,7 @@ import {
   authenticatedGet,
   authenticatedPost,
   authenticatedPut,
+  authenticatedPatch,
   authenticatedDelete,
 } from '@/utils/api';
 
@@ -65,6 +66,20 @@ export function useAuthenticatedApi() {
     [loginInfo.jwt, loginInfo.accessToken, handleTokenRefresh]
   );
 
+  // Authenticated PATCH request
+  const patch = useCallback(
+    async (url: string, body: any): Promise<Response> => {
+      return authenticatedPatch(
+        url,
+        body,
+        loginInfo.jwt || '',
+        loginInfo.accessToken,
+        handleTokenRefresh
+      );
+    },
+    [loginInfo.jwt, loginInfo.accessToken, handleTokenRefresh]
+  );
+
   // Authenticated DELETE request
   const del = useCallback(
     async (url: string): Promise<Response> => {
@@ -82,6 +97,7 @@ export function useAuthenticatedApi() {
     get,
     post,
     put,
+    patch,
     delete: del,
   };
 }

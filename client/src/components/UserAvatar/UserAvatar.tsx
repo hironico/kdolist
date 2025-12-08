@@ -80,9 +80,10 @@ const UserAvatar = () => {
         });
       }
 
-      // Clear local storage
+      // Clear ALL authentication-related data from local storage
       localStorage.removeItem('jwt');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('kdolist_auth');
 
       // Clear login context
       appContext.setLoginInfo({
@@ -110,12 +111,13 @@ const UserAvatar = () => {
       // Even if logout fails, clear local state and redirect
       localStorage.removeItem('jwt');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('kdolist_auth');
       navigate('/login');
     }
   };
 
   const { username, accessTokenProvider } = appContext.loginInfo;
-  
+
   if (username === '') {
     return <></>;
   }

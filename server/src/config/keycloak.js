@@ -10,18 +10,18 @@ let codeVerifier = null;
 async function initKeycloakClient() {
     try {
         const keycloakIssuerUrl = process.env.KEYCLOAK_ISSUER_URL;
-        
+
         if (!keycloakIssuerUrl) {
             logger.warn('KEYCLOAK_ISSUER_URL not configured. Keycloak authentication will not be available.');
             return null;
         }
 
         logger.info(`Discovering Keycloak configuration from: ${keycloakIssuerUrl}`);
-        
+
         const keycloakIssuer = await Issuer.discover(keycloakIssuerUrl);
-        
+
         logger.info(`Discovered issuer: ${keycloakIssuer.issuer}`);
-        
+
         keycloakClient = new keycloakIssuer.Client({
             client_id: process.env.KEYCLOAK_CLIENT_ID,
             client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
@@ -29,7 +29,14 @@ async function initKeycloakClient() {
             response_types: ['code'],
         });
 
-        logger.info('Keycloak OIDC client initialized successfully');
+        // Set clock tolerance to handle time synchronization issues
+        // This must be set on BOTH the issuer and client for proper JWT validation
+        // Set to 300 seconds (5 minutes) to handle clock skew
+        const clockToleranceSymbol = Symbol.for('openid-client.custom.clock_tolerance');
+        keycloakIssuer[clockToleranceSymbol] = 300;
+        keycloakClient[clockToleranceSymbol] = 300;
+
+        logger.info('Keycloak OIDC client initialized successfully with 300s clock tolerance');
         return keycloakClient;
     } catch (error) {
         logger.error(`Failed to initialize Keycloak client: ${error.message}`);
@@ -79,8 +86,18 @@ function setCodeVerifier(verifier) {
     codeVerifier = verifier;
 }
 
+/**
+ * Refresh the Keycloak client by re-discovering the issuer
+ * This can be useful if the client configuration becomes stale
+ */
+async function refreshKeycloakClient() {
+    logger.info('Refreshing Keycloak client configuration...');
+    return await initKeycloakClient();
+}
+
 module.exports = {
     initKeycloakClient,
+    refreshKeycloakClient,
     getAuthorizationUrl,
     getClient,
     getCodeVerifier,

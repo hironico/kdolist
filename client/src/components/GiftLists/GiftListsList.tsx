@@ -9,6 +9,7 @@ import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { FormatListBulleted } from '@mui/icons-material';
+import GroupIcon from '@mui/icons-material/Group';
 import { BottomDialog } from '../BottomDialog';
 import ListEditor from '@/components/GiftLists/ListEditorForm';
 import GiftListsFAB from './GiftListsFAB';
@@ -20,6 +21,8 @@ import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 
 const GiftListsList: React.FC = () => {
   const [giftLists, setGiftLists] = useState<GiftList[]>([]);
+  const [userTribes, setUserTribes] = useState<any[]>([]);
+  const [tribeListsMap, setTribeListsMap] = useState<{ [key: string]: GiftList[] }>({});
   const [activeFilters, setActiveFilters] = useState<Filter<GiftList>[]>([]);
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -45,8 +48,10 @@ const GiftListsList: React.FC = () => {
       setLoading(false);
 
       if (response.ok) {
-        const myLists = await response.json();
-        setGiftLists(myLists);
+        const data = await response.json();
+        setGiftLists(data.myLists || []);
+        setUserTribes(data.userTribes || []);
+        setTribeListsMap(data.tribeListsMap || {});
       }
     } catch (error) {
       setLoading(false);
@@ -147,6 +152,7 @@ const GiftListsList: React.FC = () => {
 
   const listEditor = <ListEditor onListSaved={handleListSaved} />;
 
+  // Build filters dynamically based on user's tribes
   const giftListsFilters: Filter<GiftList>[] = [
     {
       id: 'my-lists',
@@ -155,83 +161,174 @@ const GiftListsList: React.FC = () => {
         return item.ownerId === appContext.loginInfo.profile?.id;
       }
     },
-    {
-      id: 'shared-lists',
-      label: 'Autres listes',
+    ...userTribes.map(tribe => ({
+      id: `tribe-${tribe.id}`,
+      label: tribe.name,
       filterFn: function (item: GiftList): boolean {
-        return item.ownerId !== appContext.loginInfo.profile?.id;
+        // Check if this list is in the tribe's lists
+        const tribeLists = tribeListsMap[tribe.id] || [];
+        return tribeLists.some(tribeList => tribeList.id === item.id);
       }
-    }
+    }))
   ];
 
   const onGiftFilterChange = useCallback((activeFilterIds: string[]) => {
     const newActiveFilters = giftListsFilters.filter(f => activeFilterIds.includes(f.id));
     setActiveFilters(newActiveFilters);
-  }, []);
+  }, [userTribes, tribeListsMap]);
 
 
-  const filteredLists = giftLists.filter(list => {
-    if (activeFilters.length === 0) {
-      return true;
-    }
-
-    let matching = false;
-    activeFilters.forEach(filter => {
-      matching = matching || filter.filterFn(list);
+  const filteredLists = (() => {
+    // Combine all unique lists from giftLists and tribeListsMap
+    const allLists = [...giftLists];
+    Object.values(tribeListsMap).forEach(tribeLists => {
+      tribeLists.forEach(list => {
+        if (!allLists.find(l => l.id === list.id)) {
+          allLists.push(list);
+        }
+      });
     });
 
-    return matching;
-  });
+    // If no filters are active, show all lists
+    if (activeFilters.length === 0) {
+      return allLists;
+    }
+
+    // Collect all lists that match any active filter
+    const matchingListIds = new Set<string>();
+
+    activeFilters.forEach(filter => {
+      if (filter.id === 'my-lists') {
+        giftLists.forEach(list => {
+          if (filter.filterFn(list)) {
+            matchingListIds.add(list.id);
+          }
+        });
+      } else if (filter.id.startsWith('tribe-')) {
+        const tribeId = filter.id.replace('tribe-', '');
+        const tribeLists = tribeListsMap[tribeId] || [];
+        tribeLists.forEach(list => {
+          matchingListIds.add(list.id);
+        });
+      }
+    });
+
+    return allLists.filter(list => matchingListIds.has(list.id));
+  })();
 
   return (
     <Box display="grid" gridTemplateColumns="auto" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative">
-        <FilterBar<GiftList> onFiltersChange={onGiftFilterChange} filters={giftListsFilters} />
-      {
-        filteredLists.length > 0 ? (
-          <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start'}}>
-            {filteredLists.map((item, index) => {
-              const modifDate = new Date(item.updatedAt.toString());
-              const secondaryText = (
-                <>
-                  <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
-                  <br />
-                  <Typography variant="caption">{`Par: ${item.owner?.firstname}`}</Typography>
-                </>
-              );
+      <FilterBar<GiftList> onFiltersChange={onGiftFilterChange} filters={giftListsFilters} />
+      {loading ? (
+        <EmptyStateCard
+          title="Patience..."
+          caption="Les listes de cadeaux sont en train d'être récupérées. Ca ne devrait pas être long."
+          icon={<FacebookLikeCircularProgress />}
+        />
+      ) : userTribes.length === 0 && activeFilters.length === 0 ? (
+        // Show empty state when user has no tribes and no filters are active
+        <Box sx={{ overflowY: 'auto', alignSelf: 'start' }}>
+          <EmptyStateCard
+            title="Rejoins une tribu !"
+            caption="Tu ne fais partie d'aucune tribu pour le moment. Rejoins ou crée une tribu pour voir les listes des autres membres."
+            icon={<GroupIcon />}
+          />
+          {giftLists.length > 0 && (
+            <>
+              <Typography variant="h6" sx={{ mt: 3, mb: 2, px: 1 }}>
+                Mes Listes
+              </Typography>
+              <List sx={{ m: '0px' }}>
+                {giftLists.map((item, index) => {
+                  const modifDate = new Date(item.updatedAt.toString());
+                  const secondaryText = (
+                    <>
+                      <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
+                      <br />
+                      <Typography variant="caption">{`Par: ${item.owner?.firstname}`}</Typography>
+                    </>
+                  );
 
-              const deleteAction: SwipeableListItemAction = {
-                icon: <DeleteIcon />,
-                color: 'error',
-                onAction: () => handleSelectAndConfirmDelete(item),
-              };
+                  const deleteAction: SwipeableListItemAction = {
+                    icon: <DeleteIcon />,
+                    color: 'error',
+                    onAction: () => handleSelectAndConfirmDelete(item),
+                  };
 
-              const editListAction: SwipeableListItemAction = {
-                icon: <EditIcon />,
-                color: 'default',
-                onAction: () => handleEditGiftList(item),
-              };
+                  const editListAction: SwipeableListItemAction = {
+                    icon: <EditIcon />,
+                    color: 'default',
+                    onAction: () => handleEditGiftList(item),
+                  };
 
-              const icon = <FormatListBulleted />;
+                  const icon = <FormatListBulleted />;
+                  const editable = item.ownerId === appContext.loginInfo.profile?.id;
 
-              const editable = item.ownerId === appContext.loginInfo.profile?.id;
+                  return (
+                    <SwipeableListItem
+                      onClickMain={() => handleNavigateList(item, editable)}
+                      action1={editable ? deleteAction : undefined}
+                      action2={editable ? editListAction : undefined}
+                      primaryText={item.name}
+                      secondaryText={secondaryText}
+                      icon={icon}
+                      keyId={`index-${index}`}
+                      key={`index-${index}`}
+                    />
+                  );
+                })}
+              </List>
+            </>
+          )}
+        </Box>
+      ) : filteredLists.length > 0 ? (
+        <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+          {filteredLists.map((item, index) => {
+            const modifDate = new Date(item.updatedAt.toString());
+            const secondaryText = (
+              <>
+                <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
+                <br />
+                <Typography variant="caption">{`Par: ${item.owner?.firstname}`}</Typography>
+              </>
+            );
 
-              return (
-                <SwipeableListItem
-                  onClickMain={() => handleNavigateList(item, editable)}
-                  action1={editable ? deleteAction : undefined}
-                  action2={editable ? editListAction : undefined}
-                  primaryText={item.name}
-                  secondaryText={secondaryText}
-                  icon={icon}
-                  keyId={`index-${index}`}
-                  key={`index-${index}`}
-                />
-              );
-            })}
-          </List>
-        ) : loading ? (<EmptyStateCard title="Patience..." caption="Les listes de cadeaux sont en train d'être récupérées. Ca ne devrait pas être long." icon=<FacebookLikeCircularProgress/> />)
-              : (<EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter une liste, appuie sur le bouton '+'." icon=<SentimentVeryDissatisfiedIcon/> />)
-        }
+            const deleteAction: SwipeableListItemAction = {
+              icon: <DeleteIcon />,
+              color: 'error',
+              onAction: () => handleSelectAndConfirmDelete(item),
+            };
+
+            const editListAction: SwipeableListItemAction = {
+              icon: <EditIcon />,
+              color: 'default',
+              onAction: () => handleEditGiftList(item),
+            };
+
+            const icon = <FormatListBulleted />;
+            const editable = item.ownerId === appContext.loginInfo.profile?.id;
+
+            return (
+              <SwipeableListItem
+                onClickMain={() => handleNavigateList(item, editable)}
+                action1={editable ? deleteAction : undefined}
+                action2={editable ? editListAction : undefined}
+                primaryText={item.name}
+                secondaryText={secondaryText}
+                icon={icon}
+                keyId={`index-${index}`}
+                key={`index-${index}`}
+              />
+            );
+          })}
+        </List>
+      ) : (
+        <EmptyStateCard
+          title="C'est vide par ici ..."
+          caption="Pour ajouter une liste, appuie sur le bouton '+'."
+          icon={<SentimentVeryDissatisfiedIcon />}
+        />
+      )}
 
       <BottomDialog
         title="Nouvelle liste"

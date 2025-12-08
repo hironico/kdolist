@@ -166,6 +166,31 @@ export async function authenticatedPut(
 }
 
 /**
+ * Helper for making authenticated PATCH requests with auto-refresh
+ */
+export async function authenticatedPatch(
+  url: string,
+  body: any,
+  jwt: string,
+  refreshToken: string | undefined,
+  onTokenRefresh?: (newJwt: string) => void
+): Promise<Response> {
+  return fetchWithTokenRefresh(
+    url,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    },
+    jwt,
+    refreshToken,
+    onTokenRefresh
+  );
+}
+
+/**
  * Helper for making authenticated DELETE requests with auto-refresh
  */
 export async function authenticatedDelete(

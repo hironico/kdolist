@@ -1,0 +1,1 @@
+export { TribesPage } from './TribesPage';

@@ -18,7 +18,7 @@ export function KeycloakCallback() {
         // Extract tokens from URL parameters
         const token = searchParams.get('token');
         const refreshToken = searchParams.get('refresh');
-        
+
         if (!token) {
           throw new Error('No authentication token received');
         }
@@ -32,10 +32,10 @@ export function KeycloakCallback() {
             .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
             .join('')
         );
-        
+
         const payload = JSON.parse(jsonPayload);
 
-        console.log(`Login callback with user: ${JSON.stringify(payload, null, 4)}`);
+        // console.log(`Login callback with user: ${JSON.stringify(payload, null, 4)}`);
 
         // Update login context with user information
         setLoginInfo({
@@ -73,10 +73,10 @@ export function KeycloakCallback() {
         }
       } catch (error) {
         console.error('Authentication callback error:', error);
-        navigate('/auth/error', { 
-          state: { 
-            message: error instanceof Error ? error.message : 'Authentication failed' 
-          } 
+        navigate('/auth/error', {
+          state: {
+            message: error instanceof Error ? error.message : 'Authentication failed'
+          }
         });
       }
     };
@@ -109,6 +109,17 @@ export function KeycloakError() {
   const [searchParams] = useSearchParams();
   const errorMessage = searchParams.get('message') || 'An authentication error occurred';
 
+  useEffect(() => {
+    // If authentication failed, automatically redirect to login page after a short delay
+    if (errorMessage.toLowerCase().includes('authentication failed')) {
+      const timer = setTimeout(() => {
+        navigate('/login');
+      }, 2000); // 2 second delay to show the error message
+
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage, navigate]);
+
   return (
     <Box
       display="flex"
@@ -126,10 +137,15 @@ export function KeycloakError() {
         <Typography variant="body2">
           {errorMessage}
         </Typography>
+        {errorMessage.toLowerCase().includes('authentication failed') && (
+          <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic' }}>
+            Redirecting to login page...
+          </Typography>
+        )}
       </Alert>
-      <Typography 
-        variant="body2" 
-        color="primary" 
+      <Typography
+        variant="body2"
+        color="primary"
         sx={{ cursor: 'pointer', textDecoration: 'underline' }}
         onClick={() => navigate('/login')}
       >

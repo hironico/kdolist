@@ -1,4 +1,4 @@
-const { User, Group, GiftList, Gift, Notification, GroupMembership, SocialAccount } = require('../model/model');
+const { User, Group, GiftList, Gift, Notification, GroupMembership, SocialAccount } = require('../model');
 
 class UserController {
   async createUser(username, firstname, lastname, email) {
@@ -21,7 +21,7 @@ class UserController {
     if (!user) throw new Error('User not found');
 
     const ownLists = user.GiftLists;
-    const accessibleLists = user.GroupMemberships.flatMap(membership => 
+    const accessibleLists = user.GroupMemberships.flatMap(membership =>
       membership.Group.GroupAccesses.map(access => access.GiftList)
     );
 
@@ -104,6 +104,44 @@ class UserController {
     gift.isHidden = isHidden;
     gift.selectedAt = new Date();
     return await gift.save();
+  }
+  /**
+   * Helper function to remove accents from a string
+   */
+  _removeAccents(str) {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  /**
+   * Search users by username, firstname, lastname, or email
+   * Case-insensitive and accent-insensitive search
+   */
+  async searchUsers(query) {
+    const { Op, Sequelize } = require('sequelize');
+    
+    // Get all users first (with a reasonable limit to avoid performance issues)
+    const allUsers = await User.findAll({
+      attributes: ['id', 'username', 'firstname', 'lastname', 'email'],
+      limit: 1000 // Add a reasonable limit
+    });
+    
+    // Normalize the search query
+    const normalizedQuery = this._removeAccents(query.toLowerCase());
+    
+    // Filter users in JavaScript for accent-insensitive search
+    const matchedUsers = allUsers.filter(user => {
+      const normalizedUsername = this._removeAccents((user.username || '').toLowerCase());
+      const normalizedFirstname = this._removeAccents((user.firstname || '').toLowerCase());
+      const normalizedLastname = this._removeAccents((user.lastname || '').toLowerCase());
+      const normalizedEmail = (user.email || '').toLowerCase(); // Email usually doesn't have accents
+      
+      return normalizedUsername.includes(normalizedQuery) ||
+             normalizedFirstname.includes(normalizedQuery) ||
+             normalizedLastname.includes(normalizedQuery) ||
+             normalizedEmail.includes(normalizedQuery);
+    });
+    
+    return matchedUsers;
   }
 }
 

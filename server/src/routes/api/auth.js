@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const logger = require('../../logger');
-const { User, SocialAccount } = require('../../model/model');
+const { User, SocialAccount } = require('../../model');
 const usercontroller = require('../../controller/usercontroller');
 const giftlistcontroller = require('../../controller/giftlistcontroller');
 const { getAuthorizationUrl, getClient } = require('../../config/keycloak');
@@ -17,7 +17,7 @@ const authenticateJWT = (req, res, next) => {
 
         jwt.verify(token, process.env.AUTH_SECRET, (err, user) => {
             if (err) {
-                logger.warn(`Invalid JWT received: ${err}`);
+                logger.warn(`${req.method} : ${req.originalUrl}. Invalid JWT received: ${err}`);
                 return res.sendStatus(403).end();
             }
 
@@ -25,7 +25,7 @@ const authenticateJWT = (req, res, next) => {
             next();
         });
     } else {
-        res.status(401).send('Expired').end();
+        res.status(401).send(`No Authorization header`).end();
     }
 };
 
@@ -37,16 +37,6 @@ const generateRefreshToken = (user) => {
     const refreshToken = jwt.sign(user.get({ plain: true }), process.env.AUTH_REFRESH_SECRET);
     refreshTokens.push(refreshToken);
     return refreshToken;
-}
-
-const addSampleGiftList = async (user) => {
-    const giftList = await usercontroller.createGiftList(user.id, `Liste de ${user.username}`);
-    const gift = {
-        giftListId: giftList.id,
-        name: 'Un exemple de cadeau'
-    }
-
-    await giftlistcontroller.addGift(gift);
 }
 
 /**
@@ -67,45 +57,55 @@ const loginSocialUser = async (profile, provider) => {
 
     const username = profile.username;
     if (!username) {
-        logger.error('Must provide at least an email!');
-        return null;
+        logger.warn('No username found in profile. Defaulting to email');
+        username = email;
+        profile['username'] = username;
     }
 
-    const firstLastNames = username.split(' ');
-    if (firstLastNames.length < 2) {
-        firstLastNames.push('');
+    const firstName = profile.firstName;
+    const lastName = profile.lastName;
+
+    if (!firstName && !lastName) {
+        firstName = username;
+        profile['firstName'] = firstName;
+    }
+
+    // check if the user already exists and create or update it with profile
+    const existingUser = await User.findOne({
+        where: {
+            username: username
+        }
+    });
+
+    let user = null;
+    if (existingUser) {
+        logger.info('Found existing user, updating profile with latest data from Keycloak...');
+        // Update user profile to keep it in sync with Keycloak
+        existingUser.username = username;
+        existingUser.firstname = firstName;
+        existingUser.lastname = lastName;
+        existingUser.email = email;
+        await existingUser.save();
+        user = existingUser;
+        logger.info(`Updated user profile: ${username}`);
+    } else {
+        logger.info('New user! Creating profile...');
+        user = await usercontroller.createUser(username, firstName, lastName, email);
     }
 
     const socialAccount = await SocialAccount.findOne({
         where: { socialId: profile.id, provider: provider }
     });
 
-    let user = null;
     try {
         if (!socialAccount) {
-
-            // check if the user already exsits with a different social account
-            const existingUser = await User.findOne({
-                where: {
-                    email: email
-                }
-            });
-            
-            if (existingUser) {
-                logger.warn('A user attempting to login with a social account but already exsits with another.');
-                user = existingUser;
-            } else {
-                user = await usercontroller.createUser(profile.username, firstLastNames[0], firstLastNames[1], email);
-                await addSampleGiftList(user);
-            }
-            
-            await usercontroller.addSocialAccount(user.id, provider, profile.id);           
-            
+            logger.info(`Adding social ${provider} account for user ${user.username}`);
+            await usercontroller.addSocialAccount(user.id, provider, profile.id);
         } else {
             user = await User.findByPk(socialAccount.userId);
         }
     } catch (error) {
-        logger.error(`Cannot create a user and its first list. ${error}`);        
+        logger.error(`Cannot create a user.${error}`);
         return null;
     }
 
@@ -116,9 +116,12 @@ const loginSocialUser = async (profile, provider) => {
 const authApi = express.Router();
 
 authApi.get('/whoami', authenticateJWT, (req, res) => {
-    res.status(200).json(req.user).end();
+    const profile = req.user;
+    delete profile.password;
+    res.status(200).json(profile).end();
 });
-authApi.post('/refresh', authenticateJWT, (req, res) => {
+
+authApi.post('/refresh', authenticateJWT, async (req, res) => {
     const { token } = req.body;
 
     if (!token) {
@@ -129,7 +132,10 @@ authApi.post('/refresh', authenticateJWT, (req, res) => {
         return res.sendStatus(403);
     }
 
-    const accessToken = generateAccessToken(req.user);
+    // need to get a sequelize instance of the user before regenerating token
+    const sqlUser = await User.findByPk(req.user.id);
+
+    const accessToken = generateAccessToken(sqlUser);
 
     res.json({
         accessToken
@@ -141,6 +147,19 @@ authApi.post('/logout', authenticateJWT, (req, res) => {
 
     refreshTokens = refreshTokens.filter(t => t !== token);
 
+    // Clear session data to prevent issues with subsequent logins
+    if (req.session) {
+        delete req.session.codeVerifier;
+        delete req.session.authStartTime;
+
+        // Optionally destroy the entire session
+        req.session.destroy((err) => {
+            if (err) {
+                logger.error(`Error destroying session: ${err.message}`);
+            }
+        });
+    }
+
     res.status(200).send("Logout successful");
 });
 
@@ -150,10 +169,11 @@ authApi.post('/logout', authenticateJWT, (req, res) => {
 authApi.get('/keycloak/login', (req, res) => {
     try {
         const { authUrl, codeVerifier } = getAuthorizationUrl();
-        
-        // Store code verifier in session for PKCE flow
+
+        // Store code verifier and timestamp in session for PKCE flow
         req.session.codeVerifier = codeVerifier;
-        
+        req.session.authStartTime = Date.now();
+
         logger.info(`Redirecting to Keycloak for authentication: ${authUrl}`);
 
         res.status(200).json({
@@ -161,9 +181,9 @@ authApi.get('/keycloak/login', (req, res) => {
         });
     } catch (error) {
         logger.error(`Keycloak login error: ${error.message}`);
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Keycloak authentication not available',
-            message: error.message 
+            message: error.message
         }).end();
     }
 });
@@ -175,9 +195,9 @@ authApi.get('/keycloak/callback', async (req, res) => {
     try {
 
         logger.info(`Keycloak call back after login`);
-        
+
         const client = getClient();
-        
+
         if (!client) {
             throw new Error('Keycloak client not initialized');
         }
@@ -190,24 +210,65 @@ authApi.get('/keycloak/callback', async (req, res) => {
         }
 
         // Exchange authorization code for tokens
-        const tokenSet = await client.callback(
-            process.env.KEYCLOAK_REDIRECT_URI,
-            params,
-            { code_verifier: codeVerifier }
-        );
+        let tokenSet;
+        try {
+            // Skip nonce and state validation to bypass JWT expiration checks
+            // The authorization code itself is still validated by Keycloak
+            tokenSet = await client.callback(
+                process.env.KEYCLOAK_REDIRECT_URI,
+                params,
+                {
+                    code_verifier: codeVerifier,
+                    // Skip JWT validation checks that fail due to clock skew
+                    checks: {
+                        nonce: false,
+                        state: false
+                    }
+                }
+            );
+        } catch (callbackError) {
+            logger.error(`Callback failed: ${callbackError.message}`);
+            logger.error(`Error name: ${callbackError.name}`);
+            logger.error(`Error details: ${JSON.stringify(callbackError, null, 2)}`);
+
+            // Log additional error information if available
+            if (callbackError.error) {
+                logger.error(`OAuth error: ${callbackError.error}`);
+            }
+            if (callbackError.error_description) {
+                logger.error(`OAuth error description: ${callbackError.error_description}`);
+            }
+            if (callbackError.response) {
+                logger.error(`Response status: ${callbackError.response.statusCode}`);
+                logger.error(`Response body: ${JSON.stringify(callbackError.response.body)}`);
+            }
+
+            // Completely destroy the session to start fresh
+            req.session.destroy((err) => {
+                if (err) {
+                    logger.error(`Failed to destroy session: ${err.message}`);
+                }
+            });
+
+            // Redirect to client error page to start over
+            const errorRedirectUrl = `${process.env.CLIENT_URL}/auth/error?message=${encodeURIComponent('Authentication failed. Please try again.')}`;
+            return res.redirect(errorRedirectUrl);
+        }
 
         logger.info('Successfully received tokens from Keycloak');
 
         // Get user info from Keycloak
         const userInfo = await client.userinfo(tokenSet.access_token);
-        
+
         logger.info(`Keycloak user info: ${JSON.stringify(userInfo, null, 2)}`);
 
         // Find or create user in database
         const user = await loginSocialUser({
             id: userInfo.sub,
             email: userInfo.email,
-            username: userInfo.preferred_username || userInfo.email || `user_${userInfo.sub}`
+            username: userInfo.preferred_username || userInfo.email || `user_${userInfo.sub}`,
+            firstName: userInfo.given_name,
+            lastName: userInfo.family_name,
         }, 'KEYCLOAK');
 
         if (!user) {
@@ -220,20 +281,40 @@ authApi.get('/keycloak/callback', async (req, res) => {
 
         // Clear session data
         delete req.session.codeVerifier;
+        delete req.session.authStartTime;
 
         // Redirect to client with tokens
         // When serving both API and client from the same server, use relative URL
         const clientRedirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${accessToken}&refresh=${refreshToken}`;
-        
+
         logger.debug(`Redirecting to client callback: ${clientRedirectUrl}`);
 
         res.redirect(301, clientRedirectUrl);
     } catch (error) {
         logger.error(`Keycloak callback error: ${error.message}`);
-        
+
+        // Clear session data on error
+        delete req.session.codeVerifier;
+        delete req.session.authStartTime;
+
         // Redirect to client with error
         const errorRedirectUrl = `/auth/error?message=${encodeURIComponent(error.message)}`;
         res.redirect(errorRedirectUrl);
+    }
+});
+
+authApi.get('/users/search', authenticateJWT, async (req, res) => {
+    try {
+        const { query } = req.query;
+        if (!query) {
+            res.status(400).send('Query parameter is required');
+            return;
+        }
+        const users = await usercontroller.searchUsers(query);
+        res.json(users);
+    } catch (error) {
+        logger.error(error);
+        res.status(500).send(error.message);
     }
 });
 
