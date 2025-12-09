@@ -7,7 +7,12 @@ import { getPageHeight } from './utils';
 
 function Pages() {
   return (
-    <Box sx={{ height: (theme) => getPageHeight(theme) }}>
+    <Box sx={{
+      height: '100%',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      WebkitOverflowScrolling: 'touch'
+    }}>
       <Routes>
         {Object.values(routes).map(({ path, component: Component }) => {
           return <Route key={path} path={path} element={<Component />} />;
