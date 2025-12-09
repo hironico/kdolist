@@ -1,4 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
+import { GlobalStyles } from '@mui/material';
 
 import CssBaseline from '@mui/material/CssBaseline';
 
@@ -19,6 +20,24 @@ function App() {
       <LoginContextProvider>
         <SwipeableListProvider>
           <CssBaseline />
+          <GlobalStyles
+            styles={{
+              body: {
+                overflowY: 'hidden',
+                height: '100vh',
+                width: '100vw',
+              },
+              html: {
+                overflowY: 'hidden',
+                height: '100%',
+              },
+              '#root': {
+                height: '100%',
+                width: '100%',
+                overfowY: 'hidden',
+              },
+            }}
+          />
           <Notifications />
           <HotKeys />
           <UpdateNotifier />

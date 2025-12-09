@@ -333,11 +333,11 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
       {/* Content area */}
       {viewMode === 'list' ? (
-        <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+        <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
           {listContents}
         </List>
       ) : (
-        <Box sx={{ m: '0px', mt: '10px', overflowY: 'auto', minHeight: 0 }}>
+        <Box sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
           <Grid container spacing={2}>
             {listContents}
           </Grid>

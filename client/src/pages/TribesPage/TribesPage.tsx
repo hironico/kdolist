@@ -194,7 +194,6 @@ export function TribesPage() {
                     <FlexBox flexDirection={'row'} justifyContent={'center'} sx={{ position: 'fixed', bottom: 16, left: 0, right: 0, zIndex: 1000 }}>
                         <Fab
                             color="primary"
-                            aria-label="add"
                             onClick={() => setCreateDialogOpen(true)}
                         >
                             <GroupAdd />
