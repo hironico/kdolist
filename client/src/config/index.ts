@@ -11,20 +11,20 @@ const repository = 'https://github.com/hironico/kdolist';
 const messages = {
   app: {
     crash: {
-      title: 'Oooops... Sorry, I guess, something went wrong. You can:',
+      title: 'Oooops... Sorry, on dirait que quelque chose ne va pas comme prévu:',
       options: {
-        email: `contact with author by this email - ${email}`,
-        reset: 'Press here to reset the application',
+        email: `Essazer d'envoyer un email - ${email}`,
+        reset: 'Appuyer ici pour tenter de redémarrer.',
       },
     },
   },
   loader: {
-    fail: 'Hmmmmm, there is something wrong with this component loading process... Maybe trying later would be the best idea',
+    fail: 'Hmmmmm, quelque chose déconne avec le chargement de ce composant... Ressayer plus tard pourrait être une bonne option.',
   },
   images: {
-    failed: 'something went wrong during image loading :(',
+    failed: 'L\'image n\'a pas l\'air de vouloir se charger... :(',
   },
-  404: 'Hey bro? What are you looking for?',
+  404: 'Hey bro? Tu cherches quoi exactement?',
 };
 
 const dateFormat = 'MMMM DD, YYYY';
@@ -48,7 +48,7 @@ const loader = {
 
 const defaultMetaTags = {
   image: '/cover.png',
-  description: "Hironico's KDO List is a gift list management app",
+  description: "Hironico's KDO List est une app de listes de cadeaux à partager avec ta famille, tes amis, ta tribu...",
 };
 const giphy404 = 'https://giphy.com/embed/xTiN0L7EW5trfOvEk0';
 
