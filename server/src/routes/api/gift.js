@@ -170,25 +170,52 @@ giftApi.post('/take/:id', authenticateJWT, (req, res) => {
         });
 });
 
-giftApi.post('/untake/:id', authenticateJWT, (req, res) => {
+giftApi.post('/untake/:id', authenticateJWT, async (req, res) => {
     const giftId = req.params.id;
     if (!giftId) {
         res.status(403).send('Invalid gift id').end();
         return;
     }
 
-    giftlistcontroller.updateGift(giftId, { selectedById: null, selectedAt: null }, req.user.id)
-        .then(async theGift => {
-            // Create GIFT_UNTAKEN notification
-            await Notification.create({
-                recipientId: null,
-                senderId: req.user.id,
-                objectId: theGift.giftListId,
-                type: 'GIFT_UNTAKEN',
-                createdAt: new Date()
-            });
-            res.status(200).json(theGift);
-        })
+    try {
+        // Find the gift first to check who took it
+        const theGift = await Gift.findByPk(giftId);
+        
+        if (!theGift) {
+            res.status(404).send('Gift not found').end();
+            return;
+        }
+
+        // Check if the gift is actually taken
+        if (!theGift.selectedById) {
+            res.status(400).send('Gift is not marked as taken').end();
+            return;
+        }
+
+        // Only the person who took the gift can untake it
+        if (theGift.selectedById !== req.user.id) {
+            logger.warning(`User ${req.user.id} attempted to untake gift ${giftId} that was taken by ${theGift.selectedById}`);
+            res.status(403).send('Only the person who took this gift can untake it.').end();
+            return;
+        }
+
+        // Update the gift to untake it
+        const updatedGift = await giftlistcontroller.updateGift(giftId, { selectedById: null, selectedAt: null }, req.user.id);
+        
+        // Create GIFT_UNTAKEN notification
+        await Notification.create({
+            recipientId: null,
+            senderId: req.user.id,
+            objectId: updatedGift.giftListId,
+            type: 'GIFT_UNTAKEN',
+            createdAt: new Date()
+        });
+        
+        res.status(200).json(updatedGift);
+    } catch (error) {
+        logger.error(`Cannot untake gift ${giftId}. Error: ${error}`);
+        res.status(500).send(`Cannot untake gift. ${error}`).end();
+    }
 });
 
 giftApi.post('/favorite/:id', authenticateJWT, async (req, res) => {

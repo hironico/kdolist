@@ -32,6 +32,7 @@ type GiftsListContentsProps = {
     editable: boolean;
     isOwner: boolean;
     showTakenToOwner: boolean;
+    currentUserId?: string;
     onDelete: () => void;
     onTake: () => void;
     onEdit: () => void;
