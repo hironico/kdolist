@@ -48,6 +48,10 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                     }
                 } catch (error) {
                     console.error('Failed to fetch group details for invite', error);
+                    notificationsActions.push({
+                        options: { variant: 'error' },
+                        message: 'Erreur lors de la récupération des tribus!'
+                    });
                 }
             };
             fetchGroupDetails();
@@ -100,6 +104,10 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
             }
         } catch (error) {
             console.error('Failed to search users', error);
+            notificationsActions.push({
+                options: { variant: 'error' },
+                message: 'Impossible de recercher un utilisateur!'
+            });    
         } finally {
             setIsSearchingUsers(false);
         }
@@ -120,9 +128,10 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                 }
             } else {
                 const errorText = await response.text();
+                console.error(`Cannot invite user: ${errorText}`);
                 notificationsActions.push({
                     options: { variant: 'error' },
-                    message: `Erreur: ${errorText}`
+                    message: `Erreur: Impossible d'inviter cette personne.`
                 });
             }
         } catch (error) {
