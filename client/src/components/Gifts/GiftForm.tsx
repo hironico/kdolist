@@ -7,6 +7,7 @@ import BottomDialog, { BottomDialogAction } from '../BottomDialog/BottomDialog';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import CheckIcon from '@mui/icons-material/Check';
 import HideImageIcon from '@mui/icons-material/HideImage';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import useNotifications from '@/store/notifications';
 
 import { apiBaseUrl } from '@/config';
@@ -32,6 +33,7 @@ const defaultImages: GiftImage[] = [
 const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) => {
   const [updatedGift, setUpdatedGift] = useState<Gift>(gift);
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
@@ -215,6 +217,26 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     setUpdatedGift({ ...updatedGift, [event.target.name]: event.target.value });
   };
 
+  const handlePickImage = () => {
+    if (!editable || !fileInputRef.current) return;
+    fileInputRef.current.value = '';
+    fileInputRef.current.click();
+  };
+
+  const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (dataUrl) {
+        handleAddImage(dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleMagicPaste = () => {
     if (!editable) {
       return;
@@ -307,6 +329,12 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   const carouselKey = `carousel-${images.length}-${images.map(img => img.url).join('-').substring(0, 50)}`;
 
   const actions: BottomDialogAction[] = editable ? [
+    {
+      icon: <AddPhotoAlternateIcon />,
+      label: 'Photo',
+      onClick: handlePickImage,
+      disabled: isSaving
+    },
     {
       icon: <AutoFixHighIcon />,
       label: 'Coller',
@@ -404,6 +432,14 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   </Box>
 
   return (
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handleFileSelected}
+      />
     <BottomDialog
       open={open}
       handleClose={() => onClose(false)}
@@ -411,6 +447,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       actions={actions}
       contents={contents}
       disableBackdropClick={editable} />
+    </>
   );
 };
 
