@@ -1,0 +1,69 @@
+name: Build & Push Multi-Arch Docker image on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout du code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Installer Node.js (version à aligner avec celle du docker file)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      # 3. Installer les dépendances
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Build de l'application
+      - name: Build application
+        run: npm run build
+
+      # 5. Installer QEMU pour l’émulation multi‑arch
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # 6. Setup Buildx (builder multi‑arch)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 7. Connexion à Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 8. Génération des tags
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/kdolist
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+          flavor: |
+            latest=true
+
+      # 9. Build & Push multi‑arch
+      - name: Build and push multi-arch image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./kdolist.Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
