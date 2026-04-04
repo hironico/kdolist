@@ -14,6 +14,7 @@ type GiftGridItemProps = {
   isOwner: boolean;
   showTakenToOwner: boolean;
   editable: boolean;
+  currentUserId?: string;
   onClick: () => void;
   onDelete: () => void;
   onTake: () => void;
@@ -25,6 +26,7 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
   isOwner,
   showTakenToOwner,
   editable,
+  currentUserId,
   onClick,
   onDelete,
   onTake,
@@ -34,7 +36,11 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
   const menuOpen = Boolean(menuAnchorEl);
 
   const isTaken = oneGift.selectedById !== null;
+  const isTakenByCurrentUser = oneGift.selectedById === currentUserId;
   const isFavorite = oneGift.isFavorite || false;
+  
+  // Can untake only if taken by current user
+  const canUntake = isTaken && isTakenByCurrentUser;
 
   // Show taken indicator if:
   // - Gift is taken AND user is NOT the owner, OR
@@ -155,12 +161,17 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
           onClose={() => handleMenuClose()}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Take/Untake action */}
-          <MenuItem onClick={handleTakeAction}>
+          {/* Take/Untake action - disable untake if taken by someone else */}
+          <MenuItem onClick={handleTakeAction} disabled={isTaken && !canUntake}>
             <ListItemIcon>
               {isTaken ? <CheckCircleIcon fontSize="small" color="success" /> : <CheckCircleOutlineIcon fontSize="small" />}
             </ListItemIcon>
-            <ListItemText>{isTaken ? 'Marquer comme disponible' : 'Marquer comme pris'}</ListItemText>
+            <ListItemText>
+              {isTaken 
+                ? (canUntake ? 'Marquer comme disponible' : 'Pris par quelqu\'un d\'autre')
+                : 'Marquer comme pris'
+              }
+            </ListItemText>
           </MenuItem>
 
           {/* Favorite action - only for owners */}

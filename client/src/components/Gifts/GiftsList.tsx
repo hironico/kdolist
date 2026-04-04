@@ -146,12 +146,23 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   }
 
   const toggleSelectGift = (gift: Gift) => {
-    const url = gift.selectedById !== null ? `${apiBaseUrl}/gift/untake/${gift.id}` : `${apiBaseUrl}/gift/take/${gift.id}`;
+    const isTaken = gift.selectedById !== null;
+    const isTakenByCurrentUser = gift.selectedById === appContext.loginInfo.id;
+    
+    // If gift is taken by someone else, don't allow untaking
+    if (isTaken && !isTakenByCurrentUser) {
+      showError(`Ce cadeau a été réservé par quelqu'un d'autre. Vous ne pouvez pas le libérer.`);
+      return;
+    }
+    
+    const url = isTaken ? `${apiBaseUrl}/gift/untake/${gift.id}` : `${apiBaseUrl}/gift/take/${gift.id}`;
 
     api.post(url, {}).then((response) => {
       if (!response.ok) {
-        console.error(JSON.stringify(response));
-        showError(`Impossible de marquer ce cadeau comme étant offert/réservé.`);
+        response.text().then(errorMsg => {
+          console.error(errorMsg);
+          showError(errorMsg || `Impossible de marquer ce cadeau comme étant offert/réservé.`);
+        });
       } else {
         fetchListContents();
         setGift(newEmptyGift);
@@ -249,6 +260,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
           isOwner={isOwner}
           showTakenToOwner={showTakenToOwner}
           editable={editable}
+          currentUserId={appContext.loginInfo.id}
           onClick={() => handleEditGift(oneGift)}
           onDelete={() => handleConfirmDeleteGift(oneGift)}
           onTake={() => toggleSelectGift(oneGift)}
@@ -265,6 +277,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         editable={editable}
         isOwner={isOwner}
         showTakenToOwner={showTakenToOwner}
+        currentUserId={appContext.loginInfo.id}
         onDelete={() => handleConfirmDeleteGift(oneGift)}
         onTake={() => toggleSelectGift(oneGift)}
         onEdit={() => handleEditGift(oneGift)}

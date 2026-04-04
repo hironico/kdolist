@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { TextField, Box, Chip, CircularProgress, IconButton } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import { Gift, GiftImage, GiftLink, LoginContext } from '@/LoginContext';
@@ -7,6 +7,10 @@ import BottomDialog, { BottomDialogAction } from '../BottomDialog/BottomDialog';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import CheckIcon from '@mui/icons-material/Check';
 import HideImageIcon from '@mui/icons-material/HideImage';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import CloseIcon from '@mui/icons-material/Close';
 import useNotifications from '@/store/notifications';
 
 import { apiBaseUrl } from '@/config';
@@ -32,6 +36,10 @@ const defaultImages: GiftImage[] = [
 const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) => {
   const [updatedGift, setUpdatedGift] = useState<Gift>(gift);
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
@@ -43,6 +51,13 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   useEffect(() => {
     setUpdatedGift(gift);
   }, [gift]);
+
+  // Once cameraOpen is true and the video element is mounted, attach the stream
+  useEffect(() => {
+    if (cameraOpen && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [cameraOpen]);
 
   const showError = useCallback((message: string) => {
     notificationsActions.push({
@@ -215,6 +230,64 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     setUpdatedGift({ ...updatedGift, [event.target.name]: event.target.value });
   };
 
+  const handlePickImage = () => {
+    if (!editable || !fileInputRef.current) return;
+    fileInputRef.current.value = '';
+    fileInputRef.current.click();
+  };
+
+  const handleTakePhoto = async () => {
+    if (!editable) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      // Open the camera slide – the useEffect will attach the stream once the video element is mounted
+      setCameraOpen(true);
+    } catch (err) {
+      console.error('Camera access error:', err);
+      showError("Impossible d'accéder à la caméra.");
+    }
+  };
+
+  const handleCameraCapture = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    handleStopCamera();
+    handleAddImage(dataUrl);
+  };
+
+  const handleStopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setCameraOpen(false);
+  };
+
+  const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (dataUrl) {
+        handleAddImage(dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleMagicPaste = () => {
     if (!editable) {
       return;
@@ -303,10 +376,22 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
 
   const images: GiftImage[] = updatedGift.images.length === 0 ? defaultImages : updatedGift.images;
 
-  // Force carousel to re-render when images change by using images length as key
-  const carouselKey = `carousel-${images.length}-${images.map(img => img.url).join('-').substring(0, 50)}`;
+  // Force carousel to re-render when images change or camera state changes
+  const carouselKey = `carousel-${images.length}-${cameraOpen}-${images.map(img => img.url).join('-').substring(0, 50)}`;
 
   const actions: BottomDialogAction[] = editable ? [
+    {
+      icon: <CameraAltIcon />,
+      label: 'Caméra',
+      onClick: handleTakePhoto,
+      disabled: isSaving || cameraOpen
+    },
+    {
+      icon: <AddPhotoAlternateIcon />,
+      label: 'Photo',
+      onClick: handlePickImage,
+      disabled: isSaving
+    },
     {
       icon: <AutoFixHighIcon />,
       label: 'Coller',
@@ -321,45 +406,94 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     }
   ] : [];
 
+  // Build a flat slides array so the Carousel receives each slide as a direct child
+  const imageSlides = images.map((oneImg, index) => {
+    const isDefaultImage = !oneImg.id && defaultImages.some(defImg => defImg.url === oneImg.url);
+    return (
+      <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>
+        <Box sx={{ position: 'relative', width: '250px', height: '250px' }}>
+          <Box
+            sx={{
+              background: `url('${oneImg.url}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              width: '100%',
+              height: '100%',
+            }}
+          />
+          {editable && !isDefaultImage && (
+            <IconButton
+              onClick={() => handleDeleteImage(oneImg)}
+              sx={{
+                position: 'absolute',
+                bottom: 8,
+                left: 8,
+                bgcolor: 'rgba(255, 255, 255, 0.8)',
+                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.95)' },
+              }}
+              size="small"
+            >
+              <HideImageIcon color="error" />
+            </IconButton>
+          )}
+        </Box>
+      </FullSizeCenteredFlexBox>
+    );
+  });
+
+  if (cameraOpen) {
+    imageSlides.push(
+      <FullSizeCenteredFlexBox key="camera-slide">
+        <Box sx={{ position: 'relative', width: '250px', height: '250px', bgcolor: 'black', overflow: 'hidden' }}>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+          {/* Capture button */}
+          <IconButton
+            onClick={handleCameraCapture}
+            sx={{
+              position: 'absolute',
+              bottom: 8,
+              right: 8,
+              bgcolor: 'rgba(255, 255, 255, 0.85)',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' },
+            }}
+            size="small"
+          >
+            <PhotoCameraIcon color="primary" />
+          </IconButton>
+          {/* Close / stop camera button */}
+          <IconButton
+            onClick={handleStopCamera}
+            sx={{
+              position: 'absolute',
+              bottom: 8,
+              left: 8,
+              bgcolor: 'rgba(255, 255, 255, 0.85)',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' },
+            }}
+            size="small"
+          >
+            <CloseIcon color="error" />
+          </IconButton>
+        </Box>
+      </FullSizeCenteredFlexBox>
+    );
+  }
+
   const contents = <Box sx={{ px: 2 }}>
     <Box component="form" sx={{ marginBottom: '20px' }}>
-      <Carousel key={carouselKey} sx={{ width: '100%' }}>
-        {images.map((oneImg, index) => {
-          const isDefaultImage = !oneImg.id && defaultImages.some(defImg => defImg.url === oneImg.url);
-          return (
-            <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>
-              <Box sx={{ position: 'relative', width: '250px', height: '250px' }}>
-                <Box
-                  sx={{
-                    background: `url('${oneImg.url}')`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    width: '100%',
-                    height: '100%',
-                  }}
-                  key={`gift-img-key-${index}`}
-                />
-                {editable && !isDefaultImage && (
-                  <IconButton
-                    onClick={() => handleDeleteImage(oneImg)}
-                    sx={{
-                      position: 'absolute',
-                      bottom: 8,
-                      left: 8,
-                      bgcolor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': {
-                        bgcolor: 'rgba(255, 255, 255, 0.95)',
-                      },
-                    }}
-                    size="small"
-                  >
-                    <HideImageIcon color="error" />
-                  </IconButton>
-                )}
-              </Box>
-            </FullSizeCenteredFlexBox>
-          );
-        })}
+      <Carousel
+        key={carouselKey}
+        sx={{ width: '100%' }}
+        autoPlay={false}
+        index={cameraOpen ? imageSlides.length - 1 : undefined}
+      >
+        {imageSlides}
       </Carousel>
 
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2, mt: 2 }}>
@@ -404,13 +538,22 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   </Box>
 
   return (
-    <BottomDialog
-      open={open}
-      handleClose={() => onClose(false)}
-      title={editable ? 'Editer' : 'Détails'}
-      actions={actions}
-      contents={contents}
-      disableBackdropClick={editable} />
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handleFileSelected}
+      />
+      <BottomDialog
+        open={open}
+        handleClose={() => { handleStopCamera(); onClose(false); }}
+        title={editable ? 'Editer' : 'Détails'}
+        actions={actions}
+        contents={contents}
+        disableBackdropClick={editable} />
+    </>
   );
 };
 

@@ -176,9 +176,9 @@ class GroupController {
 
     if (!group || !user) throw new Error('Group or User not found');
 
-    const isOwner = group.adminId !== invitedByUserId;
+    const isOwner = group.adminId === invitedByUserId;
 
-    const userMemberShip = group.groupMemberships.filter(gm => gm.userId = userId)[0];
+    const userMemberShip = group.groupMemberships.filter(gm => gm.userId === invitedByUserId)[0];
     const isAdmin = userMemberShip.status === 'ADMIN';
 
     if (!isOwner && !isAdmin) {
@@ -196,7 +196,8 @@ class GroupController {
     }
 
     // Check if already member or invited
-    const existing = await GroupMembership.findOne({ where: { groupId, userId } });
+    const existingMembership = group.groupMemberships.filter(gm => gm.userId === userId);
+    const existing = existingMembership.length === 0 ? false : existingMembership[0];
     if (existing) {
       if (existing.status === 'ADMIN') throw new Error('User is already an admin of this group');
       if (existing.status === 'MEMBER') throw new Error('User is already a member');

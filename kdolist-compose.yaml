@@ -1,0 +1,33 @@
+services:
+  kdolist:
+    container_name: hironico-kdolist
+    hostname: hironico-kdolist
+    image: docker.io/hironico/kdolist:1.5.2
+    restart: always    
+    volumes:
+      - ./server/ssl_cert.pem:/app/server/ssl_cert.pem
+      - ./server/ssl_key.pem:/app/server/ssl_key.pem
+      - ./server/.env.docker:/app/server/.env
+    ports:
+      - "2020:3000"
+    networks:
+      - hironico-network
+      
+        
+networks:
+  hironico-network:
+    name: hironico-network
+    driver: bridge
+    external: true
+
+# First create 
+# - the .env file 
+# - the cert.pem and key.pem certificates (PRODUCTION use letsencrypt)
+
+# Map the above files with volumes bindings
+
+# Check the port mapping to correspond to env file setup
+
+# run with the follwing command :
+# podman compose -f kdolist-compose.yml up -d
+
