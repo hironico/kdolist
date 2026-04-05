@@ -19,12 +19,14 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
 
       # 3. CLIENT: install deps
       - name: CLIENT Install dependencies
         run: npm ci
         working-directory: ./client/
-        
 
       # 4. CLIENT Build de l'application
       - name: CLIENT Build application
