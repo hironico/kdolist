@@ -2,7 +2,7 @@ name: Build & Push Multi-Arch Docker image on Release
 
 on:
   release:
-    types: [published]
+    types: [published, edited]
 
 jobs:
   build-and-push:
