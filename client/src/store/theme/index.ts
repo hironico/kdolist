@@ -1,25 +1,16 @@
 import { useCallback, useMemo } from 'react';
-import { atom, useRecoilState } from 'recoil';
+import { useAtom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
 import { Themes } from '@/theme/types';
 
-import type { AtomEffectParams } from '../types';
 import type { Actions } from './types';
 
-const themeModeState = atom({
-  key: 'theme-mode-state',
-  default: 'light' as Themes,
-  effects: [synchronizeWithLocalStorage],
-});
-
-function synchronizeWithLocalStorage({ setSelf, onSet }: AtomEffectParams) {
-  const storedTheme = localStorage.getItem('theme-mode');
-  storedTheme && setSelf(storedTheme);
-  onSet((value: Themes) => localStorage.setItem('theme-mode', value));
-}
+// atomWithStorage automatically syncs with localStorage under the key 'theme-mode'
+const themeModeState = atomWithStorage<Themes>('theme-mode', Themes.LIGHT);
 
 function useTheme(): [Themes, Actions] {
-  const [themeMode, setThemeMode] = useRecoilState(themeModeState);
+  const [themeMode, setThemeMode] = useAtom(themeModeState);
 
   const toggle = useCallback(() => {
     setThemeMode((mode: Themes) => (mode === Themes.DARK ? Themes.LIGHT : Themes.DARK));

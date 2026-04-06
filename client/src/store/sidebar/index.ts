@@ -1,15 +1,12 @@
 import { useCallback, useMemo } from 'react';
-import { atom, useRecoilState } from 'recoil';
+import { atom, useAtom } from 'jotai';
 
 import type { Actions } from './types';
 
-const sidebarIsOpenState = atom<boolean>({
-  key: 'sidebar-openness-state',
-  default: false,
-});
+const sidebarIsOpenState = atom<boolean>(false);
 
 function useSidebar(): [boolean, Actions] {
-  const [isOpen, setIsOpen] = useRecoilState(sidebarIsOpenState);
+  const [isOpen, setIsOpen] = useAtom(sidebarIsOpenState);
 
   const toggle = useCallback(() => {
     setIsOpen((isOpen: boolean) => !isOpen);

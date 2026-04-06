@@ -1,5 +1,4 @@
-import { Box, List, ToggleButtonGroup, ToggleButton } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import { Box, Grid, List, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
@@ -254,7 +253,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   } else if (viewMode === 'grid') {
     // Grid view
     listContents = filteredGifts.map((oneGift, index) => (
-      <Grid xs={6} sm={4} md={3} lg={2.4} key={`kdo-grid-${index}`}>
+      <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2.4 }} key={`kdo-grid-${index}`}>
         <GiftGridItem
           oneGift={oneGift}
           isOwner={isOwner}

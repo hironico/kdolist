@@ -1,10 +1,12 @@
+import { ReactNode } from 'react';
+
 enum Themes {
   DARK = 'dark',
   LIGHT = 'light',
 }
 
 type CustomThemeProviderProps = {
-  children: JSX.Element;
+  children: ReactNode;
 };
 
 export type { CustomThemeProviderProps };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Card, CardContent, Grid, Typography, Skeleton } from '@mui/material';
+import { Box, Card, CardContent, Typography, Skeleton } from '@mui/material';
+import { Grid } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import PeopleIcon from '@mui/icons-material/People';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
@@ -150,7 +151,7 @@ const StatsCard: React.FC = () => {
     return (
         <Box sx={{ mt: 2, mb: 2 }}>
             <Grid container spacing={2}>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                     <StatCard
                         icon={<PeopleIcon />}
                         label="Utilisateurs"
@@ -159,7 +160,7 @@ const StatsCard: React.FC = () => {
                         loading={loading}
                     />
                 </Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                     <StatCard
                         icon={<CardGiftcardIcon />}
                         label="Cadeaux"
@@ -168,7 +169,7 @@ const StatsCard: React.FC = () => {
                         loading={loading}
                     />
                 </Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                     <StatCard
                         icon={<LinkIcon />}
                         label="Liens"
@@ -177,7 +178,7 @@ const StatsCard: React.FC = () => {
                         loading={loading}
                     />
                 </Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                     <StatCard
                         icon={<ImageIcon />}
                         label="Images"
