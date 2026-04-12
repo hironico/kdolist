@@ -44,6 +44,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState<Filter<Gift>[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
     // Load view mode from localStorage, default to 'list' if not found
     const savedViewMode = localStorage.getItem('kdolist_gift_view_mode');
@@ -230,16 +231,24 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   });
 
   const filteredGifts = sortedGifts.filter(g => {
-    if (activeFilters.length === 0) {
-      return true;
+    // Apply chip filters
+    if (activeFilters.length > 0) {
+      let matching = false;
+      activeFilters.forEach(filter => {
+        matching = matching || filter.filterFn(g);
+      });
+      if (!matching) return false;
     }
 
-    let matching = false;
-    activeFilters.forEach(filter => {
-      matching = matching || filter.filterFn(g);
-    });
+    // Apply text search filter on gift name and description
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.trim().toLowerCase();
+      const nameMatch = g.name.toLowerCase().includes(q);
+      const descMatch = g.description?.toLowerCase().includes(q) ?? false;
+      if (!nameMatch && !descMatch) return false;
+    }
 
-    return matching;
+    return true;
   });
 
   // Render content based on view mode
@@ -366,7 +375,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         message="Attention c'est irréversible !"
       />
 
-      {editable ? <GiftsFAB handleAdd={handleAddGift} /> : <></>}
+      <GiftsFAB handleAdd={editable ? handleAddGift : undefined} onSearchChange={setSearchQuery} />
     </Box>
   );
 };
