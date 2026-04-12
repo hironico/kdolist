@@ -37,7 +37,19 @@ const FilterBar = <T extends DataItem>({
   }, [activeFilterIds, onFiltersChange]);
 
   return (
-    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 1,
+        flexWrap: 'nowrap',
+        overflowX: 'auto',
+        mb: 2,
+        // Hide scrollbar across all browsers while keeping scroll functionality
+        scrollbarWidth: 'none',        // Firefox
+        msOverflowStyle: 'none',       // IE / Edge legacy
+        '&::-webkit-scrollbar': { display: 'none' },  // Chrome / Safari / mobile WebKit
+      }}
+    >
       {filters.map((filter) => (
         <Chip
           key={filter.id}
