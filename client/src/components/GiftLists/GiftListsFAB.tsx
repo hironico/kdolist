@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import InputBase from '@mui/material/InputBase';
+import IconButton from '@mui/material/IconButton';
 import { Box } from '@mui/material';
 import { FlexBox } from '../styled';
 
@@ -57,7 +58,7 @@ const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd, onSearchChange }
           boxShadow: 6,
         }}
       >
-        {/* Search / Close icon button */}
+        {/* Search icon — always visible, clicking toggles the pill */}
         <Box
           onClick={handleSearchToggle}
           sx={{
@@ -72,19 +73,25 @@ const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd, onSearchChange }
           }}
           aria-label={searchExpanded ? 'close search' : 'open search'}
         >
-          {searchExpanded ? <CloseIcon /> : <SearchIcon />}
+          <SearchIcon />
         </Box>
 
-        {/* Text input — only interactive when expanded */}
+        {/* Text input with inline clear button — only interactive when expanded */}
         <InputBase
           inputRef={inputRef}
           value={searchQuery}
           onChange={handleQueryChange}
           placeholder="Rechercher…"
           inputProps={{ 'aria-label': 'search gift lists' }}
+          endAdornment={
+            searchExpanded ? (
+              <IconButton size="small" onClick={handleSearchToggle} sx={{ color: 'text.secondary', mr: 0.5 }}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            ) : null
+          }
           sx={{
             flex: 1,
-            pr: 1.5,
             fontSize: '0.9rem',
             opacity: searchExpanded ? 1 : 0,
             transition: 'opacity 0.2s ease',
