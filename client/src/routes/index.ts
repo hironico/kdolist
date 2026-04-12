@@ -14,14 +14,14 @@ const routes: Routes = {
     path: '/mylists',
     title: 'Listes',
     icon: HomeIcon,
-    inSideBar: true,
+    inSideBar: false,
   },
   [Pages.Tribes]: {
     component: asyncComponentLoader(() => import('@/pages/TribesPage').then(m => ({ default: m.TribesPage }))),
     path: '/tribes',
     title: 'Tribus',
     icon: GroupIcon,
-    inSideBar: true,
+    inSideBar: false,
   },
   [Pages.PrivacyPage]: {
     component: asyncComponentLoader(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage }))),

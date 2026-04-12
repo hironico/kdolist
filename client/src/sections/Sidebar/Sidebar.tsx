@@ -9,6 +9,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Badge from '@mui/material/Badge';
+import Divider from '@mui/material/Divider';
 
 import routes from '@/routes';
 import useSidebar from '@/store/sidebar';
@@ -52,6 +53,8 @@ function Sidebar() {
     }
   }, [api, isSidebarOpen]);
 
+  const sidebarRoutes = Object.values(routes).filter((route) => route.inSideBar);
+
   return (
     <SwipeableDrawer
       anchor="left"
@@ -61,14 +64,15 @@ function Sidebar() {
       disableBackdropTransition={false}
       swipeAreaWidth={30}
       data-pw="sidebar"
+      PaperProps={{ sx: { width: 250 } }}
     >
-      <List sx={{ width: '250px' }}>
-        {Object.values(routes)
-          .filter((route) => route.inSideBar)
-          .map(({ path, title, icon: Icon }) => (
-            <ListItem sx={{ p: 0 }} key={path}>
-              <ListItemButton component={Link} to={path as string} onClick={sidebarActions.close}>
-                <ListItemIcon>
+      <List disablePadding>
+        {sidebarRoutes.map(({ path, title, icon: Icon }, index) => (
+          <div key={path}>
+            {index > 0 && <Divider />}
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to={path as string} onClick={sidebarActions.close} sx={{ px: 1.5 }}>
+                <ListItemIcon sx={{ minWidth: 36 }}>
                   {path === '/tribes' && pendingInvitationsCount > 0 ? (
                     <Badge badgeContent={pendingInvitationsCount} color="error">
                       {Icon ? <Icon /> : <DefaultIcon />}
@@ -77,14 +81,24 @@ function Sidebar() {
                     Icon ? <Icon /> : <DefaultIcon />
                   )}
                 </ListItemIcon>
-                <ListItemText>{title}</ListItemText>
+                <ListItemText primary={title} />
               </ListItemButton>
             </ListItem>
-          ))}
-        <ListItem sx={{ p: 0 }} key="github">
-          <ListItemButton component={Link} to="/redirect?url=https://github.com/hironico/kdolist&newTab=true" onClick={sidebarActions.close}>
-            <ListItemIcon><DefaultIcon /></ListItemIcon>
-            <ListItemText>GitHub</ListItemText>
+          </div>
+        ))}
+
+        {sidebarRoutes.length > 0 && <Divider />}
+
+        {/* GitHub link */}
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/redirect?url=https://github.com/hironico/kdolist&newTab=true"
+            onClick={sidebarActions.close}
+            sx={{ px: 1.5 }}
+          >
+            <ListItemIcon sx={{ minWidth: 36 }}><DefaultIcon /></ListItemIcon>
+            <ListItemText primary="GitHub" />
           </ListItemButton>
         </ListItem>
       </List>
