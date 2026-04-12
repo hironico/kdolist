@@ -1,24 +1,25 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Fab, Slide } from '@mui/material';
+import { Slide } from '@mui/material';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 import { apiBaseUrl } from '@/config';
 import Meta from '@/components/Meta';
 import ProtectedRoute from '@/routes/ProtectedRoute';
-import { FlexBox, FullSizeTopCenteredFlexBox } from '@/components/styled';
+import { FullSizeTopCenteredFlexBox } from '@/components/styled';
 import useNotifications from '@/store/notifications';
 import { LoginContext } from '@/LoginContext';
 import {
     TribeList,
+    TribesFAB,
     Group,
     CreateTribeDialog,
     InviteUserDialog,
     TribeDetailsDialog
 } from '@/components/Tribes';
 import ActionSheet from '@/components/ActionSheet/ActionSheet';
-import { GroupAdd } from '@mui/icons-material';
 
 export function TribesPage() {
     const [myTribes, setMyTribes] = useState<Group[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const api = useAuthenticatedApi();
     const { loginInfo } = useContext(LoginContext);
@@ -182,7 +183,13 @@ export function TribesPage() {
             <Slide direction="left" in={true} timeout={500}>
                 <FullSizeTopCenteredFlexBox>
                     <TribeList
-                        tribes={myTribes}
+                        tribes={
+                          searchQuery.trim()
+                            ? myTribes.filter(t =>
+                                t.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+                              )
+                            : myTribes
+                        }
                         currentUserId={loginInfo?.id}
                         onAcceptInvite={handleAcceptInvite}
                         onRejectInvite={handleRejectInvite}
@@ -191,14 +198,10 @@ export function TribesPage() {
                         onDeleteTribe={handleDeleteTribe}
                         onViewDetails={handleViewDetails}
                     />
-                    <FlexBox flexDirection={'row'} justifyContent={'center'} sx={{ position: 'fixed', bottom: 16, left: 0, right: 0, zIndex: 1000 }}>
-                        <Fab
-                            color="primary"
-                            onClick={() => setCreateDialogOpen(true)}
-                        >
-                            <GroupAdd />
-                        </Fab>
-                    </FlexBox>
+                    <TribesFAB
+                        handleAdd={() => setCreateDialogOpen(true)}
+                        onSearchChange={setSearchQuery}
+                    />
 
                     <CreateTribeDialog
                         open={createDialogOpen}

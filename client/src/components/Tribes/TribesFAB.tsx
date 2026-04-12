@@ -1,10 +1,9 @@
 import React, { useRef, useState } from 'react';
 import Fab from '@mui/material/Fab';
-import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import AppsIcon from '@mui/icons-material/Apps';
-import { FormatListBulleted } from '@mui/icons-material';
+import { FormatListBulleted, GroupAdd } from '@mui/icons-material';
 import GroupIcon from '@mui/icons-material/Group';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
@@ -12,14 +11,14 @@ import { Box, Tooltip } from '@mui/material';
 import { FlexBox } from '../styled';
 import { useNavigate } from 'react-router-dom';
 
-export type GiftListsFABProps = {
+export type TribesFABProps = {
   handleAdd: () => void;
   onSearchChange: (query: string) => void;
 };
 
 type ExpandedPill = 'search' | 'nav' | null;
 
-const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd, onSearchChange }) => {
+const TribesFAB: React.FC<TribesFABProps> = ({ handleAdd, onSearchChange }) => {
   const [expandedPill, setExpandedPill] = useState<ExpandedPill>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -55,7 +54,7 @@ const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd, onSearchChange }
     onSearchChange(value);
   };
 
-  // Clicking Add FAB collapses any open pill before opening the editor
+  // Clicking Add FAB collapses any open pill
   const handleAddClick = () => {
     if (expandedPill === 'search') clearSearch();
     setExpandedPill(null);
@@ -122,17 +121,16 @@ const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd, onSearchChange }
             zIndex: 1,
           }}
         >
-          {/* Listes — active */}
+          {/* Listes — inactive */}
           <Tooltip title="Mes Listes">
             <Box
               onClick={() => navigate('/mylists')}
               sx={{
                 width: 56, height: 56,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                bgcolor: 'primary.main',
-                color: 'common.white',
+                color: 'text.secondary',
                 cursor: 'pointer',
-                '&:hover': { bgcolor: 'primary.dark' },
+                '&:hover': { bgcolor: 'action.hover' },
               }}
               aria-label="aller aux listes"
             >
@@ -140,16 +138,17 @@ const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd, onSearchChange }
             </Box>
           </Tooltip>
 
-          {/* Tribus — inactive */}
+          {/* Tribus — active */}
           <Tooltip title="Mes Tribus">
             <Box
               onClick={() => navigate('/tribes')}
               sx={{
                 width: 56, height: 56,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'text.secondary',
+                bgcolor: 'primary.main',
+                color: 'common.white',
                 cursor: 'pointer',
-                '&:hover': { bgcolor: 'action.hover' },
+                '&:hover': { bgcolor: 'primary.dark' },
               }}
               aria-label="aller aux tribus"
             >
@@ -192,7 +191,7 @@ const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd, onSearchChange }
           value={searchQuery}
           onChange={handleQueryChange}
           placeholder="Rechercher…"
-          inputProps={{ 'aria-label': 'search gift lists' }}
+          inputProps={{ 'aria-label': 'search tribes' }}
           endAdornment={
             isSearchExpanded ? (
               <IconButton size="small" onClick={toggleSearch} sx={{ color: 'text.secondary', mr: 0.5 }}>
@@ -210,12 +209,12 @@ const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd, onSearchChange }
         />
       </Box>
 
-      {/* ── Add FAB — collapses nav on click ─────────────────────────────── */}
-      <Fab color="primary" aria-label="add" onClick={handleAddClick}>
-        <AddIcon />
+      {/* ── Create tribe FAB — collapses nav on click ─────────────────────── */}
+      <Fab color="primary" aria-label="create tribe" onClick={handleAddClick}>
+        <GroupAdd />
       </Fab>
     </FlexBox>
   );
 };
 
-export default GiftListsFAB;
+export default TribesFAB;
