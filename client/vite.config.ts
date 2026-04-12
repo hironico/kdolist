@@ -8,12 +8,6 @@ import manifest from './manifest.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  legacy: {
-    // Restore Vite 5 CJS interop behaviour for packages like @mui/icons-material
-    // that use default exports from CommonJS subpath imports (e.g. '@mui/icons-material/Menu').
-    // Remove once those packages declare ESM-only exports or update their peer deps for Vite 8.
-    inconsistentCjsInterop: true,
-  },
   plugins: [
     react(),
     VitePWA({
