@@ -7,7 +7,7 @@ import { FormatListBulleted, GroupAdd } from '@mui/icons-material';
 import GroupIcon from '@mui/icons-material/Group';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
-import { Box, Tooltip } from '@mui/material';
+import { Box, Typography, Tooltip } from '@mui/material';
 import { FlexBox } from '../styled';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,10 @@ export type TribesFABProps = {
 };
 
 type ExpandedPill = 'search' | 'nav' | null;
+
+// Expanded pill dimensions — height matches the 56 px search pill
+const EXPANDED_W = 136;
+const EXPANDED_H = 56;
 
 const TribesFAB: React.FC<TribesFABProps> = ({ handleAdd, onSearchChange }) => {
   const [expandedPill, setExpandedPill] = useState<ExpandedPill>(null);
@@ -54,7 +58,6 @@ const TribesFAB: React.FC<TribesFABProps> = ({ handleAdd, onSearchChange }) => {
     onSearchChange(value);
   };
 
-  // Clicking Add FAB collapses any open pill
   const handleAddClick = () => {
     if (expandedPill === 'search') clearSearch();
     setExpandedPill(null);
@@ -76,21 +79,21 @@ const TribesFAB: React.FC<TribesFABProps> = ({ handleAdd, onSearchChange }) => {
       <Box
         sx={{
           position: 'relative',
-          height: 56,
           borderRadius: '28px',
           overflow: 'hidden',
           boxShadow: 6,
-          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          width: isNavExpanded ? 112 : 56,
+          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          width: isNavExpanded ? EXPANDED_W : 56,
+          height: isNavExpanded ? EXPANDED_H : 56,
         }}
       >
-        {/* Collapsed: AppsIcon — fades out when nav expands */}
+        {/* Collapsed: AppsIcon — primary circle */}
         <Box
           onClick={toggleNav}
           sx={{
             position: 'absolute',
-            inset: 0,
-            width: 56,
+            top: 0, left: 0,
+            width: 56, height: 56,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -107,13 +110,16 @@ const TribesFAB: React.FC<TribesFABProps> = ({ handleAdd, onSearchChange }) => {
           <AppsIcon />
         </Box>
 
-        {/* Expanded: two full-size toggle buttons — fade in when nav expands */}
+        {/* Expanded: two round Fab buttons with labels */}
         <Box
           sx={{
             position: 'absolute',
-            inset: 0,
-            width: 112,
+            top: 0, left: 0,
+            width: EXPANDED_W,
+            height: EXPANDED_H,
             display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-evenly',
             bgcolor: 'background.paper',
             opacity: isNavExpanded ? 1 : 0,
             transition: 'opacity 0.15s ease 0.1s',
@@ -123,36 +129,45 @@ const TribesFAB: React.FC<TribesFABProps> = ({ handleAdd, onSearchChange }) => {
         >
           {/* Listes — inactive */}
           <Tooltip title="Mes Listes">
-            <Box
-              onClick={() => navigate('/mylists')}
-              sx={{
-                width: 56, height: 56,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'text.secondary',
-                cursor: 'pointer',
-                '&:hover': { bgcolor: 'action.hover' },
-              }}
-              aria-label="aller aux listes"
-            >
-              <FormatListBulleted />
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+              <IconButton
+                size="small"
+                onClick={() => navigate('/mylists')}
+                aria-label="aller aux listes"
+                sx={{
+                  width: 32, height: 32,
+                  bgcolor: 'action.focus',
+                  color: 'text.secondary',
+                  '&:hover': { bgcolor: 'action.selected' },
+                }}
+              >
+                <FormatListBulleted sx={{ fontSize: 18 }} />
+              </IconButton>
+              <Typography sx={{ fontSize: '0.55rem', fontWeight: 700, color: 'text.secondary', lineHeight: 1 }}>
+                Listes
+              </Typography>
             </Box>
           </Tooltip>
 
           {/* Tribus — active */}
           <Tooltip title="Mes Tribus">
-            <Box
-              onClick={() => navigate('/tribes')}
-              sx={{
-                width: 56, height: 56,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                bgcolor: 'primary.main',
-                color: 'common.white',
-                cursor: 'pointer',
-                '&:hover': { bgcolor: 'primary.dark' },
-              }}
-              aria-label="aller aux tribus"
-            >
-              <GroupIcon />
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+              <IconButton
+                size="small"
+                onClick={() => navigate('/tribes')}
+                aria-label="aller aux tribus"
+                sx={{
+                  width: 32, height: 32,
+                  bgcolor: 'primary.main',
+                  color: 'common.white',
+                  '&:hover': { bgcolor: 'primary.dark' },
+                }}
+              >
+                <GroupIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+              <Typography sx={{ fontSize: '0.55rem', fontWeight: 700, color: 'primary.main', lineHeight: 1 }}>
+                Tribus
+              </Typography>
             </Box>
           </Tooltip>
         </Box>

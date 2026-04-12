@@ -112,7 +112,6 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   };
 
   useEffect(() => {
-    console.log('USe effect, set loading to true');
     setLoading(true);
     appContext.setGiftListContents([]);
     fetchListContents();
@@ -312,14 +311,14 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   if (!isOwner || showTakenToOwner) {
     giftFilters.push({
       id: 'gifts-non-taken',
-      label: 'Non rayés',
+      label: 'Non réservés',
       filterFn: function (item: Gift): boolean {
         return item.selectedById === null;
       }
     });
     giftFilters.push({
       id: 'gifts-taken',
-      label: 'Rayés',
+      label: 'Réservés',
       filterFn: function (item: Gift): boolean {
         return item.selectedById !== null;
       }
