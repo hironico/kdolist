@@ -24,6 +24,7 @@ const GiftListsList: React.FC = () => {
   const [userTribes, setUserTribes] = useState<any[]>([]);
   const [tribeListsMap, setTribeListsMap] = useState<{ [key: string]: GiftList[] }>({});
   const [activeFilters, setActiveFilters] = useState<Filter<GiftList>[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [giftListEditorVisible, setGiftListEditorVisible] = useState(false);
@@ -189,31 +190,44 @@ const GiftListsList: React.FC = () => {
       });
     });
 
-    // If no filters are active, show all lists
-    if (activeFilters.length === 0) {
-      return allLists;
+    // Apply chip filters first
+    let result = allLists;
+    if (activeFilters.length > 0) {
+      const matchingListIds = new Set<string>();
+
+      activeFilters.forEach(filter => {
+        if (filter.id === 'my-lists') {
+          giftLists.forEach(list => {
+            if (filter.filterFn(list)) {
+              matchingListIds.add(list.id);
+            }
+          });
+        } else if (filter.id.startsWith('tribe-')) {
+          const tribeId = filter.id.replace('tribe-', '');
+          const tribeLists = tribeListsMap[tribeId] || [];
+          tribeLists.forEach(list => {
+            matchingListIds.add(list.id);
+          });
+        }
+      });
+
+      result = result.filter(list => matchingListIds.has(list.id));
     }
 
-    // Collect all lists that match any active filter
-    const matchingListIds = new Set<string>();
+    // Apply text search filter on list name and owner name
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(list => {
+        const nameMatch = list.name.toLowerCase().includes(q);
+        const ownerFirstname = list.owner?.firstname?.toLowerCase() ?? '';
+        const ownerLastname = list.owner?.lastname?.toLowerCase() ?? '';
+        const ownerUsername = list.owner?.username?.toLowerCase() ?? '';
+        const ownerMatch = ownerFirstname.includes(q) || ownerLastname.includes(q) || ownerUsername.includes(q);
+        return nameMatch || ownerMatch;
+      });
+    }
 
-    activeFilters.forEach(filter => {
-      if (filter.id === 'my-lists') {
-        giftLists.forEach(list => {
-          if (filter.filterFn(list)) {
-            matchingListIds.add(list.id);
-          }
-        });
-      } else if (filter.id.startsWith('tribe-')) {
-        const tribeId = filter.id.replace('tribe-', '');
-        const tribeLists = tribeListsMap[tribeId] || [];
-        tribeLists.forEach(list => {
-          matchingListIds.add(list.id);
-        });
-      }
-    });
-
-    return allLists.filter(list => matchingListIds.has(list.id));
+    return result;
   })();
 
   return (
@@ -345,7 +359,7 @@ const GiftListsList: React.FC = () => {
         message="Attention c'est irreversible !"
       />
 
-      <GiftListsFAB handleAdd={() => handleAddGiftList()} />
+      <GiftListsFAB handleAdd={() => handleAddGiftList()} onSearchChange={setSearchQuery} />
     </Box>
   );
 };
