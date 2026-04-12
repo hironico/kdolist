@@ -1,5 +1,5 @@
 import { Box, Grid, List, ToggleButtonGroup, ToggleButton } from '@mui/material';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 
@@ -45,6 +45,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [loading, setLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState<Filter<Gift>[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const listViewRef = useRef<HTMLUListElement>(null);
+  const gridViewRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
     // Load view mode from localStorage, default to 'list' if not found
     const savedViewMode = localStorage.getItem('kdolist_gift_view_mode');
@@ -324,6 +326,12 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     });
   }
 
+  // Scroll back to the top whenever the active filters or search query change
+  useEffect(() => {
+    listViewRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    gridViewRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [searchQuery, activeFilters]);
+
   const onGiftFilterChange = useCallback((activeFilterIds: string[]) => {
     const newActiveFilters = giftFilters.filter(f => activeFilterIds.includes(f.id));
     setActiveFilters(newActiveFilters);
@@ -354,11 +362,11 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
       {/* Content area */}
       {viewMode === 'list' ? (
-        <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
+        <List ref={listViewRef} sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
           {listContents}
         </List>
       ) : (
-        <Box sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
+        <Box ref={gridViewRef} sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
           <Grid container spacing={2}>
             {listContents}
           </Grid>

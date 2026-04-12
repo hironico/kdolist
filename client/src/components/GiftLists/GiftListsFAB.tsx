@@ -92,7 +92,7 @@ const GiftListsFAB: React.FC<GiftListsFABProps> = ({ handleAdd, onSearchChange }
           }
           sx={{
             flex: 1,
-            fontSize: '0.9rem',
+            fontSize: '1rem',   // ≥ 16px prevents iOS Safari from zooming on focus
             opacity: searchExpanded ? 1 : 0,
             transition: 'opacity 0.2s ease',
             pointerEvents: searchExpanded ? 'auto' : 'none',

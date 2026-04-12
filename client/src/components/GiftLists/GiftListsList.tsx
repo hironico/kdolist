@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { List, Typography } from '@mui/material';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import { GiftList, LoginContext } from '@/LoginContext';
@@ -25,6 +25,7 @@ const GiftListsList: React.FC = () => {
   const [tribeListsMap, setTribeListsMap] = useState<{ [key: string]: GiftList[] }>({});
   const [activeFilters, setActiveFilters] = useState<Filter<GiftList>[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const listRef = useRef<HTMLUListElement>(null);
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [giftListEditorVisible, setGiftListEditorVisible] = useState(false);
@@ -173,6 +174,11 @@ const GiftListsList: React.FC = () => {
     }))
   ];
 
+  // Scroll back to the top whenever the active filters or search query change
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [searchQuery, activeFilters]);
+
   const onGiftFilterChange = useCallback((activeFilterIds: string[]) => {
     const newActiveFilters = giftListsFilters.filter(f => activeFilterIds.includes(f.id));
     setActiveFilters(newActiveFilters);
@@ -296,7 +302,7 @@ const GiftListsList: React.FC = () => {
           )}
         </Box>
       ) : filteredLists.length > 0 ? (
-        <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+          <List ref={listRef} sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
           {filteredLists.map((item, index) => {
             const modifDate = new Date(item.updatedAt.toString());
             const secondaryText = (
