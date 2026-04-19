@@ -16,7 +16,9 @@ export type BottomDialogAction = {
   icon: ReactNode,
   label: string,
   onClick: () => void,
-  disabled?: boolean
+  disabled?: boolean,
+  /** When true the button is rendered with a filled primary background to stand out as the main action */
+  isPrimary?: boolean,
 }
 
 export type BottomDialogProps = {
@@ -81,10 +83,22 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
             return <IconButton
               key={`bottom-dlg-key-${a.label}-${index}`}
               color="primary"
-              aria-label="open drawer"
+              aria-label={a.label}
               onClick={a.onClick}
               disabled={a.disabled}
-              sx={{ ml: '10px', mr: '10px', padding: '0px' }}>
+              sx={{
+                ml: '10px', mr: '10px',
+                ...(a.isPrimary ? {
+                  bgcolor: 'primary.main',
+                  color: 'common.white',
+                  borderRadius: '50%',
+                  width: 36,
+                  height: 36,
+                  p: '8px',
+                  '&:hover': { bgcolor: 'primary.dark' },
+                  '&.Mui-disabled': { bgcolor: 'action.disabledBackground', color: 'action.disabled' },
+                } : { padding: '0px' })
+              }}>
               {a.icon}
             </IconButton>
           }) : <></>}

@@ -402,7 +402,8 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
       icon: isSaving ? <CircularProgress size={24} /> : <CheckIcon />,
       label: 'OK',
       onClick: () => handleSaveGift(updatedGift, true),
-      disabled: isSaving
+      disabled: isSaving,
+      isPrimary: true,
     }
   ] : [];
 

@@ -9,7 +9,6 @@ import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Diversity3, FormatListBulleted, Group } from '@mui/icons-material';
-import { BottomDialog } from '../BottomDialog';
 import ListEditor from '@/components/GiftLists/ListEditorForm';
 import GiftListsFAB from './GiftListsFAB';
 import FilterBar, { Filter } from '../FilterBar/FilterBar';
@@ -72,8 +71,8 @@ const GiftListsList: React.FC = () => {
   }, []);
 
   /**
-   * Navigates to the list contents editor. Sets the selecte dlist in the list editor context.
-   * @param item the selected list to navitge to.
+   * Navigates to the list contents editor. Sets the selected list in the list editor context.
+   * @param item the selected list to navigate to.
    */
   const handleNavigateList = (item: GiftList, editable: boolean) => {
     appContext.setGiftList(item);
@@ -150,8 +149,6 @@ const GiftListsList: React.FC = () => {
     color: 'primary',
     onAction: () => setShowConfirmDialog(false),
   };
-
-  const listEditor = <ListEditor onListSaved={handleListSaved} userTribes={userTribes} />;
 
   // Build filters dynamically based on user's tribes
   const giftListsFilters: Filter<GiftList>[] = [
@@ -367,11 +364,12 @@ const GiftListsList: React.FC = () => {
         />
       )}
 
-      <BottomDialog
-        title="Nouvelle liste"
+      {/* ListEditor now owns its own BottomDialog */}
+      <ListEditor
         open={giftListEditorVisible}
-        handleClose={() => setGiftListEditorVisible(false)}
-        contents={listEditor}
+        onClose={() => setGiftListEditorVisible(false)}
+        onListSaved={handleListSaved}
+        userTribes={userTribes}
       />
 
       <ActionSheet
