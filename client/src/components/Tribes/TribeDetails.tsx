@@ -250,7 +250,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             keyId={`member-${member.id}`}
                             icon={<PersonIcon />}
                             primaryText={`${member.firstname} ${member.lastname}`}
-                            secondaryText={`@${member.username}`}
+                            secondaryText={`${member.username}`}
                             rightContent={<Chip label="Membre" size="small" color="default" />}
                             action1={
                                 isCurrentUserAdmin && onChangeMembershipStatus && member.id !== adminId
