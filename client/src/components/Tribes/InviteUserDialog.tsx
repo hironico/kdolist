@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { TextField, Autocomplete, CircularProgress, Typography, Box } from '@mui/material';
 import BottomDialog from '@/components/BottomDialog/BottomDialog';
-import { PersonAdd, Close } from '@mui/icons-material';
+import { PersonAdd } from '@mui/icons-material';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
@@ -190,11 +190,7 @@ const InviteUserDialog: React.FC<InviteUserDialogProps> = ({
                     label: 'Inviter',
                     onClick: handleInviteUser,
                     disabled: !selectedUser || isSearchingUsers,
-                },
-                {
-                    icon: <Close />,
-                    label: 'Annuler',
-                    onClick: onClose,
+                    isPrimary: true,
                 },
             ]}
         />

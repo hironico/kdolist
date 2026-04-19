@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, FormControl, Box } from '@mui/material';
 import BottomDialog from '@/components/BottomDialog/BottomDialog';
-import { Check, Close } from '@mui/icons-material';
+import { Check } from '@mui/icons-material';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
@@ -81,15 +81,11 @@ const CreateTribeDialog: React.FC<CreateTribeDialogProps> = ({
             }
             actions={[
                 {
-                    icon: <Close />,
-                    label: 'Annuler',
-                    onClick: handleClose,
-                },
-                {
                     icon: <Check />,
                     label: 'Créer',
                     onClick: handleCreateTribe,
                     disabled: !tribeName.trim(),
+                    isPrimary: true,
                 },
             ]}
         />
