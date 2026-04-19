@@ -260,6 +260,19 @@ class GiftListController {
     return membership !== null;
   }
 
+  /**
+   * Bump the updatedAt timestamp on a list without ownership checks.
+   * Call this after any mutation that affects list contents
+   * (gift added, updated, deleted, taken, untaken).
+   */
+  async touchList(giftListId) {
+    // Explicitly supply updatedAt so Sequelize doesn't silently ignore it
+    await GiftList.update(
+      { updatedAt: new Date() },
+      { where: { id: giftListId }, silent: true }
+    );
+  }
+
   async toggleFavorite(giftId) {
     const gift = await Gift.findByPk(giftId, { include: [GiftList] });
     if (!gift) throw new Error('Gift not found');

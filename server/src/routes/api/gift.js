@@ -58,8 +58,8 @@ giftApi.post('/', authenticateJWT, async (req, res) => {
             await giftlistcontroller.addAllGiftImages(imagesToCreate);
         }
 
-        // update the last modified date of the list to indicate there are changes to this list
-        giftlistcontroller.addOrUpdateGiftList(theList, req.user.id);
+        // Bump the list's updatedAt so the list page shows when it was last changed
+        await giftlistcontroller.touchList(req.body.giftListId);
 
         // return newly created gift with links and images
         const newGift = await Gift.findByPk(gift.id, {
@@ -106,6 +106,7 @@ giftApi.delete('/:id', authenticateJWT, async (req, res) => {
         }
 
         await theGift.destroy();
+        await giftlistcontroller.touchList(theGift.giftListId);
         res.status(200).send('Gift has been removed.');
     } catch (error) {
         logger.error(`Cannot delete gift ${giftId}. Error: ${error}`);
@@ -151,6 +152,7 @@ giftApi.post('/take/:id', authenticateJWT, (req, res) => {
             } else {
                 giftlistcontroller.updateGift(giftId, { selectedById: req.user.id, selectedAt: new Date() }, req.user.id)
                     .then(async theGift => {
+                        await giftlistcontroller.touchList(theGift.giftListId);
                         // Create GIFT_TAKEN notification
                         await Notification.create({
                             recipientId: null,
@@ -200,7 +202,8 @@ giftApi.post('/untake/:id', authenticateJWT, async (req, res) => {
 
         // Update the gift to untake it
         const updatedGift = await giftlistcontroller.updateGift(giftId, { selectedById: null, selectedAt: null }, req.user.id);
-        
+        await giftlistcontroller.touchList(updatedGift.giftListId);
+
         // Create GIFT_UNTAKEN notification
         await Notification.create({
             recipientId: null,
