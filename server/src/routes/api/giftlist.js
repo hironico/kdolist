@@ -3,7 +3,7 @@ const { Op } = require('sequelize');
 
 const { authenticateJWT } = require('./auth');
 
-const { GiftList, Gift, User } = require('../../model');
+const { GiftList, Gift, User, GroupAccess } = require('../../model');
 const logger = require('../../logger');
 const giftlistcontroller = require('../../controller/giftlistcontroller');
 
@@ -17,7 +17,7 @@ giftListApi.get('/', authenticateJWT, async (req, res) => {
         where: {
             ownerId: req.user.id
         },
-        include: 'owner'
+        include: ['owner', { model: GroupAccess, attributes: ['groupId'] }]
     });
 
     res.json(allMyLists);
@@ -26,7 +26,8 @@ giftListApi.get('/', authenticateJWT, async (req, res) => {
 
 
 /**
- * Get user's own lists and lists from tribes they are members of
+ * Get user's own lists and lists from tribes they are members of.
+ * Each list includes its groupAccesses so the client can determine collaborative editability.
  */
 giftListApi.get('/all', authenticateJWT, async (req, res) => {
     const { Group, GroupMembership } = require('../../model');
@@ -60,25 +61,31 @@ giftListApi.get('/all', authenticateJWT, async (req, res) => {
 
         const memberIds = confirmedMemberships.map(m => m.userId);
 
-        // Get all lists owned by these members
+        // Get all lists owned by these members (include groupAccesses)
         const tribeLists = await GiftList.findAll({
             where: {
                 ownerId: {
                     [Op.in]: memberIds
                 }
             },
-            include: 'owner'
+            include: [
+                'owner',
+                { model: GroupAccess, attributes: ['groupId'] }
+            ]
         });
 
         tribeListsMap[tribe.id] = tribeLists;
     }
 
-    // Get user's own lists
+    // Get user's own lists (include groupAccesses)
     const myLists = await GiftList.findAll({
         where: {
             ownerId: req.user.id
         },
-        include: 'owner'
+        include: [
+            'owner',
+            { model: GroupAccess, attributes: ['groupId'] }
+        ]
     });
 
     res.json({
@@ -86,6 +93,29 @@ giftListApi.get('/all', authenticateJWT, async (req, res) => {
         userTribes: userTribes,
         tribeListsMap: tribeListsMap
     });
+});
+
+/**
+ * Get the group accesses for a specific list (owner only).
+ */
+giftListApi.get('/:id/access', authenticateJWT, async (req, res) => {
+    const listId = req.params.id;
+    try {
+        const list = await GiftList.findOne({
+            where: { id: listId, ownerId: req.user.id },
+            include: [{ model: GroupAccess, attributes: ['groupId'] }]
+        });
+
+        if (!list) {
+            res.status(404).send('List not found or you are not the owner.').end();
+            return;
+        }
+
+        res.status(200).json(list.groupAccesses.map(ga => ga.groupId));
+    } catch (error) {
+        logger.error(`Cannot get group accesses for list ${listId}: ${error}`);
+        res.status(500).send(error).end();
+    }
 });
 
 /**
@@ -108,12 +138,27 @@ giftListApi.get('/contents/:id', authenticateJWT, async (req, res) => {
 });
 
 /**
- * Create or update a new list for the current loggedin user.
- * Returns the newly created list json to client.
+ * Create or update a list for the current logged-in user.
+ * Accepts isCollaborative (boolean) and groupIds (string[]) in the body.
+ * Returns the saved list.
  */
 giftListApi.post('/', authenticateJWT, async (req, res) => {
     try {
         const newGiftList = await giftlistcontroller.addOrUpdateGiftList(req.body, req.user.id);
+
+        if (!newGiftList) {
+            res.status(403).send('Cannot create or update list.').end();
+            return;
+        }
+
+        // Handle group accesses if the list is collaborative
+        const { groupIds } = req.body;
+        if (groupIds !== undefined) {
+            await giftlistcontroller.setGroupAccesses(newGiftList.id, groupIds, req.user.id);
+        } else if (newGiftList.isCollaborative === false) {
+            // If collaborative was explicitly turned off, clear all group accesses
+            await giftlistcontroller.setGroupAccesses(newGiftList.id, [], req.user.id);
+        }
 
         res.status(200).json(newGiftList);
     } catch (error) {

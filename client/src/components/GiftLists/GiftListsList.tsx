@@ -8,8 +8,7 @@ import useNotifications from '@/store/notifications';
 import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { FormatListBulleted } from '@mui/icons-material';
-import GroupIcon from '@mui/icons-material/Group';
+import { Diversity3, FormatListBulleted, Group } from '@mui/icons-material';
 import { BottomDialog } from '../BottomDialog';
 import ListEditor from '@/components/GiftLists/ListEditorForm';
 import GiftListsFAB from './GiftListsFAB';
@@ -152,7 +151,7 @@ const GiftListsList: React.FC = () => {
     onAction: () => setShowConfirmDialog(false),
   };
 
-  const listEditor = <ListEditor onListSaved={handleListSaved} />;
+  const listEditor = <ListEditor onListSaved={handleListSaved} userTribes={userTribes} />;
 
   // Build filters dynamically based on user's tribes
   const giftListsFilters: Filter<GiftList>[] = [
@@ -251,7 +250,7 @@ const GiftListsList: React.FC = () => {
           <EmptyStateCard
             title="Rejoins une tribu !"
             caption="Tu ne fais partie d'aucune tribu pour le moment. Rejoins ou crée une tribu pour voir les listes des autres membres."
-            icon={<GroupIcon />}
+            icon={<Group />}
           />
           {giftLists.length > 0 && (
             <>
@@ -281,14 +280,23 @@ const GiftListsList: React.FC = () => {
                     onAction: () => handleEditGiftList(item),
                   };
 
-                  const icon = <FormatListBulleted />;
-                  const editable = item.ownerId === appContext.loginInfo.profile?.id;
+                  const isOwner = item.ownerId === appContext.loginInfo.profile?.id;
+                  const isCollaborativeMember =
+                    item.isCollaborative === true &&
+                    (item.groupAccesses ?? []).some(ga =>
+                      userTribes.some((t: any) => t.id === ga.groupId)
+                    );
+                  const editable = isOwner || isCollaborativeMember;
+
+                  const icon = item.isCollaborative
+                    ? <Diversity3 />
+                    : <FormatListBulleted />;
 
                   return (
                     <SwipeableListItem
                       onClickMain={() => handleNavigateList(item, editable)}
-                      action1={editable ? deleteAction : undefined}
-                      action2={editable ? editListAction : undefined}
+                      action1={isOwner ? deleteAction : undefined}
+                      action2={isOwner ? editListAction : undefined}
                       primaryText={item.name}
                       secondaryText={secondaryText}
                       icon={icon}
@@ -325,14 +333,23 @@ const GiftListsList: React.FC = () => {
               onAction: () => handleEditGiftList(item),
             };
 
-            const icon = <FormatListBulleted />;
-            const editable = item.ownerId === appContext.loginInfo.profile?.id;
+            const isOwner = item.ownerId === appContext.loginInfo.profile?.id;
+            const isCollaborativeMember =
+              item.isCollaborative === true &&
+              (item.groupAccesses ?? []).some(ga =>
+                userTribes.some((t: any) => t.id === ga.groupId)
+              );
+            const editable = isOwner || isCollaborativeMember;
+
+            const icon = item.isCollaborative
+              ? <Diversity3 />
+              : <FormatListBulleted />;
 
             return (
               <SwipeableListItem
                 onClickMain={() => handleNavigateList(item, editable)}
-                action1={editable ? deleteAction : undefined}
-                action2={editable ? editListAction : undefined}
+                action1={isOwner ? deleteAction : undefined}
+                action2={isOwner ? editListAction : undefined}
                 primaryText={item.name}
                 secondaryText={secondaryText}
                 icon={icon}

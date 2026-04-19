@@ -1,5 +1,6 @@
 const { DataTypes, where } = require('sequelize');
-const { GiftList, Gift, GroupAccess, Notification, Link, Image, sequelize } = require('../model');
+const { GiftList, Gift, Group, GroupAccess, GroupMembership, Notification, Link, Image, sequelize } = require('../model');
+const { Op } = require('sequelize');
 const logger = require('../logger');
 
 class GiftListController {
@@ -190,6 +191,9 @@ class GiftListController {
 
       list.set('name', giftList.name);
       list.set('showTakenToOwner', giftList.showTakenToOwner);
+      if (giftList.isCollaborative !== undefined) {
+        list.set('isCollaborative', giftList.isCollaborative);
+      }
       list.set('updatedAt', new Date());
 
       await list.save();
@@ -198,10 +202,62 @@ class GiftListController {
     } else {
       const newGiftList = await GiftList.create({
         name: giftList.name,
-        ownerId: ownerId
+        ownerId: ownerId,
+        isCollaborative: giftList.isCollaborative ?? false
       });
       return newGiftList;
     }
+  }
+
+  /**
+   * Replace all GroupAccess records for a list with the supplied groupIds.
+   * Only the owner may call this.
+   */
+  async setGroupAccesses(giftListId, groupIds, ownerId) {
+    const list = await GiftList.findByPk(giftListId);
+    if (!list) throw new Error(`GiftList not found: ${giftListId}`);
+    if (list.ownerId !== ownerId) throw new Error('Only the list owner can manage group access.');
+
+    // Delete existing accesses for this list
+    await GroupAccess.destroy({ where: { giftListId } });
+
+    if (!groupIds || groupIds.length === 0) {
+      return [];
+    }
+
+    const created = await Promise.all(
+      groupIds.map(groupId => GroupAccess.create({ giftListId, groupId }))
+    );
+
+    logger.info(`Set ${created.length} group accesses for list ${giftListId}`);
+    return created;
+  }
+
+  /**
+   * Returns true if userId is the list owner, OR if the list is collaborative
+   * and the user is a MEMBER or ADMIN of any group that has GroupAccess to this list.
+   */
+  async isUserAuthorizedToEdit(listId, userId) {
+    const list = await GiftList.findByPk(listId, {
+      include: [{ model: GroupAccess }]
+    });
+
+    if (!list) return false;
+    if (list.ownerId === userId) return true;
+    if (!list.isCollaborative) return false;
+
+    const groupIds = list.groupAccesses.map(ga => ga.groupId);
+    if (groupIds.length === 0) return false;
+
+    const membership = await GroupMembership.findOne({
+      where: {
+        userId,
+        groupId: { [Op.in]: groupIds },
+        status: { [Op.in]: ['MEMBER', 'ADMIN'] }
+      }
+    });
+
+    return membership !== null;
   }
 
   async toggleFavorite(giftId) {

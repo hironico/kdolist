@@ -15,15 +15,17 @@ const giftApi = express.Router();
 giftApi.post('/', authenticateJWT, async (req, res) => {
 
     try {
-        const theList = await GiftList.findOne({
-            where: {
-                id: req.body.giftListId,
-                ownerId: req.user.id
-            }
-        });
+        const authorized = await giftlistcontroller.isUserAuthorizedToEdit(req.body.giftListId, req.user.id);
+
+        if (!authorized) {
+            res.status(403).send('Cannot add/update gift. List not found or you do not have write access.').end();
+            return;
+        }
+
+        const theList = await GiftList.findByPk(req.body.giftListId);
 
         if (theList === null) {
-            res.status(400).send('Cannot add gift to list. List not found or you are not the owner.').end();
+            res.status(400).send('Gift list not found.').end();
             return;
         }
 
@@ -82,7 +84,7 @@ giftApi.post('/', authenticateJWT, async (req, res) => {
     }
 });
 
-giftApi.delete('/:id', authenticateJWT, (req, res) => {
+giftApi.delete('/:id', authenticateJWT, async (req, res) => {
     const giftId = req.params.id;
     if (!giftId) {
         res.status(403).send('Invalid gift id').end();
@@ -90,26 +92,23 @@ giftApi.delete('/:id', authenticateJWT, (req, res) => {
     }
 
     try {
-        Gift.findByPk(giftId, {
-            include: [GiftList]
-        })
-            .then(theGift => {
-                if (theGift.giftList.ownerId !== req.user.id) {
-                    logger.warning(`Attempt to delete a gift where user is not owner of the list!`);
-                    res.status(403).send('You cannot delete a gift of someone else\'s list.').end();
-                    return;
-                }
+        const theGift = await Gift.findByPk(giftId, { include: [GiftList] });
+        if (!theGift) {
+            res.status(404).send('Gift not found').end();
+            return;
+        }
 
-                theGift.destroy()
-                    .then(() => {
-                        res.status(200).send('Gift has been removed.');
-                    })
-            }).catch(error => {
-                logger.error('Cannot delete gift. Error:' + error);
-                res.status(400).send(`Cannot delete gift. ${error}`);
-            });
+        const authorized = await giftlistcontroller.isUserAuthorizedToEdit(theGift.giftListId, req.user.id);
+        if (!authorized) {
+            logger.warning(`Attempt to delete a gift where user has no write access to the list!`);
+            res.status(403).send('You do not have permission to delete a gift from this list.').end();
+            return;
+        }
+
+        await theGift.destroy();
+        res.status(200).send('Gift has been removed.');
     } catch (error) {
-        logger.error(`Cannot delete gift ${id}. Error: ${error}`);
+        logger.error(`Cannot delete gift ${giftId}. Error: ${error}`);
         res.status(500).send(error).end();
     }
 });
@@ -236,10 +235,11 @@ giftApi.post('/favorite/:id', authenticateJWT, async (req, res) => {
             return;
         }
 
-        // Check if user is the owner of the gift list
-        if (theGift.giftList.ownerId !== req.user.id) {
-            logger.warning(`Attempt to toggle favorite on a gift where user is not owner of the list!`);
-            res.status(403).send('You can only mark favorites on your own lists.').end();
+        // Check if user is owner or collaborative member of the gift list
+        const authorized = await giftlistcontroller.isUserAuthorizedToEdit(theGift.giftListId, req.user.id);
+        if (!authorized) {
+            logger.warning(`Attempt to toggle favorite on a gift where user has no write access to the list!`);
+            res.status(403).send('You do not have permission to mark favourites on this list.').end();
             return;
         }
 

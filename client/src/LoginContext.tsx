@@ -21,6 +21,10 @@ export interface LoginInfoProps {
   profile?: LoginProfile | null;
 }
 
+export interface GiftListAccess {
+  groupId: string;
+}
+
 export interface GiftList {
   id: string;
   name: string;
@@ -29,6 +33,8 @@ export interface GiftList {
   ownerId: string;
   owner?: LoginInfoProps;
   showTakenToOwner?: boolean;
+  isCollaborative?: boolean;
+  groupAccesses?: GiftListAccess[];
 }
 
 export interface Gift {
