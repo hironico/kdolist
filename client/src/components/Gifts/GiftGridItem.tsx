@@ -174,8 +174,8 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
             </ListItemText>
           </MenuItem>
 
-          {/* Favorite action - only for owners */}
-          {isOwner && (
+          {/* Favorite action - for owners and collaborative members */}
+          {editable && (
             <MenuItem onClick={handleFavoriteAction}>
               <ListItemIcon>
                 {isFavorite ? <FavoriteIcon fontSize="small" color="error" /> : <FavoriteBorderIcon fontSize="small" />}

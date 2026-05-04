@@ -10,8 +10,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Diversity3, FormatListBulleted, Group } from '@mui/icons-material';
 import ListEditor from '@/components/GiftLists/ListEditorForm';
-import GiftListsFAB from './GiftListsFAB';
 import FilterBar, { Filter } from '../FilterBar/FilterBar';
+import { usePageActions } from '@/sections/FloatingActionPill';
 import { Box } from '@mui/system';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
@@ -99,6 +99,18 @@ const GiftListsList: React.FC = () => {
     appContext.setGiftList(null);
     setGiftListEditorVisible(true);
   }
+
+  // Register page-level actions for the global FloatingActionPill
+  usePageActions(
+    {
+      onAdd: handleAddGiftList,
+      addAriaLabel: 'nouvelle liste',
+      addLabel: 'Ajouter',
+      onSearchChange: setSearchQuery,
+      searchPlaceholder: 'Rechercher une liste…',
+    },
+    [],
+  );
 
   const handleDeleteGiftList = async () => {
     if (!appContext.giftList) {
@@ -379,8 +391,6 @@ const GiftListsList: React.FC = () => {
         defaultEntry={defaultAction}
         message="Attention c'est irreversible !"
       />
-
-      <GiftListsFAB handleAdd={() => handleAddGiftList()} onSearchChange={setSearchQuery} />
     </Box>
   );
 };

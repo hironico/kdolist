@@ -54,7 +54,7 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ oneGift, editable, is
     // Handle favorite click: animate first, then update server
     const handleFavoriteClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!isOwner) return;
+        if (!editable) return;
 
         // Trigger animation
         setShouldAnimate(true);
@@ -77,14 +77,14 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ oneGift, editable, is
     );
 
     // Create favorite icon as rightContent - visible to all users
-    // Only clickable for list owners
-    const rightContent = isFavorite || isOwner ? (
+    // Clickable for owners and collaborative members
+    const rightContent = isFavorite || editable ? (
         <IconButton
             size="small"
             onClick={handleFavoriteClick}
-            disabled={!isOwner}
+            disabled={!editable}
             sx={{
-                cursor: isOwner ? 'pointer' : 'default',
+                cursor: editable ? 'pointer' : 'default',
                 '&.Mui-disabled': {
                     opacity: 1
                 },

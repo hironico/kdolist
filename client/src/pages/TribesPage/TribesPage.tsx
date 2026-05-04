@@ -9,13 +9,14 @@ import useNotifications from '@/store/notifications';
 import { LoginContext } from '@/LoginContext';
 import {
     TribeList,
-    TribesFAB,
     Group,
     CreateTribeDialog,
     InviteUserDialog,
     TribeDetailsDialog
 } from '@/components/Tribes';
 import ActionSheet from '@/components/ActionSheet/ActionSheet';
+import { usePageActions } from '@/sections/FloatingActionPill';
+import { GroupAdd } from '@mui/icons-material';
 
 export function TribesPage() {
     const [myTribes, setMyTribes] = useState<Group[]>([]);
@@ -29,6 +30,19 @@ export function TribesPage() {
     const [leaveTribeConfirmOpen, setLeaveTribeConfirmOpen] = useState(false);
     const [deleteTribeConfirmOpen, setDeleteTribeConfirmOpen] = useState(false);
     const [pendingTribeId, setPendingTribeId] = useState<string | null>(null);
+
+    // Register page-level actions for the global FloatingActionPill
+    usePageActions(
+        {
+            onAdd: () => setCreateDialogOpen(true),
+            addAriaLabel: 'nouvelle tribu',
+            addLabel: 'Ajouter',
+            addIcon: <GroupAdd />,
+            onSearchChange: setSearchQuery,
+            searchPlaceholder: 'Rechercher une tribu…',
+        },
+        [],
+    );
 
     const fetchMyTribes = async () => {
         try {
@@ -198,11 +212,6 @@ export function TribesPage() {
                         onDeleteTribe={handleDeleteTribe}
                         onViewDetails={handleViewDetails}
                     />
-                    <TribesFAB
-                        handleAdd={() => setCreateDialogOpen(true)}
-                        onSearchChange={setSearchQuery}
-                    />
-
                     <CreateTribeDialog
                         open={createDialogOpen}
                         onClose={() => setCreateDialogOpen(false)}
