@@ -13,6 +13,9 @@ import Sidebar from '@/sections/Sidebar';
 import { LoginContextProvider } from './LoginContext';
 import { UpdateNotifier } from '@/components/UpdateNotifier';
 import { SwipeableListProvider } from '@/components/SwipeableListItem';
+import FloatingActionPill, {
+  FloatingActionPillProvider,
+} from '@/sections/FloatingActionPill';
 
 function App() {
   return (
@@ -42,9 +45,12 @@ function App() {
           <HotKeys />
           <UpdateNotifier />
           <BrowserRouter>
-            <Header />
-            <Sidebar />
-            <Pages />
+            <FloatingActionPillProvider>
+              <Header />
+              <Sidebar />
+              <Pages />
+              <FloatingActionPill />
+            </FloatingActionPillProvider>
           </BrowserRouter>
         </SwipeableListProvider>
       </LoginContextProvider>

@@ -8,8 +8,8 @@ import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
 import GiftForm from './GiftForm';
-import { GiftsFAB } from './GiftsFAB';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
+import { usePageActions } from '@/sections/FloatingActionPill';
 import { useNavigate } from 'react-router-dom';
 import GiftsListItem from './GiftsListItem';
 import GiftGridItem from './GiftGridItem';
@@ -204,6 +204,21 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     }
   }
 
+  // Register page-level actions for the global FloatingActionPill.
+  // On the ListContents page only the "Listes" nav button is shown.
+  usePageActions(
+    {
+      onAdd: editable ? handleAddGift : undefined,
+      addAriaLabel: 'nouveau cadeau',
+      addLabel: 'Ajouter',
+      onSearchChange: setSearchQuery,
+      searchPlaceholder: 'Rechercher un cadeau…',
+      showNav: { lists: true, tribes: false },
+      activeNav: 'none',
+    },
+    [editable],
+  );
+
   const actions: ActionSheetEntry[] = [
     {
       label: 'Oui, effacer ce cadeau de la liste',
@@ -381,8 +396,6 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         defaultEntry={defaultAction}
         message="Attention c'est irréversible !"
       />
-
-      <GiftsFAB handleAdd={editable ? handleAddGift : undefined} onSearchChange={setSearchQuery} />
     </Box>
   );
 };
