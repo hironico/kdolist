@@ -19,6 +19,10 @@ const baseTheme = createTheme({
     },
     background: {
       default: '#F2F1F3',
+      // List items / cards: a half tone between the page background (#F2F1F3)
+      // and pure white. This makes the floating "liquid glass" pill stand out
+      // on top of the otherwise flat surface.
+      paper: '#F8F8F9',
     },
   },
   shape: {
@@ -192,7 +196,9 @@ const baseTheme = createTheme({
           gap: 0,
           borderBottom: `1px solid`,
           borderBottomColor: grey[300],
-          backgroundColor: 'white',
+          // Inherits theme.palette.background.paper (#F8F8F9), a half tone
+          // darker than pure white so the floating action pill pops on top.
+          backgroundColor: '#F8F8F9',
           padding: '0px',
         },
       },

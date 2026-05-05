@@ -23,7 +23,7 @@ const ICON_BTN_SX = { width: 40, height: 40 } as const;
 //     and a softer base at the bottom, just like a drop of liquid lens.
 // Together they replace the previous flat tinted background and the visible
 // border — the rim-light is now produced by an inset box-shadow instead.
-const BACKDROP_FILTER = 'blur(15px) saturate(180%) brightness(1.05)';
+const BACKDROP_FILTER = 'saturate(180%) brightness(1.05)';
 const COLLAPSED_ICON_FONT_SIZE = 22;
 
 // Returns the layered background + rim-lighting that gives the pill its
@@ -32,16 +32,16 @@ const COLLAPSED_ICON_FONT_SIZE = 22;
 const liquidGlassSx = (theme: any) => {
   const isDark = theme.palette.mode === 'dark';
   // Transparency halved compared to the previous values: opacity doubled.
-  const baseAlpha = isDark ? 0.44 : 0.56;
+  const baseAlpha = isDark ? 0.64 : 0.90;
   const topHighlight = isDark
     ? 'rgba(255,255,255,0.18)'
-    : 'rgba(255,255,255,0.55)';
+    : 'rgba(255,255,255,0.30)';
   const midHighlight = isDark
     ? 'rgba(255,255,255,0.04)'
-    : 'rgba(255,255,255,0.10)';
+    : 'rgba(255,255,255,0.05)';
   const bottomShade = isDark
     ? 'rgba(0,0,0,0.10)'
-    : 'rgba(255,255,255,0.04)';
+    : 'rgba(255,255,255,0.0)';
 
   // Inset rim-light replaces a hard border for a more tactile glass edge.
   const rimLight = isDark
@@ -204,19 +204,33 @@ const FloatingActionPill: React.FC = () => {
 
   return (
     <Box
-      sx={{
+      sx={(theme) => ({
         position: 'fixed',
-        bottom: 20,
-        left: 20,
-        right: 20,
+        bottom: 0,
+        left: 0,
+        right: 0,
         zIndex: 1000,
+        // Subtle grey backdrop covering the whole bottom navigation area, so
+        // the floating pill stands out from the list items above without
+        // needing its own outer halo. The grey fades to transparent over the
+        // top 16 px to blend smoothly with the page content.
+        background:
+          theme.palette.mode === 'dark'
+            ? 'linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0.18) 32px)'
+            : 'linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0.05) 32px)',
+        // The previous left/right/bottom 20 px offsets are now provided by
+        // padding so that the grey backdrop reaches all edges.
+        pt: '32px',
+        pb: '20px',
+        pl: '20px',
+        pr: '20px',
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         gap: 1.25,
         pointerEvents: 'none', // pills below re-enable pointer events themselves
-      }}
+      })}
     >
       {/* ── Navigation pill ───────────────────────────────────────────── */}
       <Box
