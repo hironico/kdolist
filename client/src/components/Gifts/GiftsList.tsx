@@ -354,8 +354,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   return (
     <Box display="grid" gridTemplateColumns="auto" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative">
       {/* Filter bar and view toggle */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-        <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 2 }}>
+        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
           <FilterBar<Gift> onFiltersChange={onGiftFilterChange} filters={giftFilters} />
         </Box>
         <ToggleButtonGroup

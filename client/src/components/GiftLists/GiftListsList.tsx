@@ -246,7 +246,9 @@ const GiftListsList: React.FC = () => {
 
   return (
     <Box display="grid" gridTemplateColumns="auto" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative">
-      <FilterBar<GiftList> onFiltersChange={onGiftFilterChange} filters={giftListsFilters} />
+      <Box sx={{ mb: 2 }}>
+        <FilterBar<GiftList> onFiltersChange={onGiftFilterChange} filters={giftListsFilters} />
+      </Box>
       {loading ? (
         <EmptyStateCard
           title="Patience..."

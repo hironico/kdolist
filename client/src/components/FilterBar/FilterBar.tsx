@@ -43,7 +43,10 @@ const FilterBar = <T extends DataItem>({
         gap: 1,
         flexWrap: 'nowrap',
         overflowX: 'auto',
-        mb: 2,
+        // No bottom margin: it would offset the FilterBar inside flex layouts
+        // that align it next to other controls (e.g. the ToggleButtonGroup
+        // in GiftsList). Spacing below the FilterBar is the parent's
+        // responsibility.
         // Hide scrollbar across all browsers while keeping scroll functionality
         scrollbarWidth: 'none',        // Firefox
         msOverflowStyle: 'none',       // IE / Edge legacy
