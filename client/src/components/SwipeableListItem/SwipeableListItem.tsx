@@ -381,7 +381,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
         secondaryAction={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {rightContent}
-            {!isTouchDevice && (totalSwipeDistance > 0) && (
+            {(totalSwipeDistance > 0) && (
               <IconButton onClick={toggleOpen}>
                 <MoreVertIcon />
               </IconButton>
