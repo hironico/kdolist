@@ -245,8 +245,12 @@ const GiftListsList: React.FC = () => {
   })();
 
   return (
-    <Box display="grid" gridTemplateColumns="auto" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative">
-      <Box sx={{ mb: 2 }}>
+    <Box display="grid" gridTemplateColumns="1fr" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative" sx={{ overflowX: 'hidden' }}>
+      {/* minWidth:0 is required on this grid item so the column stays at 1fr
+          and the FilterBar's own overflowX:auto scroll container can function
+          (without it the grid item expands to chip intrinsic width and the
+          overflowX:hidden parent clips the scrollable area). */}
+      <Box sx={{ mb: 2, minWidth: 0 }}>
         <FilterBar<GiftList> onFiltersChange={onGiftFilterChange} filters={giftListsFilters} />
       </Box>
       {loading ? (
@@ -257,7 +261,7 @@ const GiftListsList: React.FC = () => {
         />
       ) : userTribes.length === 0 && activeFilters.length === 0 ? (
         // Show empty state when user has no tribes and no filters are active
-        <Box sx={{ overflowY: 'auto', alignSelf: 'start' }}>
+        <Box sx={{ overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
           <EmptyStateCard
             title="Rejoins une tribu !"
             caption="Tu ne fais partie d'aucune tribu pour le moment. Rejoins ou crée une tribu pour voir les listes des autres membres."
@@ -268,7 +272,7 @@ const GiftListsList: React.FC = () => {
               <Typography variant="h6" sx={{ mt: 3, mb: 2, px: 1 }}>
                 Mes Listes
               </Typography>
-              <List sx={{ m: '0px' }}>
+              <List sx={{ m: '0px', overflowX: 'hidden' }}>
                 {giftLists.map((item, index) => {
                   const modifDate = new Date(item.updatedAt.toString());
                   const secondaryText = (
@@ -321,7 +325,7 @@ const GiftListsList: React.FC = () => {
           )}
         </Box>
       ) : filteredLists.length > 0 ? (
-          <List ref={listRef} sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+          <List ref={listRef} sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
           {filteredLists.map((item, index) => {
             const modifDate = new Date(item.updatedAt.toString());
             const secondaryText = (

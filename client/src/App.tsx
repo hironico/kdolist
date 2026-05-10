@@ -27,12 +27,15 @@ function App() {
             styles={{
               body: {
                 overflowY: 'hidden',
+                overflowX: 'hidden',
                 height: '100vh',
-                width: '100vw',
+                width: '100%',
               },
               html: {
                 overflowY: 'hidden',
+                overflowX: 'hidden',
                 height: '100%',
+                width: '100%',
               },
               '#root': {
                 height: '100%',

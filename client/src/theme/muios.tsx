@@ -172,7 +172,11 @@ const baseTheme = createTheme({
           width: '100%',
           maxHeight: '100%',
           overflowY: 'scroll',
-          margin: '16px',
+          // Only top/bottom margin: horizontal margins (left+right) combined
+          // with width:100% caused the list to overflow the viewport on
+          // narrow screens (≤430px). The parent containers provide their own
+          // horizontal padding via p={2}.
+          margin: '16px 0',
           borderRadius: '16px',
           border: '1px solid white',
         },
