@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 
 import DefaultIcon from '@mui/icons-material/Deblur';
+import InstallMobileIcon from '@mui/icons-material/InstallMobile';
+import usePWAInstall from '@/components/PWAInstallPrompt/usePWAInstall';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -28,6 +30,7 @@ interface Tribe {
 
 function Sidebar() {
   const [isSidebarOpen, sidebarActions] = useSidebar();
+  const { canInstall, requestInstallDialog } = usePWAInstall();
   const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
   const api = useAuthenticatedApi();
 
@@ -88,6 +91,25 @@ function Sidebar() {
         ))}
 
         {sidebarRoutes.length > 0 && <Divider />}
+
+        {/* Install the app (hidden when already installed or not installable) */}
+        {canInstall && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  sidebarActions.close();
+                  requestInstallDialog();
+                }}
+                sx={{ px: 1.5 }}
+              >
+                <ListItemIcon sx={{ minWidth: 36 }}><InstallMobileIcon /></ListItemIcon>
+                <ListItemText primary="Installer l'application" />
+              </ListItemButton>
+            </ListItem>
+            <Divider />
+          </>
+        )}
 
         {/* GitHub link */}
         <ListItem disablePadding>

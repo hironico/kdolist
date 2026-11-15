@@ -2,6 +2,7 @@
   "name": "kdolist",
   "short_name": "K.Do-LiST",
   "description": "hironico's KDO list is a gift list manager for you and your family.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

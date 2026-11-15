@@ -11,7 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Diversity3, FormatListBulleted, Group } from '@mui/icons-material';
 import ListEditor from '@/components/GiftLists/ListEditorForm';
 import FilterBar, { Filter } from '../FilterBar/FilterBar';
-import { usePageActions } from '@/sections/FloatingActionPill';
+import { usePageActions, FLOATING_ACTION_PILL_CLEARANCE } from '@/sections/FloatingActionPill';
 import { Box } from '@mui/system';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
@@ -261,7 +261,7 @@ const GiftListsList: React.FC = () => {
         />
       ) : userTribes.length === 0 && activeFilters.length === 0 ? (
         // Show empty state when user has no tribes and no filters are active
-        <Box sx={{ overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
+        <Box sx={{ pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
           <EmptyStateCard
             title="Rejoins une tribu !"
             caption="Tu ne fais partie d'aucune tribu pour le moment. Rejoins ou crée une tribu pour voir les listes des autres membres."
@@ -325,7 +325,7 @@ const GiftListsList: React.FC = () => {
           )}
         </Box>
       ) : filteredLists.length > 0 ? (
-          <List ref={listRef} sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
+          <List ref={listRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
           {filteredLists.map((item, index) => {
             const modifDate = new Date(item.updatedAt.toString());
             const secondaryText = (

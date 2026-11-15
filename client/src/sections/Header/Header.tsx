@@ -12,22 +12,11 @@ import { getRandomJoke } from './utils';
 import routes from '@/routes';
 import { PathRouteProps, useLocation, useNavigate } from 'react-router-dom';
 import { PathRouteCustomProps, Routes } from '@/routes/types';
-import { ReactNode, useContext, useState, useEffect } from 'react';
+import { ReactNode, useContext, useState } from 'react';
 import { ArrowBackIos, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { LoginContext } from '@/LoginContext';
 import UserAvatar from '@/components/UserAvatar/UserAvatar';
 import { UpdateDialog } from '@/components/UpdateDialog';
-import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
-import { apiBaseUrl } from '@/config';
-
-interface Tribe {
-  id: string;
-  name: string;
-  adminId: string;
-  groupMemberships?: Array<{
-    status: string;
-  }>;
-}
 
 function Header() {
   const [, sidebarActions] = useSidebar();
@@ -36,31 +25,6 @@ function Header() {
   const location = useLocation();
   const loginContext = useContext(LoginContext);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
-  const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
-  const api = useAuthenticatedApi();
-
-  // Fetch tribes to check for pending invitations
-  useEffect(() => {
-    const fetchTribes = async () => {
-      try {
-        const response = await api.get(`${apiBaseUrl}/group`);
-        if (response.ok) {
-          const tribes: Tribe[] = await response.json();
-          const invitedCount = tribes.filter(
-            (tribe) => tribe.groupMemberships?.[0]?.status === 'INVITED'
-          ).length;
-          setPendingInvitationsCount(invitedCount);
-        }
-      } catch (error) {
-        console.error('Failed to fetch tribes for badge', error);
-      }
-    };
-
-    fetchTribes();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchTribes, 30000);
-    return () => clearInterval(interval);
-  }, [api]);
 
   function getRouteByPath(
     routes: Routes,
@@ -112,9 +76,7 @@ function Header() {
         aria-label="menu"
         sx={{ mr: 1 }}
       >
-        <Badge badgeContent={pendingInvitationsCount} color="error">
-          <MenuIcon />
-        </Badge>
+        <MenuIcon />
       </IconButton>
     );
   };

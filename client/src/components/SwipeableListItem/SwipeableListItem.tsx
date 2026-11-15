@@ -371,6 +371,14 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
       <CardWrapper
         transform={getTransform()}
         theme={theme}
+        sx={{
+          // On touch devices: inset right border of 5px in primary colour
+          // signals to the user that this item can be swiped to reveal actions.
+          // On desktop the MoreVert button serves as the affordance instead.
+          boxShadow: (isTouchDevice && totalSwipeDistance > 0)
+            ? `inset -5px 0 0 0 ${theme.palette.primary.main}`
+            : 'none',
+        }}
         {...(isTouchDevice
           ? {
             onTouchStart,
@@ -379,19 +387,26 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
           }
           : {})}
         secondaryAction={
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {rightContent}
-            {(totalSwipeDistance > 0) && (
-              <IconButton onClick={toggleOpen}>
-                <MoreVertIcon />
-              </IconButton>
-            )}
-          </Box>
+          (rightContent || (!isTouchDevice && totalSwipeDistance > 0)) ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {rightContent}
+              {!isTouchDevice && totalSwipeDistance > 0 && (
+                <IconButton onClick={toggleOpen}>
+                  <MoreVertIcon />
+                </IconButton>
+              )}
+            </Box>
+          ) : undefined
         }
       >
         <ListItemButton
           autoFocus={false}
-          sx={{ width: '100%', pr: isTouchDevice ? 0 : 6 }}
+          sx={{
+            width: '100%',
+            // Reserve right padding when a secondary action is visible (either
+            // the favourite icon on touch, or the MoreVert button on desktop).
+            pr: (rightContent || (!isTouchDevice && totalSwipeDistance > 0)) ? 6 : 0,
+          }}
           onClick={(_e) => {
             if (onClickMain) onClickMain();
           }}

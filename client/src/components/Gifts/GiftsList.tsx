@@ -9,7 +9,7 @@ import useNotifications from '@/store/notifications';
 import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
 import GiftForm from './GiftForm';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
-import { usePageActions } from '@/sections/FloatingActionPill';
+import { usePageActions, FLOATING_ACTION_PILL_CLEARANCE } from '@/sections/FloatingActionPill';
 import { useNavigate } from 'react-router-dom';
 import GiftsListItem from './GiftsListItem';
 import GiftGridItem from './GiftGridItem';
@@ -376,11 +376,11 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
       {/* Content area */}
       {viewMode === 'list' ? (
-        <List ref={listViewRef} sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
+        <List ref={listViewRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
           {listContents}
         </List>
       ) : (
-        <Box ref={gridViewRef} sx={{ m: '0px', mt: '10px', overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
+        <Box ref={gridViewRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
           <Grid container spacing={2}>
             {listContents}
           </Grid>

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, IconButton, InputBase, Tooltip, Typography } from '@mui/material';
+import { Badge, Box, IconButton, InputBase, Tooltip, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SearchIcon from '@mui/icons-material/Search';
@@ -10,11 +10,17 @@ import GroupIcon from '@mui/icons-material/Group';
 import ViewListIcon from '@mui/icons-material/ViewList';
 
 import { LoginContext } from '@/LoginContext';
+import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
+import { apiBaseUrl } from '@/config';
 import { useFloatingActionPill } from './FloatingActionPillContext';
 
 // Pill height — gives ~14px of vertical breathing room around the 40px icon
 // buttons + their tiny label.
 const PILL_HEIGHT = 68;
+// Total vertical space occupied by the fixed pill wrapper: 32px top padding +
+// pill + 20px bottom padding (+16px margin). Scrollable content must reserve
+// this at its end so the last item is never covered by the pill.
+export const FLOATING_ACTION_PILL_CLEARANCE = `${PILL_HEIGHT + 32 + 20 + 16}px`;
 const ICON_BTN_SX = { width: 40, height: 40 } as const;
 // "Liquid glass" Apple-style effect shared by both pills. Two ingredients:
 //  1) a strong backdrop-filter (blur + saturate + slight brightness boost)
@@ -94,6 +100,38 @@ const FloatingActionPill: React.FC = () => {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const api = useAuthenticatedApi();
+  const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
+  const isLoggedIn = Boolean(loginInfo?.jwt);
+
+  // Poll tribes to display the pending invitations badge on the Tribus icon.
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setPendingInvitationsCount(0);
+      return;
+    }
+
+    const fetchTribes = async () => {
+      try {
+        const response = await api.get(`${apiBaseUrl}/group`);
+        if (response.ok) {
+          const tribes: Array<{ groupMemberships?: Array<{ status: string }> }> =
+            await response.json();
+          setPendingInvitationsCount(
+            tribes.filter((tribe) => tribe.groupMemberships?.[0]?.status === 'INVITED').length,
+          );
+        }
+      } catch (error) {
+        console.error('Failed to fetch tribes for badge', error);
+      }
+    };
+
+    fetchTribes();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchTribes, 30000);
+    return () => clearInterval(interval);
+  }, [api, isLoggedIn]);
 
   // Reset internal state whenever the page (and therefore the page actions) change.
   useEffect(() => {
@@ -315,7 +353,11 @@ const FloatingActionPill: React.FC = () => {
               onClick: () => navigate('/tribes'),
               ariaLabel: 'aller aux tribus',
               tooltip: 'Mes Tribus',
-              icon: <GroupIcon />,
+              icon: (
+                <Badge badgeContent={pendingInvitationsCount} color="error">
+                  <GroupIcon />
+                </Badge>
+              ),
               label: 'Tribus',
             })}
 

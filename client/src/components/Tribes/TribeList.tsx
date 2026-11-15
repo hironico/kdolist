@@ -4,6 +4,7 @@ import TribeListItem from './TribeListItem';
 import { EmptyStateCard } from '../EmptyStateCard';
 import { SentimentDissatisfied } from '@mui/icons-material';
 import { Group } from './types';
+import { FLOATING_ACTION_PILL_CLEARANCE } from '@/sections/FloatingActionPill';
 
 interface TribeListProps {
     tribes: Group[];
@@ -45,7 +46,7 @@ const TribeList: React.FC<TribeListProps> = ({
     );
 
     return (
-        <Box width="100%" p={2} marginRight="15px">
+        <Box width="100%" p={2} pb={FLOATING_ACTION_PILL_CLEARANCE} marginRight="15px">
             {/* Invitations Section */}
             {invitedTribes.length > 0 && (
                 <>

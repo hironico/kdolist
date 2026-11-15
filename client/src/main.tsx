@@ -1,4 +1,7 @@
 import welcome from '@/utils/welcome';
+// Register the PWA install listeners as early as possible: `beforeinstallprompt`
+// fires only once and may happen before React is mounted.
+import '@/components/PWAInstallPrompt/usePWAInstall';
 
 // Root contains the main dependencies and providers of the base app
 //  - React, ReactDom, RecoilRoot, HelmetProvider, ThemeProvider, MUI-core)

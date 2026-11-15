@@ -1,5 +1,8 @@
 export { default } from './FloatingActionPill';
-export { default as FloatingActionPill } from './FloatingActionPill';
+export {
+  default as FloatingActionPill,
+  FLOATING_ACTION_PILL_CLEARANCE,
+} from './FloatingActionPill';
 export {
   FloatingActionPillProvider,
   FloatingActionPillContext,

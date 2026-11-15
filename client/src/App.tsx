@@ -12,6 +12,7 @@ import Notifications from '@/sections/Notifications';
 import Sidebar from '@/sections/Sidebar';
 import { LoginContextProvider } from './LoginContext';
 import { UpdateNotifier } from '@/components/UpdateNotifier';
+import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
 import { SwipeableListProvider } from '@/components/SwipeableListItem';
 import FloatingActionPill, {
   FloatingActionPillProvider,
@@ -47,6 +48,7 @@ function App() {
           <Notifications />
           <HotKeys />
           <UpdateNotifier />
+          <PWAInstallPrompt />
           <BrowserRouter>
             <FloatingActionPillProvider>
               <Header />
