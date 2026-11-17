@@ -166,6 +166,33 @@ giftListApi.post('/', authenticateJWT, async (req, res) => {
     }
 });
 
+/**
+ * Delete the gifts taken for more than 6 months from the list :id.
+ * Owner only. Returns the number of deleted gifts.
+ * Declared before DELETE /:id so that it is matched first.
+ */
+giftListApi.delete('/:id/old-taken-gifts', authenticateJWT, async (req, res) => {
+    const listId = req.params.id;
+    if (!listId) {
+        res.status(403).send('Invalid gift list id').end();
+        return;
+    }
+
+    try {
+        const deleted = await giftlistcontroller.deleteOldTakenGifts(listId, req.user.id, 6);
+
+        if (deleted === null) {
+            res.status(403).send('List not found or you are not the owner of this list.').end();
+            return;
+        }
+
+        res.status(200).json({ deleted });
+    } catch (error) {
+        logger.error(error);
+        res.status(500).send('Cannot delete old taken gifts.').end();
+    }
+});
+
 giftListApi.delete('/:id', authenticateJWT, async (req, res) => {
     const listId = req.params.id;
     if (!listId) {
