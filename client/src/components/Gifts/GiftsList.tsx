@@ -17,6 +17,17 @@ import { FilterBar } from '../FilterBar';
 import { Filter } from '../FilterBar/FilterBar';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 
+// Gifts taken for longer than this are proposed for deletion to the list owner.
+const OLD_TAKEN_MONTHS = 6;
+const CLEANUP_SNOOZE_KEY_PREFIX = 'kdolist_gift_cleanup_snoozed_until_';
+const CLEANUP_SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;
+
+const oldTakenCutoff = (): number => {
+  const d = new Date();
+  d.setMonth(d.getMonth() - OLD_TAKEN_MONTHS);
+  return d.getTime();
+};
+
 const newEmptyGift = (): Gift => {
   return {
     id: '',
@@ -45,6 +56,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [loading, setLoading] = useState(true);
   const [activeFilters, setActiveFilters] = useState<Filter<Gift>[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [cleanupOpen, setCleanupOpen] = useState(false);
+  const cleanupProposedRef = useRef(false);
   const listViewRef = useRef<HTMLUListElement>(null);
   const gridViewRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
@@ -237,6 +250,83 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const isOwner = appContext.giftList?.ownerId === appContext.loginInfo.id;
   const showTakenToOwner = appContext.giftList?.showTakenToOwner ?? false;
 
+  // ── Cleanup of gifts taken for a long time (owner only) ─────────────────
+  // The wording is intentionally neutral so it does not reveal anything when
+  // the owner is not supposed to see which gifts are taken.
+  const hasOldTakenGifts =
+    isOwner &&
+    !loading &&
+    appContext.giftListContents.some(
+      (g) => g.selectedById && g.selectedAt && new Date(g.selectedAt).getTime() < oldTakenCutoff(),
+    );
+
+  useEffect(() => {
+    if (!hasOldTakenGifts || cleanupProposedRef.current) return;
+    const listId = appContext.giftList?.id;
+    if (!listId) return;
+    try {
+      const snoozedUntil = Number(localStorage.getItem(`${CLEANUP_SNOOZE_KEY_PREFIX}${listId}`) ?? 0);
+      if (snoozedUntil > Date.now()) return;
+    } catch {
+      /* ignore storage errors */
+    }
+    cleanupProposedRef.current = true;
+    setCleanupOpen(true);
+  }, [hasOldTakenGifts, appContext.giftList?.id]);
+
+  const handleSnoozeCleanup = () => {
+    const listId = appContext.giftList?.id;
+    if (listId) {
+      try {
+        localStorage.setItem(
+          `${CLEANUP_SNOOZE_KEY_PREFIX}${listId}`,
+          String(Date.now() + CLEANUP_SNOOZE_MS),
+        );
+      } catch {
+        /* ignore storage errors */
+      }
+    }
+    setCleanupOpen(false);
+  };
+
+  const handleCleanupOldTakenGifts = () => {
+    setCleanupOpen(false);
+    const listId = appContext.giftList?.id;
+    if (!listId) return;
+
+    api.delete(`${apiBaseUrl}/giftlist/${listId}/old-taken-gifts`)
+      .then(async (response) => {
+        if (!response.ok) {
+          showError('Impossible de faire le ménage dans la liste.');
+          return;
+        }
+        const { deleted } = await response.json();
+        notificationsActions.push({
+          options: { variant: 'success' },
+          message: `${deleted} cadeau${deleted > 1 ? 'x' : ''} supprimé${deleted > 1 ? 's' : ''}.`,
+        });
+        fetchListContents();
+      })
+      .catch((error) => {
+        console.error(`Cannot clean up old taken gifts: ${error}`);
+        showError('Impossible de faire le ménage dans la liste.');
+      });
+  };
+
+  const cleanupActions: ActionSheetEntry[] = [
+    {
+      label: 'Oui, supprimer ces cadeaux',
+      color: 'error',
+      onAction: handleCleanupOldTakenGifts,
+    },
+  ];
+
+  const cleanupDefaultAction: ActionSheetEntry = {
+    label: 'Non, plus tard',
+    color: 'primary',
+    onAction: handleSnoozeCleanup,
+  };
+
   // Sort gifts: favorites first, then by update date
   const sortedGifts = loading ? [] : [...appContext.giftListContents].sort((a, b) => {
     // Favorites come first
@@ -388,6 +478,14 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
       )}
 
       <GiftForm gift={gift} editable={editable} open={giftEditorOpen} onClose={handleCloseGiftForm} />
+
+      <ActionSheet
+        open={cleanupOpen}
+        handleClose={handleSnoozeCleanup}
+        entries={cleanupActions}
+        defaultEntry={cleanupDefaultAction}
+        message="Faire le ménage : supprimer les cadeaux offerts depuis plus de 6 mois ? C'est irréversible !"
+      />
 
       <ActionSheet
         open={confirmDeleteOpen}

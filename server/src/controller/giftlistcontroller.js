@@ -273,6 +273,42 @@ class GiftListController {
     );
   }
 
+  /**
+   * Delete the gifts of a list that have been taken for more than `months` months.
+   * Only the owner of the list is allowed to do this.
+   * The cutoff date is computed here so that a client cannot widen it.
+   * @returns the number of deleted gifts, or null if the list is not found / user is not the owner.
+   */
+  async deleteOldTakenGifts(giftListId, userId, months = 6) {
+    const list = await GiftList.findByPk(giftListId);
+    if (!list || list.ownerId !== userId) return null;
+
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - months);
+
+    const oldGifts = await Gift.findAll({
+      attributes: ['id'],
+      where: {
+        giftListId,
+        selectedById: { [Op.ne]: null },
+        selectedAt: { [Op.lt]: cutoff }
+      }
+    });
+
+    if (oldGifts.length === 0) return 0;
+
+    const ids = oldGifts.map(g => g.id);
+    await sequelize.transaction(async (transaction) => {
+      await Link.destroy({ where: { giftId: { [Op.in]: ids } }, transaction });
+      await Image.destroy({ where: { giftId: { [Op.in]: ids } }, transaction });
+      await Gift.destroy({ where: { id: { [Op.in]: ids } }, transaction });
+    });
+
+    await this.touchList(giftListId);
+    logger.debug(`Deleted ${ids.length} gifts taken for more than ${months} months from list ${giftListId}`);
+    return ids.length;
+  }
+
   async toggleFavorite(giftId) {
     const gift = await Gift.findByPk(giftId, { include: [GiftList] });
     if (!gift) throw new Error('Gift not found');
