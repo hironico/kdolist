@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Badge, Box, IconButton, InputBase, Tooltip, Typography } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
@@ -12,6 +11,7 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import { LoginContext } from '@/LoginContext';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 import { apiBaseUrl } from '@/config';
+import { liquidGlassSx } from '@/theme/ios27';
 import { useFloatingActionPill } from './FloatingActionPillContext';
 
 // Pill height — gives ~14px of vertical breathing room around the 40px icon
@@ -22,53 +22,10 @@ const PILL_HEIGHT = 68;
 // this at its end so the last item is never covered by the pill.
 export const FLOATING_ACTION_PILL_CLEARANCE = `${PILL_HEIGHT + 32 + 20 + 16}px`;
 const ICON_BTN_SX = { width: 40, height: 40 } as const;
-// "Liquid glass" Apple-style effect shared by both pills. Two ingredients:
-//  1) a strong backdrop-filter (blur + saturate + slight brightness boost)
-//     to make whatever is behind ripple through the surface.
-//  2) a translucent gradient overlay that fakes a refracted highlight on top
-//     and a softer base at the bottom, just like a drop of liquid lens.
-// Together they replace the previous flat tinted background and the visible
-// border — the rim-light is now produced by an inset box-shadow instead.
-const BACKDROP_FILTER = 'saturate(180%) brightness(1.05)';
 const COLLAPSED_ICON_FONT_SIZE = 22;
-
-// Returns the layered background + rim-lighting that gives the pill its
-// liquid-glass look. Colours are theme-aware so the effect works in both
-// light and dark mode.
-const liquidGlassSx = (theme: any) => {
-  const isDark = theme.palette.mode === 'dark';
-  // Transparency halved compared to the previous values: opacity doubled.
-  const baseAlpha = isDark ? 0.64 : 0.90;
-  const topHighlight = isDark
-    ? 'rgba(255,255,255,0.18)'
-    : 'rgba(255,255,255,0.30)';
-  const midHighlight = isDark
-    ? 'rgba(255,255,255,0.04)'
-    : 'rgba(255,255,255,0.05)';
-  const bottomShade = isDark
-    ? 'rgba(0,0,0,0.10)'
-    : 'rgba(255,255,255,0.0)';
-
-  // Inset rim-light replaces a hard border for a more tactile glass edge.
-  const rimLight = isDark
-    ? 'inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.25)'
-    : 'inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(0,0,0,0.06)';
-
-  return {
-    background: `
-      linear-gradient(
-        180deg,
-        ${topHighlight} 0%,
-        ${midHighlight} 45%,
-        ${bottomShade} 100%
-      ),
-      ${alpha(theme.palette.background.paper, baseAlpha)}
-    `,
-    backdropFilter: BACKDROP_FILTER,
-    WebkitBackdropFilter: BACKDROP_FILTER,
-    boxShadow: rimLight,
-  };
-};
+// Both pills use the iOS 27 Liquid Glass material from the design tokens
+// (`liquidGlassSx`, driven by the --ios27-glass-* CSS variables), so they follow
+// light/dark mode and honour prefers-reduced-transparency.
 
 type ActiveNav = 'lists' | 'tribes' | 'none';
 
@@ -254,8 +211,8 @@ const FloatingActionPill: React.FC = () => {
         // top 16 px to blend smoothly with the page content.
         background:
           theme.palette.mode === 'dark'
-            ? 'linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0.18) 32px)'
-            : 'linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0.05) 32px)',
+            ? 'linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0.45) 32px)'
+            : 'linear-gradient(to bottom, rgba(242,242,247,0) 0px, rgba(242,242,247,0.7) 32px)',
         // The previous left/right/bottom 20 px offsets are now provided by
         // padding so that the grey backdrop reaches all edges.
         pt: '32px',
@@ -285,7 +242,7 @@ const FloatingActionPill: React.FC = () => {
           width: searchExpanded ? PILL_HEIGHT : undefined,
           minWidth: PILL_HEIGHT,
           pointerEvents: 'auto',
-          ...liquidGlassSx(theme),
+          ...liquidGlassSx,
         })}
       >
         {/* Collapsed layer (AppsIcon) — visible when search is expanded */}
@@ -390,7 +347,7 @@ const FloatingActionPill: React.FC = () => {
           width: searchExpanded ? undefined : PILL_HEIGHT,
           minWidth: PILL_HEIGHT,
           pointerEvents: 'auto',
-          ...liquidGlassSx(theme),
+          ...liquidGlassSx,
         })}
       >
         <Box

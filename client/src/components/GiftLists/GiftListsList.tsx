@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { List, Typography } from '@mui/material';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import { GiftList, LoginContext } from '@/LoginContext';
-import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
+import ConfirmAlert from '../ConfirmAlert';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
@@ -147,20 +147,6 @@ const GiftListsList: React.FC = () => {
     setGiftListEditorVisible(false);
     fetchGiftLists();
   }
-
-  const actions: ActionSheetEntry[] = [
-    {
-      label: 'Oui, effacer la liste',
-      color: 'error',
-      onAction: () => handleDeleteGiftList(),
-    },
-  ];
-
-  const defaultAction: ActionSheetEntry = {
-    label: 'Non, laisse tomber',
-    color: 'primary',
-    onAction: () => setShowConfirmDialog(false),
-  };
 
   // Build filters dynamically based on user's tribes
   const giftListsFilters: Filter<GiftList>[] = [
@@ -390,12 +376,13 @@ const GiftListsList: React.FC = () => {
         userTribes={userTribes}
       />
 
-      <ActionSheet
+      <ConfirmAlert
         open={showConfirmDialog}
-        handleClose={() => setShowConfirmDialog(false)}
-        entries={actions}
-        defaultEntry={defaultAction}
-        message="Attention c'est irreversible !"
+        onCancel={() => setShowConfirmDialog(false)}
+        onConfirm={handleDeleteGiftList}
+        title="Effacer cette liste ?"
+        message="Attention c'est irréversible !"
+        confirmLabel="Effacer"
       />
     </Box>
   );

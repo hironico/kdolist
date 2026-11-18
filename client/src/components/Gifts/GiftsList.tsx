@@ -1,12 +1,11 @@
-import { Box, Grid, List, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { Box, Grid, List } from '@mui/material';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import ViewListIcon from '@mui/icons-material/ViewList';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import { SegmentedControl } from '@ios27_design_system/react';
 
 import { Gift, LoginContext } from '@/LoginContext';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
-import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
+import ConfirmAlert from '../ConfirmAlert';
 import GiftForm from './GiftForm';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 import { usePageActions, FLOATING_ACTION_PILL_CLEARANCE } from '@/sections/FloatingActionPill';
@@ -16,6 +15,11 @@ import GiftGridItem from './GiftGridItem';
 import { FilterBar } from '../FilterBar';
 import { Filter } from '../FilterBar/FilterBar';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
+
+// List / grid display, shown as an iOS segmented control.
+type ViewMode = 'list' | 'grid';
+const VIEW_MODES: ViewMode[] = ['list', 'grid'];
+const VIEW_MODE_LABELS = ['Liste', 'Grille'];
 
 // Gifts taken for longer than this are proposed for deletion to the list owner.
 const OLD_TAKEN_MONTHS = 6;
@@ -60,7 +64,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const cleanupProposedRef = useRef(false);
   const listViewRef = useRef<HTMLUListElement>(null);
   const gridViewRef = useRef<HTMLDivElement>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
     // Load view mode from localStorage, default to 'list' if not found
     const savedViewMode = localStorage.getItem('kdolist_gift_view_mode');
     return (savedViewMode === 'list' || savedViewMode === 'grid') ? savedViewMode : 'list';
@@ -68,11 +72,8 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
   const api = useAuthenticatedApi();
 
-  const handleViewModeChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newViewMode: 'list' | 'grid' | null,
-  ) => {
-    if (newViewMode !== null) {
+  const handleViewModeChange = (newViewMode: ViewMode | undefined) => {
+    if (newViewMode) {
       setViewMode(newViewMode);
       // Save preference to localStorage
       localStorage.setItem('kdolist_gift_view_mode', newViewMode);
@@ -232,20 +233,6 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     [editable],
   );
 
-  const actions: ActionSheetEntry[] = [
-    {
-      label: 'Oui, effacer ce cadeau de la liste',
-      color: 'error',
-      onAction: handleDeleteGift,
-    },
-  ];
-
-  const defaultAction: ActionSheetEntry = {
-    label: 'Non, laisse tomber',
-    color: 'primary',
-    onAction: () => setConfirmDeleteOpen(false),
-  };
-
   // Check if current user owns this list and list settings
   const isOwner = appContext.giftList?.ownerId === appContext.loginInfo.id;
   const showTakenToOwner = appContext.giftList?.showTakenToOwner ?? false;
@@ -311,20 +298,6 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         console.error(`Cannot clean up old taken gifts: ${error}`);
         showError('Impossible de faire le ménage dans la liste.');
       });
-  };
-
-  const cleanupActions: ActionSheetEntry[] = [
-    {
-      label: 'Oui, supprimer ces cadeaux',
-      color: 'error',
-      onAction: handleCleanupOldTakenGifts,
-    },
-  ];
-
-  const cleanupDefaultAction: ActionSheetEntry = {
-    label: 'Non, plus tard',
-    color: 'primary',
-    onAction: handleSnoozeCleanup,
   };
 
   // Sort gifts: favorites first, then by update date
@@ -448,20 +421,13 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
           <FilterBar<Gift> onFiltersChange={onGiftFilterChange} filters={giftFilters} />
         </Box>
-        <ToggleButtonGroup
-          value={viewMode}
-          exclusive
-          onChange={handleViewModeChange}
-          aria-label="view mode"
-          size="small"
-        >
-          <ToggleButton value="list" aria-label="list view">
-            <ViewListIcon />
-          </ToggleButton>
-          <ToggleButton value="grid" aria-label="grid view">
-            <ViewModuleIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
+        <SegmentedControl
+          className="kdo-segmented"
+          aria-label="mode d'affichage"
+          segments={VIEW_MODE_LABELS}
+          selected={VIEW_MODES.indexOf(viewMode)}
+          onChange={(index) => handleViewModeChange(VIEW_MODES[index])}
+        />
       </Box>
 
       {/* Content area */}
@@ -479,20 +445,23 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
       <GiftForm gift={gift} editable={editable} open={giftEditorOpen} onClose={handleCloseGiftForm} />
 
-      <ActionSheet
+      <ConfirmAlert
         open={cleanupOpen}
-        handleClose={handleSnoozeCleanup}
-        entries={cleanupActions}
-        defaultEntry={cleanupDefaultAction}
-        message="Faire le ménage : supprimer les cadeaux offerts depuis plus de 6 mois ? C'est irréversible !"
+        onCancel={handleSnoozeCleanup}
+        onConfirm={handleCleanupOldTakenGifts}
+        title="Faire le ménage ?"
+        message="Supprimer les cadeaux offerts depuis plus de 6 mois ? C'est irréversible !"
+        confirmLabel="Supprimer"
+        cancelLabel="Plus tard"
       />
 
-      <ActionSheet
+      <ConfirmAlert
         open={confirmDeleteOpen}
-        handleClose={() => setConfirmDeleteOpen(false)}
-        entries={actions}
-        defaultEntry={defaultAction}
+        onCancel={() => setConfirmDeleteOpen(false)}
+        onConfirm={handleDeleteGift}
+        title="Effacer ce cadeau ?"
         message="Attention c'est irréversible !"
+        confirmLabel="Effacer"
       />
     </Box>
   );

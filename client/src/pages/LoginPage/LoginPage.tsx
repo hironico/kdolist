@@ -41,10 +41,10 @@ function LoginPage() {
             }}
           >
             <CenteredVerticalFlexBox>
-              <Typography variant="h2" color="lightgray">
+              <Typography variant="h2" color="text.primary">
                 K.DO-List
               </Typography>
-              <Typography variant='subtitle2' color="lightgray">
+              <Typography variant='subtitle2' color="text.secondary">
                 Il faut se connecter pour ouvrir K.DO-List.
               </Typography>
             </CenteredVerticalFlexBox>

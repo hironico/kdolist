@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Card, CardContent, Typography, Skeleton } from '@mui/material';
 import { Grid } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import PeopleIcon from '@mui/icons-material/People';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import LinkIcon from '@mui/icons-material/Link';
 import ImageIcon from '@mui/icons-material/Image';
 import { apiBaseUrl } from '@/config';
 import { iOSBoxShadow } from '@/theme/muios';
+import { accent } from '@/theme/ios27';
 
 interface Stats {
     users: number;
@@ -118,6 +119,7 @@ const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, loading 
 };
 
 const StatsCard: React.FC = () => {
+    const theme = useTheme();
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -156,7 +158,7 @@ const StatsCard: React.FC = () => {
                         icon={<PeopleIcon />}
                         label="Utilisateurs"
                         value={stats?.users || 0}
-                        color="#1976d2"
+                        color={theme.palette.primary.main}
                         loading={loading}
                     />
                 </Grid>
@@ -165,7 +167,7 @@ const StatsCard: React.FC = () => {
                         icon={<CardGiftcardIcon />}
                         label="Cadeaux"
                         value={stats?.gifts || 0}
-                        color="#2e7d32"
+                        color={theme.palette.success.main}
                         loading={loading}
                     />
                 </Grid>
@@ -174,7 +176,7 @@ const StatsCard: React.FC = () => {
                         icon={<LinkIcon />}
                         label="Liens"
                         value={stats?.links || 0}
-                        color="#ed6c02"
+                        color={theme.palette.warning.main}
                         loading={loading}
                     />
                 </Grid>
@@ -183,7 +185,7 @@ const StatsCard: React.FC = () => {
                         icon={<ImageIcon />}
                         label="Images"
                         value={stats?.images || 0}
-                        color="#9c27b0"
+                        color={accent("purple", theme.palette.mode)}
                         loading={loading}
                     />
                 </Grid>

@@ -1,0 +1,81 @@
+/*
+ * Integration of @ios27_design_system/react components with the MUI app.
+ * Loaded after the library stylesheet (see Root.tsx).
+ */
+
+/* ── Stacking ───────────────────────────────────────────────────────────────
+ * The library uses z-index 1000 for every overlay. MUI uses:
+ *   app bar 1100 · drawer 1200 · modal/popper/autocomplete 1300 · snackbar 1400.
+ * Sheets must cover the app chrome (floating pill 1000, sidebar 1200) but stay
+ * below MUI poppers opened from inside them (autocomplete, menus).
+ * Alerts (confirmations) must cover sheets and MUI dialogs, but not snackbars.
+ */
+.ios27-sheet-backdrop {
+  z-index: 1250;
+  background-color: var(--ios27-color-overlay-default, rgba(0, 0, 0, 0.2));
+}
+
+.ios27-alert-backdrop {
+  z-index: 1350;
+}
+
+/* ── Sheet ─────────────────────────────────────────────────────────────────
+ * iOS 27 large sheet corner radius is 38pt (tokens: radius.semantic.sheet).
+ * Content padding is handled by the app's own sheet header/body.
+ */
+.ios27-sheet {
+  border-top-left-radius: 38px;
+  border-top-right-radius: 38px;
+}
+
+.kdo-sheet .ios27-sheet-content {
+  padding: 0 0 env(safe-area-inset-bottom);
+}
+
+/* ── Alert ─────────────────────────────────────────────────────────────────
+ * iOS 27 alerts are 34pt-rounded (tokens: radius.semantic.alert).
+ */
+.ios27-alert {
+  width: 300px;
+  border-radius: 34px;
+}
+
+.ios27-alert-message {
+  white-space: pre-line;
+}
+
+/* Force stacked buttons when labels are too long to sit side by side. */
+.kdo-alert--stacked .ios27-alert-actions {
+  flex-direction: column;
+}
+
+.kdo-alert--stacked .ios27-alert-actions .ios27-alert-action + .ios27-alert-action {
+  border-left: none;
+  border-top: var(--separator-height, 0.5px) solid var(--separator);
+}
+
+/* ── Toolbar (navigation bar) ─────────────────────────────────────────────
+ * Used edge to edge as the app bar: no floating card radius, 64px tall to
+ * keep the page layout (pages use calc(100vh - 64px)).
+ */
+.kdo-toolbar {
+  position: relative;
+  z-index: 1100;
+  border-radius: 0;
+  box-shadow: none;
+  border-bottom: var(--separator-height, 0.5px) solid var(--separator);
+}
+
+.kdo-toolbar .ios27-toolbar-bar {
+  min-height: 64px;
+  padding: 0 8px;
+}
+
+.kdo-toolbar .ios27-toolbar-title {
+  cursor: pointer;
+}
+
+/* ── Segmented control ──────────────────────────────────────────────────── */
+.kdo-segmented {
+  flex-shrink: 0;
+}

@@ -14,7 +14,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BoltIcon from '@mui/icons-material/Bolt';
 import SwipeableListItem from '@/components/SwipeableListItem/SwipeableListItem';
-import ActionSheet, { ActionSheetEntry } from '@/components/ActionSheet/ActionSheet';
+import ConfirmAlert from '@/components/ConfirmAlert';
 import { TribeDetailsData } from './types';
 
 interface TribeDetailsProps {
@@ -29,7 +29,7 @@ interface TribeDetailsProps {
  * including picture, name, member counts, admins, and members.
  */
 const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId, onDeleteInvitation, onChangeMembershipStatus }) => {
-    // State for confirmation ActionSheet
+    // State for the confirmation alert
     const [confirmActionSheetOpen, setConfirmActionSheetOpen] = useState(false);
     const [pendingAction, setPendingAction] = useState<{
         membershipId: string;
@@ -188,7 +188,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             action1={
                                 isCurrentUserAdmin && onChangeMembershipStatus && admin.id !== adminId
                                     ? {
-                                        icon: <BoltIcon sx={{ color: '#FFA500' }} />,
+                                        icon: <BoltIcon sx={{ color: 'warning.main' }} />,
                                         color: 'default' as const,
                                         onAction: () => handleRequestAdminChange(
                                             admin.membershipId,
@@ -255,7 +255,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             action1={
                                 isCurrentUserAdmin && onChangeMembershipStatus && member.id !== adminId
                                     ? {
-                                        icon: <BoltIcon sx={{ color: '#D3D3D3' }} />,
+                                        icon: <BoltIcon sx={{ color: 'text.disabled' }} />,
                                         color: 'default' as const,
                                         onAction: () => handleRequestAdminChange(
                                             member.membershipId,
@@ -270,27 +270,18 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                 </List>
             </Box>
 
-            {/* Confirmation ActionSheet */}
-            <ActionSheet
+            {/* Confirmation alert */}
+            <ConfirmAlert
                 open={confirmActionSheetOpen}
-                handleClose={handleCancelAdminChange}
-                message={
+                onCancel={handleCancelAdminChange}
+                onConfirm={handleConfirmAdminChange}
+                title={
                     pendingAction?.action === 'REMOVE_ADMIN'
                         ? `Retirer les droits d'administrateur à ${pendingAction.memberName} ?`
-                        : `Promouvoir ${pendingAction?.memberName} en tant qu'administrateur ?`
+                        : `Promouvoir ${pendingAction?.memberName ?? ''} en tant qu'administrateur ?`
                 }
-                entries={[
-                    {
-                        label: pendingAction?.action === 'REMOVE_ADMIN' ? 'Retirer les droits' : 'Promouvoir',
-                        color: pendingAction?.action === 'REMOVE_ADMIN' ? 'error' : 'primary',
-                        onAction: handleConfirmAdminChange,
-                    },
-                ]}
-                defaultEntry={{
-                    label: 'Annuler',
-                    color: 'primary',
-                    onAction: handleCancelAdminChange,
-                }}
+                confirmLabel={pendingAction?.action === 'REMOVE_ADMIN' ? 'Retirer' : 'Promouvoir'}
+                destructive={pendingAction?.action === 'REMOVE_ADMIN'}
             />
         </Box>
     );

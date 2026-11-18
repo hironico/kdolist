@@ -127,7 +127,7 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ oneGift, editable, is
             sx={{
                 width: 40,
                 height: 40,
-                backgroundColor: 'white',
+                backgroundColor: 'background.default',
                 filter: shouldShowStrikethrough ? 'grayscale(100%)' : 'none'
 
             }}

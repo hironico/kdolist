@@ -58,7 +58,7 @@ const ActionsWrapper = styled(Box)(({ theme }) => ({
   height: '100%',
   display: 'flex',
   alignItems: 'center',
-  backgroundColor: theme.palette.grey[100],
+  backgroundColor: theme.palette.action.selected,
 }));
 
 export interface SwipeableListItemAction {

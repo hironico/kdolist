@@ -507,7 +507,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
             color='primary'
             variant='filled'
             sx={{
-              '&:hover': 'rgba(0, 0, 0, 0.04)'
+              '&:hover': { opacity: 0.85 }
             }}
           />
         ))}
