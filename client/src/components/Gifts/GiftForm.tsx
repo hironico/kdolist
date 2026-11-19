@@ -12,6 +12,7 @@ import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import CloseIcon from '@mui/icons-material/Close';
 import useNotifications from '@/store/notifications';
+import { iosRadius, photoOverlayButtonSx } from '@/theme/ios27';
 
 import { apiBaseUrl } from '@/config';
 import { useNavigate } from 'react-router-dom';
@@ -412,7 +413,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     const isDefaultImage = !oneImg.id && defaultImages.some(defImg => defImg.url === oneImg.url);
     return (
       <FullSizeCenteredFlexBox key={`box-img-key-${index}`}>
-        <Box sx={{ position: 'relative', width: '250px', height: '250px' }}>
+        <Box sx={{ position: 'relative', width: '250px', height: '250px', borderRadius: `${iosRadius.card + 4}px`, overflow: 'hidden' }}>
           <Box
             sx={{
               background: `url('${oneImg.url}')`,
@@ -425,12 +426,12 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
           {editable && !isDefaultImage && (
             <IconButton
               onClick={() => handleDeleteImage(oneImg)}
+              aria-label="supprimer l'image"
               sx={{
                 position: 'absolute',
                 bottom: 8,
                 left: 8,
-                bgcolor: 'rgba(255, 255, 255, 0.8)',
-                '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.95)' },
+                ...photoOverlayButtonSx,
               }}
               size="small"
             >
@@ -445,7 +446,7 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
   if (cameraOpen) {
     imageSlides.push(
       <FullSizeCenteredFlexBox key="camera-slide">
-        <Box sx={{ position: 'relative', width: '250px', height: '250px', bgcolor: 'black', overflow: 'hidden' }}>
+        <Box sx={{ position: 'relative', width: '250px', height: '250px', bgcolor: 'black', borderRadius: `${iosRadius.card + 4}px`, overflow: 'hidden' }}>
           <video
             ref={videoRef}
             autoPlay
@@ -456,12 +457,12 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
           {/* Capture button */}
           <IconButton
             onClick={handleCameraCapture}
+            aria-label="prendre la photo"
             sx={{
               position: 'absolute',
               bottom: 8,
               right: 8,
-              bgcolor: 'rgba(255, 255, 255, 0.85)',
-              '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' },
+              ...photoOverlayButtonSx,
             }}
             size="small"
           >
@@ -470,12 +471,12 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
           {/* Close / stop camera button */}
           <IconButton
             onClick={handleStopCamera}
+            aria-label="fermer la caméra"
             sx={{
               position: 'absolute',
               bottom: 8,
               left: 8,
-              bgcolor: 'rgba(255, 255, 255, 0.85)',
-              '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' },
+              ...photoOverlayButtonSx,
             }}
             size="small"
           >

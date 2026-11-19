@@ -416,8 +416,12 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
   return (
     <Box display="grid" gridTemplateColumns="1fr" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative" sx={{ overflowX: 'hidden' }}>
-      {/* Filter bar and view toggle */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 2 }}>
+      {/* Filter bar and view toggle.
+          minWidth:0 is required on this grid item: grid items default to
+          min-width:auto, so the chips + segmented control would widen the 1fr
+          column beyond the screen and every list row below would overflow on
+          the right (same fix as in GiftListsList). */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 2, minWidth: 0 }}>
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
           <FilterBar<Gift> onFiltersChange={onGiftFilterChange} filters={giftFilters} />
         </Box>
@@ -432,11 +436,11 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
       {/* Content area */}
       {viewMode === 'list' ? (
-        <List ref={listViewRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
+        <List ref={listViewRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start', minWidth: 0 }}>
           {listContents}
         </List>
       ) : (
-        <Box ref={gridViewRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
+        <Box ref={gridViewRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', minHeight: 0, minWidth: 0 }}>
           <Grid container spacing={2}>
             {listContents}
           </Grid>

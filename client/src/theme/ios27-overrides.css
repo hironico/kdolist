@@ -57,7 +57,13 @@
 /* ── Toolbar (navigation bar) ─────────────────────────────────────────────
  * Used edge to edge as the app bar: no floating card radius, 64px tall to
  * keep the page layout (pages use calc(100vh - 64px)).
+ * --kdo-header-height is also used by the sidebar swipe area (Sidebar.tsx) so
+ * that it starts below the header and never covers the menu / back buttons.
  */
+:root {
+  --kdo-header-height: 64px;
+}
+
 .kdo-toolbar {
   position: relative;
   z-index: 1100;
@@ -66,13 +72,86 @@
   border-bottom: var(--separator-height, 0.5px) solid var(--separator);
 }
 
+/*
+ * The library lays the bar out with flex: the side slots are `flex: 1 1 0;
+ * min-width: 0` and the title `flex: 0 1 auto`. A long title (e.g. a list
+ * name) then squeezes the side slots to 0px while their buttons still paint
+ * over the title. A 3-column grid keeps the title centred like iOS, while the
+ * side columns always keep the width of their buttons:
+ *   [ leading (≥ content) | title (shrinks, ellipsis) | trailing (≥ content) ]
+ */
 .kdo-toolbar .ios27-toolbar-bar {
-  min-height: 64px;
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) minmax(0, auto) minmax(max-content, 1fr);
+  column-gap: 8px;
+  min-height: var(--kdo-header-height);
   padding: 0 8px;
 }
 
+.kdo-toolbar .ios27-toolbar-leading,
+.kdo-toolbar .ios27-toolbar-trailing {
+  min-width: max-content;
+}
+
+/*
+ * Long titles (list names) use the iOS 27 "Title 2 Line" bar style: wrap to two
+ * lines, then ellipsis. Two 20px lines fit in the 64px bar, so the header
+ * height (and the calc(100vh - 64px) page layouts) never change.
+ */
 .kdo-toolbar .ios27-toolbar-title {
+  min-width: 0;
+  max-width: 100%;
   cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 20px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* ── Inset grouped sections (ListSection / ListRow) ───────────────────────
+ * Same corner radius as the app's MUI grouped lists (iosRadius.group = 26px).
+ */
+.kdo-group {
+  margin-bottom: 16px;
+}
+
+.kdo-group .ios27-list-section-content {
+  border-radius: 26px;
+}
+
+.kdo-group .ios27-list-section-header {
+  padding-top: 0;
+}
+
+/* ── Toggle row (ToggleRow component) ──────────────────────────────────── */
+.kdo-toggle-row {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
+.kdo-toggle-row .kdo-toggle-row-text {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.kdo-toggle-row.is-disabled .kdo-toggle-row-text {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.kdo-toggle-row .kdo-toggle-row-description {
+  margin-top: 2px;
+}
+
+/* The trailing slot is styled as secondary text by the library: keep the
+   switch at full contrast. */
+.kdo-toggle-row .ios27-list-row-trailing {
+  color: inherit;
 }
 
 /* ── Segmented control ──────────────────────────────────────────────────── */

@@ -6,8 +6,10 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { Redeem } from '@mui/icons-material';
+import { photoOverlayButtonSx } from '@/theme/ios27';
+import { iOSBoxShadow } from '@/theme/muios';
 
 type GiftGridItemProps = {
   oneGift: Gift;
@@ -90,11 +92,13 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
         aspectRatio: '1 / 1',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: 6,
-        }
+        overflow: 'hidden',
+        // iOS press feedback instead of the Material "lift" on hover.
+        transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+        '&:active': { transform: 'scale(0.97)' },
+        '@media (hover: hover)': {
+          '&:hover': { boxShadow: iOSBoxShadow },
+        },
       }}
       onClick={onClick}
     >
@@ -116,24 +120,12 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
         {(shouldShowTaken || isFavorite) && (
           <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 0.5 }}>
             {shouldShowTaken && (
-              <IconButton
-                size="small"
-                sx={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' }
-                }}
-              >
+              <IconButton size="small" sx={photoOverlayButtonSx} aria-label="réservé">
                 <CheckCircleIcon color="success" fontSize="small" />
               </IconButton>
             )}
             {isFavorite && (
-              <IconButton
-                size="small"
-                sx={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' }
-                }}
-              >
+              <IconButton size="small" sx={photoOverlayButtonSx} aria-label="favori">
                 <FavoriteIcon color="error" fontSize="small" />
               </IconButton>
             )}
@@ -145,12 +137,10 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
           <IconButton
             size="small"
             onClick={handleMenuOpen}
-            sx={{
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)' }
-            }}
+            sx={photoOverlayButtonSx}
+            aria-label="actions"
           >
-            <MoreVertIcon fontSize="small" />
+            <MoreHorizIcon fontSize="small" />
           </IconButton>
         </Box>
 
@@ -207,12 +197,12 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+              bgcolor: 'action.selected',
               pointerEvents: 'none',
               zIndex: 1,
             }}
           >
-            <Redeem sx={{ fontSize: 60, color: 'white', opacity: 0.7 }} />
+            <Redeem sx={{ fontSize: 60, color: 'text.secondary', opacity: 0.7 }} />
           </Box>
         )}
       </Box>
@@ -230,11 +220,10 @@ const GiftGridItem: React.FC<GiftGridItemProps> = ({
         }
       }}>
         <Typography
-          variant="h6"
+          variant="subtitle2"
           component="div"
           sx={{
-            fontSize: '1rem',
-            fontWeight: 500,
+            fontWeight: 600,
             textDecoration: shouldShowTaken ? 'line-through' : 'none',
             mb: '0px',
             lineHeight: 1.3,

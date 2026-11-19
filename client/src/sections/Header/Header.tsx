@@ -10,7 +10,7 @@ import { getRandomJoke } from './utils';
 import routes from '@/routes';
 import { PathRouteProps, useLocation, useNavigate } from 'react-router-dom';
 import { PathRouteCustomProps, Routes } from '@/routes/types';
-import React, { ReactNode, useContext, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { ArrowBackIosNew, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { LoginContext } from '@/LoginContext';
 import UserAvatar from '@/components/UserAvatar/UserAvatar';
@@ -72,7 +72,7 @@ function Header() {
         edge="start"
         color="primary"
         aria-label="menu"
-      >
+      >        
         <MenuIcon />
       </IconButton>
     );
@@ -125,13 +125,24 @@ function Header() {
     }
   };
 
+  const title = getTitle();
+
+  // Long list names are clamped to two lines in the bar (see ios27-overrides.css).
+  // Expose the full name as a native tooltip on the title element, which the
+  // library Toolbar does not let us set directly.
+  const toolbarRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    toolbarRef.current?.querySelector('.ios27-toolbar-title')?.setAttribute('title', title);
+  }, [title]);
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* iOS 27 navigation bar (@ios27_design_system/react Toolbar) on the
           uniform toolbar material, edge to edge. */}
       <IosToolbar
+        ref={toolbarRef}
         className="kdo-toolbar ios27-toolbar-uniform"
-        title={getTitle()}
+        title={title}
         onClick={handleToolbarClick}
         leading={renderIconButton()}
         trailing={

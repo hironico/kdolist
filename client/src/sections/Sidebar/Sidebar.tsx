@@ -73,6 +73,10 @@ function Sidebar() {
       onOpen={sidebarActions.open}
       disableBackdropTransition={false}
       swipeAreaWidth={30}
+      // The invisible swipe-to-open strip is full height and sits above the
+      // header (z-index drawer - 1). Start it below the header so it does not
+      // swallow taps on the menu / back buttons.
+      SwipeAreaProps={{ style: { top: 'var(--kdo-header-height)' } }}
       data-pw="sidebar"
       PaperProps={{
         sx: {

@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { List, Typography } from '@mui/material';
+import { List, Typography, useTheme } from '@mui/material';
+import { accent } from '@/theme/ios27';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import { GiftList, LoginContext } from '@/LoginContext';
 import ConfirmAlert from '../ConfirmAlert';
@@ -31,6 +32,7 @@ const GiftListsList: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const theme = useTheme();
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
 
@@ -230,6 +232,57 @@ const GiftListsList: React.FC = () => {
     return result;
   })();
 
+  /**
+   * One gift list as an iOS grouped row: coloured icon tile (indigo for
+   * collaborative lists, accent blue otherwise), name, then a single secondary
+   * line "Prénom · date". Owners can swipe to edit / delete.
+   */
+  const renderListRow = (item: GiftList, index: number) => {
+    const modifDate = new Date(item.updatedAt.toString());
+    const owner = item.owner?.firstname;
+    const secondaryText = (
+      <Typography variant="caption" color="text.secondary">
+        {[owner, `modifiée le ${modifDate.toLocaleDateString()}`].filter(Boolean).join(' · ')}
+      </Typography>
+    );
+
+    const deleteAction: SwipeableListItemAction = {
+      icon: <DeleteIcon />,
+      color: 'error',
+      onAction: () => handleSelectAndConfirmDelete(item),
+      ariaLabel: 'Supprimer la liste',
+    };
+
+    const editListAction: SwipeableListItemAction = {
+      icon: <EditIcon />,
+      color: 'default',
+      onAction: () => handleEditGiftList(item),
+      ariaLabel: 'Modifier la liste',
+    };
+
+    const isOwner = item.ownerId === appContext.loginInfo.profile?.id;
+    const isCollaborativeMember =
+      item.isCollaborative === true &&
+      (item.groupAccesses ?? []).some(ga =>
+        userTribes.some((t: any) => t.id === ga.groupId)
+      );
+    const editable = isOwner || isCollaborativeMember;
+
+    return (
+      <SwipeableListItem
+        onClickMain={() => handleNavigateList(item, editable)}
+        action1={isOwner ? deleteAction : undefined}
+        action2={isOwner ? editListAction : undefined}
+        primaryText={item.name}
+        secondaryText={secondaryText}
+        icon={item.isCollaborative ? <Diversity3 /> : <FormatListBulleted />}
+        iconTint={item.isCollaborative ? accent('indigo', theme.palette.mode) : undefined}
+        keyId={`index-${index}`}
+        key={`index-${index}`}
+      />
+    );
+  };
+
   return (
     <Box display="grid" gridTemplateColumns="1fr" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative" sx={{ overflowX: 'hidden' }}>
       {/* minWidth:0 is required on this grid item so the column stays at 1fr
@@ -255,110 +308,18 @@ const GiftListsList: React.FC = () => {
           />
           {giftLists.length > 0 && (
             <>
-              <Typography variant="h6" sx={{ mt: 3, mb: 2, px: 1 }}>
-                Mes Listes
+              <Typography variant="overline" color="text.secondary" component="h2" sx={{ display: 'block', mt: 3, px: 2 }}>
+                Mes listes
               </Typography>
-              <List sx={{ m: '0px', overflowX: 'hidden' }}>
-                {giftLists.map((item, index) => {
-                  const modifDate = new Date(item.updatedAt.toString());
-                  const secondaryText = (
-                    <>
-                      <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
-                      <br />
-                      <Typography variant="caption">{`Par: ${item.owner?.firstname}`}</Typography>
-                    </>
-                  );
-
-                  const deleteAction: SwipeableListItemAction = {
-                    icon: <DeleteIcon />,
-                    color: 'error',
-                    onAction: () => handleSelectAndConfirmDelete(item),
-                  };
-
-                  const editListAction: SwipeableListItemAction = {
-                    icon: <EditIcon />,
-                    color: 'default',
-                    onAction: () => handleEditGiftList(item),
-                  };
-
-                  const isOwner = item.ownerId === appContext.loginInfo.profile?.id;
-                  const isCollaborativeMember =
-                    item.isCollaborative === true &&
-                    (item.groupAccesses ?? []).some(ga =>
-                      userTribes.some((t: any) => t.id === ga.groupId)
-                    );
-                  const editable = isOwner || isCollaborativeMember;
-
-                  const icon = item.isCollaborative
-                    ? <Diversity3 />
-                    : <FormatListBulleted />;
-
-                  return (
-                    <SwipeableListItem
-                      onClickMain={() => handleNavigateList(item, editable)}
-                      action1={isOwner ? deleteAction : undefined}
-                      action2={isOwner ? editListAction : undefined}
-                      primaryText={item.name}
-                      secondaryText={secondaryText}
-                      icon={icon}
-                      keyId={`index-${index}`}
-                      key={`index-${index}`}
-                    />
-                  );
-                })}
+              <List sx={{ m: '0px', mt: 1, overflowX: 'hidden' }}>
+                {giftLists.map(renderListRow)}
               </List>
             </>
           )}
         </Box>
       ) : filteredLists.length > 0 ? (
           <List ref={listRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
-          {filteredLists.map((item, index) => {
-            const modifDate = new Date(item.updatedAt.toString());
-            const secondaryText = (
-              <>
-                <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
-                <br />
-                <Typography variant="caption">{`Par: ${item.owner?.firstname}`}</Typography>
-              </>
-            );
-
-            const deleteAction: SwipeableListItemAction = {
-              icon: <DeleteIcon />,
-              color: 'error',
-              onAction: () => handleSelectAndConfirmDelete(item),
-            };
-
-            const editListAction: SwipeableListItemAction = {
-              icon: <EditIcon />,
-              color: 'default',
-              onAction: () => handleEditGiftList(item),
-            };
-
-            const isOwner = item.ownerId === appContext.loginInfo.profile?.id;
-            const isCollaborativeMember =
-              item.isCollaborative === true &&
-              (item.groupAccesses ?? []).some(ga =>
-                userTribes.some((t: any) => t.id === ga.groupId)
-              );
-            const editable = isOwner || isCollaborativeMember;
-
-            const icon = item.isCollaborative
-              ? <Diversity3 />
-              : <FormatListBulleted />;
-
-            return (
-              <SwipeableListItem
-                onClickMain={() => handleNavigateList(item, editable)}
-                action1={isOwner ? deleteAction : undefined}
-                action2={isOwner ? editListAction : undefined}
-                primaryText={item.name}
-                secondaryText={secondaryText}
-                icon={icon}
-                keyId={`index-${index}`}
-                key={`index-${index}`}
-              />
-            );
-          })}
+          {filteredLists.map(renderListRow)}
         </List>
       ) : (
         <EmptyStateCard

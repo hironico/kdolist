@@ -97,21 +97,23 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ oneGift, editable, is
 
     const modifDate = new Date(oneGift.updatedAt.toString());
     const secondaryText = (
-        <Typography variant="caption">
-            {`Modif.${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()} `}
+        <Typography variant="caption" color="text.secondary">
+            {`Modifié le ${modifDate.toLocaleDateString()} à ${modifDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
         </Typography>
     );
 
     const deleteActionSwipe: SwipeableListItemAction = {
         icon: <DeleteIcon />,
         color: 'error',
-        onAction: deleteAction
+        onAction: deleteAction,
+        ariaLabel: 'Supprimer',
     };
 
     const takeActionSwipe: SwipeableListItemAction = {
         icon: <CheckIcon />,
         color: isTaken ? 'success' : 'default',
-        onAction: takeAction
+        onAction: takeAction,
+        ariaLabel: isTaken ? 'Libérer' : 'Réserver',
     }
 
     // Get first image or use default
@@ -119,17 +121,18 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ oneGift, editable, is
         ? oneGift.images[0].url
         : '/logo_kdolist-192.png';
 
+    // iOS list row image (tall row): 44pt, 11pt corner radius.
     const giftIcon = (
         <Avatar
             src={imageUrl}
             alt={oneGift.name}
             variant="rounded"
             sx={{
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
+                borderRadius: '11px',
                 backgroundColor: 'background.default',
                 filter: shouldShowStrikethrough ? 'grayscale(100%)' : 'none'
-
             }}
         >
         </Avatar>
@@ -144,6 +147,7 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ oneGift, editable, is
             action1={editable ? deleteActionSwipe : undefined}
             action2={takeActionSwipe}
             icon={giftIcon}
+            iconTint="none"
             rightContent={rightContent}
         />
     );

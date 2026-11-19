@@ -12,7 +12,7 @@ import {
   useTheme,
   keyframes,
 } from '@mui/material';
-import { MoreVert as MoreVertIcon } from '@mui/icons-material';
+import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material';
 import { useSwipeableList } from './SwipeableListContext';
 
 // Bounce animation keyframes - starts completely invisible
@@ -41,7 +41,12 @@ const SwipeableCard = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
 }));
 
-const CardWrapper = styled(ListItem)<{ transform: string; theme: Theme }>(
+// `transform` is a style-only prop: don't forward it to the DOM. The theme is
+// injected by `styled` itself and must not be passed as a prop (passing it
+// makes MUI try to overwrite a read-only `theme` and crash in some setups).
+const CardWrapper = styled(ListItem, {
+  shouldForwardProp: (prop) => prop !== 'transform',
+})<{ transform: string }>(
   ({ transform, theme }) => ({
     display: 'flex',
     transform,
@@ -49,6 +54,9 @@ const CardWrapper = styled(ListItem)<{ transform: string; theme: Theme }>(
     backgroundColor: theme.palette.background.paper,
     padding: '0px',
     margin: '0px',
+    // Never wider than the list: long names must wrap, not push the row out.
+    minWidth: 0,
+    maxWidth: '100%',
   }),
 );
 
@@ -58,13 +66,33 @@ const ActionsWrapper = styled(Box)(({ theme }) => ({
   height: '100%',
   display: 'flex',
   alignItems: 'center',
-  backgroundColor: theme.palette.action.selected,
+  backgroundColor: theme.palette.background.paper,
 }));
+
+/**
+ * iOS 27 swipe action: a filled circular button with a white glyph
+ * (red for destructive, grey for neutral, accent colour otherwise).
+ * Each action keeps the 50px slot used by the swipe distance computation.
+ */
+const swipeActionSx = (theme: Theme, color: SwipeableListItemAction['color']) => {
+  const fill = color === 'default' ? theme.palette.secondary.main : theme.palette[color].main;
+  return {
+    width: 40,
+    height: 40,
+    mx: '5px',
+    bgcolor: fill,
+    color: '#ffffff',
+    '&:hover': { bgcolor: fill },
+  };
+};
 
 export interface SwipeableListItemAction {
   icon: ReactElement;
+  /** Fill colour of the iOS circular action ('default' = neutral grey). */
   color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
   onAction: () => void;
+  /** Accessible name of the action button (e.g. "Supprimer"). */
+  ariaLabel?: string;
 }
 
 export interface SwipeableListItemProps {
@@ -75,6 +103,12 @@ export interface SwipeableListItemProps {
   action3?: SwipeableListItemAction;
   onClickMain?: () => void;
   icon?: ReactElement;
+  /**
+   * Background of the iOS icon tile. Any CSS colour or palette path
+   * (e.g. 'success.main'); 'none' renders the icon as is (photos, avatars).
+   * Defaults to the accent colour.
+   */
+  iconTint?: string;
   keyId: string;
   rightContent?: ReactElement;
 }
@@ -87,6 +121,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   action3,
   onClickMain,
   icon,
+  iconTint,
   keyId,
   rightContent,
 }) => {
@@ -305,6 +340,34 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
     };
   }, [primaryText]);
 
+  // One swipe action button (iOS 27 filled circle), scaled in as the row is swiped.
+  const renderAction = (
+    action: SwipeableListItemAction,
+    index: 1 | 2 | 3,
+    scale: number,
+    bounced: boolean,
+  ) => (
+    <IconButton
+      key={`action${index}-${bounced}`}
+      onClick={(_evt) => onActionClick(action.onAction)}
+      aria-label={action.ariaLabel ?? `action ${index}`}
+      sx={{
+        ...swipeActionSx(theme, action.color),
+        transform: `scale(${scale})`,
+        opacity: scale,
+        animationName: bounced ? `${bounceIn}` : 'none',
+        animationDuration: bounced ? '0.4s' : '0s',
+        animationTimingFunction: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        animationFillMode: 'forwards',
+        transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+        // Glyphs inherit the white foreground, whatever colour the caller set.
+        '& .MuiSvgIcon-root': { color: '#ffffff' },
+      }}
+    >
+      {action.icon}
+    </IconButton>
+  );
+
   const currentSwipeDistance = getCurrentSwipeDistance();
   const action1Scale = getIconScale(getActionPosition(1), currentSwipeDistance);
   const action2Scale = getIconScale(getActionPosition(2), currentSwipeDistance);
@@ -313,70 +376,19 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
   return (
     <SwipeableCard id={`card-${keyId}`}>
       <ActionsWrapper>
-        {action1 && (
-          <IconButton
-            key={`action1-${action1Bounced}`}
-            onClick={(_evt) => onActionClick(action1.onAction)}
-            color={action1.color}
-            sx={{
-              transform: `scale(${action1Scale})`,
-              opacity: action1Scale,
-              animationName: action1Bounced ? `${bounceIn}` : 'none',
-              animationDuration: action1Bounced ? '0.4s' : '0s',
-              animationTimingFunction: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-              animationFillMode: 'forwards',
-              transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
-            }}
-          >
-            {action1.icon}
-          </IconButton>
-        )}
-        {action2 && (
-          <IconButton
-            key={`action2-${action2Bounced}`}
-            onClick={(_evt) => onActionClick(action2.onAction)}
-            color={action2.color}
-            sx={{
-              transform: `scale(${action2Scale})`,
-              opacity: action2Scale,
-              animationName: action2Bounced ? `${bounceIn}` : 'none',
-              animationDuration: action2Bounced ? '0.4s' : '0s',
-              animationTimingFunction: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-              animationFillMode: 'forwards',
-              transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
-            }}
-          >
-            {action2.icon}
-          </IconButton>
-        )}
-        {action3 && (
-          <IconButton
-            key={`action3-${action3Bounced}`}
-            onClick={(_evt) => onActionClick(action3.onAction)}
-            color={action3.color}
-            sx={{
-              transform: `scale(${action3Scale})`,
-              opacity: action3Scale,
-              animationName: action3Bounced ? `${bounceIn}` : 'none',
-              animationDuration: action3Bounced ? '0.4s' : '0s',
-              animationTimingFunction: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-              animationFillMode: 'forwards',
-              transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
-            }}
-          >
-            {action3.icon}
-          </IconButton>
-        )}
+        {action1 && renderAction(action1, 1, action1Scale, action1Bounced)}
+        {action2 && renderAction(action2, 2, action2Scale, action2Bounced)}
+        {action3 && renderAction(action3, 3, action3Scale, action3Bounced)}
       </ActionsWrapper>
       <CardWrapper
         transform={getTransform()}
-        theme={theme}
         sx={{
-          // On touch devices: inset right border of 5px in primary colour
-          // signals to the user that this item can be swiped to reveal actions.
-          // On desktop the MoreVert button serves as the affordance instead.
+          // On touch devices: a thin accent bar on the right edge signals that
+          // the row can be swiped to reveal actions (iOS has no visible
+          // affordance, but users of this app rely on it). On desktop the "…"
+          // button serves as the affordance instead.
           boxShadow: (isTouchDevice && totalSwipeDistance > 0)
-            ? `inset -5px 0 0 0 ${theme.palette.primary.main}`
+            ? `inset -3px 0 0 0 ${theme.palette.primary.main}`
             : 'none',
         }}
         {...(isTouchDevice
@@ -391,8 +403,8 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {rightContent}
               {!isTouchDevice && totalSwipeDistance > 0 && (
-                <IconButton onClick={toggleOpen}>
-                  <MoreVertIcon />
+                <IconButton onClick={toggleOpen} aria-label="actions" sx={{ color: 'text.secondary' }}>
+                  <MoreHorizIcon />
                 </IconButton>
               )}
             </Box>
@@ -403,6 +415,7 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
           autoFocus={false}
           sx={{
             width: '100%',
+            minWidth: 0,
             // Reserve right padding when a secondary action is visible (either
             // the favourite icon on touch, or the MoreVert button on desktop).
             pr: (rightContent || (!isTouchDevice && totalSwipeDistance > 0)) ? 6 : 0,
@@ -412,13 +425,32 @@ const SwipeableListItem: React.FC<SwipeableListItemProps> = ({
           }}
         >
           {icon && (
-            <ListItemAvatar>
-              <Avatar variant="rounded" sx={{ bgcolor: theme.palette.primary.light }}>
-                {icon}
-              </Avatar>
+            <ListItemAvatar sx={{ minWidth: iconTint === 'none' ? 56 : 48 }}>
+              {iconTint === 'none' ? (
+                icon
+              ) : (
+                // iOS Settings-style icon tile: coloured fill, white glyph, 8px radius
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '8px',
+                    bgcolor: iconTint ?? 'primary.main',
+                    color: '#ffffff',
+                    '& .MuiSvgIcon-root': { fontSize: 20 },
+                  }}
+                >
+                  {icon}
+                </Avatar>
+              )}
             </ListItemAvatar>
           )}
-          <ListItemText primary={primaryText} secondary={secondaryText} />
+          <ListItemText
+            primary={primaryText}
+            secondary={secondaryText}
+            sx={{ minWidth: 0, overflowWrap: 'anywhere' }}
+          />
         </ListItemButton>
       </CardWrapper>
     </SwipeableCard>

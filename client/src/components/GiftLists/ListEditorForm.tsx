@@ -2,8 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   FormControl,
   TextField,
-  FormControlLabel,
-  Switch,
   Typography,
   Box,
   Chip,
@@ -11,12 +9,13 @@ import {
   CircularProgress,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
+import { ListSection } from '@ios27_design_system/react';
 import { apiBaseUrl } from '@/config';
 import { GiftList, LoginContext } from '@/LoginContext';
 import useNotifications from '@/store/notifications';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
-import { VerticalFlexBox } from '../styled';
 import BottomDialog, { BottomDialogAction } from '../BottomDialog/BottomDialog';
+import ToggleRow from '../ToggleRow';
 
 export interface TribeOption {
   id: string;
@@ -143,59 +142,35 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({
         />
       </FormControl>
 
-      {/* Show taken to owner toggle */}
-      <FormControlLabel
-        sx={{ mb: '10px', ml: '0px' }}
-        control={
-          <Switch
-            sx={{ height: '42px', width: '64px' }}
-            checked={showTakenToOwner}
-            onChange={(e) => setShowTakenToOwner(e.target.checked)}
-            color="primary"
-          />
-        }
-        label={
-          <VerticalFlexBox sx={{ height: 'auto', ml: '5px' }}>
-            <Typography variant="subtitle1">Voir les cadeaux rayés</Typography>
-            <Typography variant="caption">Pour les séries et les collections, mais ca gâche la surprise!</Typography>
-          </VerticalFlexBox>
-        }
-      />
-
-      {/* Collaborative toggle */}
-      <FormControlLabel
-        sx={{ mb: '10px', ml: '0px' }}
-        control={
-          <Switch
-            sx={{ height: '42px', width: '64px' }}
-            checked={isCollaborative}
-            onChange={(e) => {
-              setIsCollaborative(e.target.checked);
-              if (!e.target.checked) setSelectedGroupIds([]);
-            }}
-            color="primary"
-          />
-        }
-        label={
-          <VerticalFlexBox sx={{ height: 'auto', ml: '5px' }}>
-              <Typography variant="subtitle1">Liste collaborative</Typography>
-              <Typography variant="caption">Permets à des tribus d'ajouter et modifier des cadeaux.</Typography>
-            </VerticalFlexBox>
-        }
-      />
+      {/* Options: iOS settings rows, switches on the right */}
+      <ListSection className="kdo-group">
+        <ToggleRow
+          label="Voir les cadeaux rayés"
+          description="Pour les séries et les collections, mais ça gâche la surprise !"
+          checked={showTakenToOwner}
+          onChange={setShowTakenToOwner}
+        />
+        <ToggleRow
+          label="Liste collaborative"
+          description="Permets à des tribus d'ajouter et modifier des cadeaux."
+          checked={isCollaborative}
+          onChange={(checked) => {
+            setIsCollaborative(checked);
+            if (!checked) setSelectedGroupIds([]);
+          }}
+          separator={false}
+        />
+      </ListSection>
 
       {/* Tribe selector — visible only when collaborative is on */}
       <Collapse in={isCollaborative}>
         {userTribes.length === 0 ? (
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, px: 2 }}>
             Tu ne fais partie d'aucune tribu pour le moment.
           </Typography>
         ) : (
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              Tribus autorisées à modifier cette liste :
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <ListSection className="kdo-group" header="Tribus autorisées à modifier cette liste">
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', p: 2 }}>
               {userTribes.map(tribe => (
                 <Chip
                   key={tribe.id}
@@ -206,7 +181,7 @@ const ListEditorForm: React.FC<ListEditorFormProps> = ({
                 />
               ))}
             </Box>
-          </Box>
+          </ListSection>
         )}
       </Collapse>
     </Box>

@@ -147,6 +147,20 @@ export const thickMaterialSx = {
   WebkitBackdropFilter: 'blur(30px) saturate(180%)',
 } as const;
 
+/**
+ * Small round button laid over a photo (favourite / menu / delete image /
+ * camera controls). Thick material, so it stays readable on any picture and
+ * follows light/dark mode (white glass in light, dark glass in dark).
+ */
+export const photoOverlayButtonSx = {
+  ...thickMaterialSx,
+  color: 'text.primary',
+  boxShadow: '0 1px 4px rgba(0,0,0,0.18)',
+  '&:hover': {
+    backgroundColor: thickMaterialSx.backgroundColor,
+  },
+} as const;
+
 /** Chrome material (navigation bar). */
 export const chromeMaterialSx = {
   backgroundColor:

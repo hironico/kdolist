@@ -137,12 +137,40 @@ export const iosControlComponents = (mode: IosMode): Components<Theme> => {
     MuiFormControl: {
       styleOverrides: { root: { width: '100%' } },
     },
+    // iOS grouped text field: filled grouped-row background, no visible
+    // border at rest, accent ring on focus, red ring on error.
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: iosRadius.md,
+          borderRadius: iosRadius.card,
           backgroundColor: c.grouped.secondary,
-          '& .MuiOutlinedInput-notchedOutline': { borderColor: c.separator.nonOpaque },
+          '& .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
+          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: c.separator.nonOpaque },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: accent('blue', mode),
+            borderWidth: 2,
+          },
+          '&.Mui-error .MuiOutlinedInput-notchedOutline': { borderColor: accent('red', mode) },
+          '&.Mui-readOnly .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: { color: c.label.secondary },
+      },
+    },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: { ...textStyle('footnote'), marginLeft: 16 },
+      },
+    },
+    MuiAutocomplete: {
+      styleOverrides: {
+        paper: {
+          borderRadius: iosRadius.menu,
+          backgroundColor: c.bg.elevated,
+          boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
         },
       },
     },
