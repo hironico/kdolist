@@ -11,6 +11,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Diversity3, FormatListBulleted, Group } from '@mui/icons-material';
 import ListEditor from '@/components/GiftLists/ListEditorForm';
+import AddActionSection from '../AddActionSection';
+import { nestedListSx } from '../styled';
 import FilterBar, { Filter } from '../FilterBar/FilterBar';
 import { usePageActions, FLOATING_ACTION_PILL_CLEARANCE } from '@/sections/FloatingActionPill';
 import { Box } from '@mui/system';
@@ -24,7 +26,7 @@ const GiftListsList: React.FC = () => {
   const [tribeListsMap, setTribeListsMap] = useState<{ [key: string]: GiftList[] }>({});
   const [activeFilters, setActiveFilters] = useState<Filter<GiftList>[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const listRef = useRef<HTMLUListElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [giftListEditorVisible, setGiftListEditorVisible] = useState(false);
@@ -103,11 +105,9 @@ const GiftListsList: React.FC = () => {
   }
 
   // Register page-level actions for the global FloatingActionPill
+  // (navigation + search only: adding a list is done from the first row below).
   usePageActions(
     {
-      onAdd: handleAddGiftList,
-      addAriaLabel: 'nouvelle liste',
-      addLabel: 'Ajouter',
       onSearchChange: setSearchQuery,
       searchPlaceholder: 'Rechercher une liste…',
     },
@@ -298,35 +298,45 @@ const GiftListsList: React.FC = () => {
           caption="Les listes de cadeaux sont en train d'être récupérées. Ca ne devrait pas être long."
           icon={<FacebookLikeCircularProgress />}
         />
-      ) : userTribes.length === 0 && activeFilters.length === 0 ? (
-        // Show empty state when user has no tribes and no filters are active
-        <Box sx={{ pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
-          <EmptyStateCard
-            title="Rejoins une tribu !"
-            caption="Tu ne fais partie d'aucune tribu pour le moment. Rejoins ou crée une tribu pour voir les listes des autres membres."
-            icon={<Group />}
-          />
-          {giftLists.length > 0 && (
+      ) : (
+        <Box
+          ref={listRef}
+          sx={{ mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', minHeight: 0, minWidth: 0 }}
+        >
+          {/* Creating a list is done from here, not from the floating pill. */}
+          <AddActionSection label="Nouvelle liste" onClick={handleAddGiftList} />
+
+          {userTribes.length === 0 && activeFilters.length === 0 ? (
+            // Show empty state when user has no tribes and no filters are active
             <>
-              <Typography variant="overline" color="text.secondary" component="h2" sx={{ display: 'block', mt: 3, px: 2 }}>
-                Mes listes
-              </Typography>
-              <List sx={{ m: '0px', mt: 1, overflowX: 'hidden' }}>
-                {giftLists.map(renderListRow)}
-              </List>
+              <EmptyStateCard
+                title="Rejoins une tribu !"
+                caption="Tu ne fais partie d'aucune tribu pour le moment. Rejoins ou crée une tribu pour voir les listes des autres membres."
+                icon={<Group />}
+              />
+              {giftLists.length > 0 && (
+                <>
+                  <Typography variant="overline" color="text.secondary" component="h2" sx={{ display: 'block', mt: 3, px: 2 }}>
+                    Mes listes
+                  </Typography>
+                  <List sx={{ m: '0px', mt: 1, ...nestedListSx }}>
+                    {giftLists.map(renderListRow)}
+                  </List>
+                </>
+              )}
             </>
+          ) : filteredLists.length > 0 ? (
+            <List sx={{ m: '0px', ...nestedListSx }}>
+              {filteredLists.map(renderListRow)}
+            </List>
+          ) : (
+            <EmptyStateCard
+              title="C'est vide par ici ..."
+              caption="Pour ajouter une liste, utilise « Nouvelle liste » ci-dessus."
+              icon={<SentimentVeryDissatisfiedIcon />}
+            />
           )}
         </Box>
-      ) : filteredLists.length > 0 ? (
-          <List ref={listRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
-          {filteredLists.map(renderListRow)}
-        </List>
-      ) : (
-        <EmptyStateCard
-          title="C'est vide par ici ..."
-          caption="Pour ajouter une liste, appuie sur le bouton '+'."
-          icon={<SentimentVeryDissatisfiedIcon />}
-        />
       )}
 
       {/* ListEditor now owns its own BottomDialog */}

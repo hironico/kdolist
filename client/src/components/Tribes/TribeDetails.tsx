@@ -110,13 +110,16 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
     };
 
     return (
-        <Box sx={{ pb: 2, px: 2 }}>
+        // Fills the (non scrolling) sheet: the header and the stats keep their
+        // height and the members section takes the rest, scrolling its list.
+        <Box sx={{ pb: 2, px: 2, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
             {/* Tribe picture and name, like an iOS contact card header */}
             <Box
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    flexShrink: 0,
                     pt: 1,
                     pb: 3,
                 }}
@@ -144,6 +147,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                     display: 'grid',
                     gridTemplateColumns: '1fr auto 1fr auto 1fr',
                     alignItems: 'center',
+                    flexShrink: 0,
                     py: 1.5,
                     bgcolor: 'background.paper',
                     borderRadius: '26px',
@@ -157,15 +161,19 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
             </Box>
 
             {/* All members, as an inset grouped list with a section header */}
-            <Box sx={{ pt: 3 }}>
-                <Typography variant="overline" color="text.secondary" component="h3" sx={{ display: 'block', px: 2, mb: 0.5 }}>
+            <Box sx={{ pt: 3, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="overline" color="text.secondary" component="h3" sx={{ display: 'block', flexShrink: 0, px: 2, mb: 0.5 }}>
                     Membres ({totalMembers})
                 </Typography>
+                {/* The only scrolling area of the sheet: it shrinks to the space
+                    left under the header and the stats. */}
                 <List sx={{
                     m: '0px',
-                    maxHeight: '50vh',
+                    flex: '0 1 auto',
+                    minHeight: 0,
+                    maxHeight: 'none',
+                    overflowX: 'hidden',
                     overflowY: 'auto',
-                    alignSelf: 'start'
                 }}>
                     {/* Admins First */}
                     {admins.map((admin) => (

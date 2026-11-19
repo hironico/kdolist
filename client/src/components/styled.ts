@@ -44,7 +44,21 @@ const StyledFab = styled(Fab)({
   margin: '0 auto',
 });
 
+/**
+ * sx for a MUI <List> placed inside a container that already scrolls.
+ *
+ * The theme makes every List scroll on its own (maxHeight: 100%, overflowY:
+ * auto). Nested in a scroll area this creates a second scrollbar, so the list
+ * must grow to its content instead. `overflow: hidden` keeps the rounded
+ * corners / swipe clipping (overflowX alone would turn overflowY back to auto).
+ */
+const nestedListSx = {
+  maxHeight: 'none',
+  overflow: 'hidden',
+} as const;
+
 export {
+  nestedListSx,
   FlexBox,
   CenteredFlexBox,
   FullSizeCenteredFlexBox,

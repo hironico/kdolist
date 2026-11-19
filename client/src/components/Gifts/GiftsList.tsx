@@ -7,6 +7,8 @@ import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import ConfirmAlert from '../ConfirmAlert';
 import GiftForm from './GiftForm';
+import AddActionSection from '../AddActionSection';
+import { nestedListSx } from '../styled';
 import { EmptyStateCard, FacebookLikeCircularProgress } from '../EmptyStateCard';
 import { usePageActions, FLOATING_ACTION_PILL_CLEARANCE } from '@/sections/FloatingActionPill';
 import { useNavigate } from 'react-router-dom';
@@ -62,7 +64,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [cleanupOpen, setCleanupOpen] = useState(false);
   const cleanupProposedRef = useRef(false);
-  const listViewRef = useRef<HTMLUListElement>(null);
+  const listViewRef = useRef<HTMLDivElement>(null);
   const gridViewRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     // Load view mode from localStorage, default to 'list' if not found
@@ -218,19 +220,15 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     }
   }
 
-  // Register page-level actions for the global FloatingActionPill.
-  // On the ListContents page only the "Listes" nav button is shown.
+  // Register page-level actions for the global FloatingActionPill
+  // (navigation + search only: adding a gift is done from the first row below).
   usePageActions(
     {
-      onAdd: editable ? handleAddGift : undefined,
-      addAriaLabel: 'nouveau cadeau',
-      addLabel: 'Ajouter',
       onSearchChange: setSearchQuery,
       searchPlaceholder: 'Rechercher un cadeau…',
-      showNav: { lists: true, tribes: false },
-      activeNav: 'none',
+      activeNav: 'lists',
     },
-    [editable],
+    [],
   );
 
   // Check if current user owns this list and list settings
@@ -337,7 +335,7 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
     const fbIcon = <FacebookLikeCircularProgress />;
     listContents = <EmptyStateCard title="Patience..." caption="La liste se charge. Ca ne devrait pas être très long." icon={fbIcon} />;
   } else if (filteredGifts.length === 0) {
-    listContents = <EmptyStateCard title="C'est vide par ici ..." caption="Pour ajouter un cadeau à la liste, appuie sur le bouton '+' ou retire des filtres" />;
+    listContents = <EmptyStateCard title="C'est vide par ici ..." caption={editable ? "Pour ajouter un cadeau à la liste, utilise « Ajouter un cadeau » ci-dessus ou retire des filtres." : "Aucun cadeau ne correspond à ta recherche."} />;
   } else if (viewMode === 'grid') {
     // Grid view
     listContents = filteredGifts.map((oneGift, index) => (
@@ -436,11 +434,16 @@ const GifsList: React.FC<GiftsListProps> = ({ editable }) => {
 
       {/* Content area */}
       {viewMode === 'list' ? (
-        <List ref={listViewRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start', minWidth: 0 }}>
-          {listContents}
-        </List>
+        <Box ref={listViewRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', minHeight: 0, minWidth: 0 }}>
+          {/* Creating a gift is done from here, not from the floating pill. */}
+          {editable && <AddActionSection label="Ajouter un cadeau" onClick={handleAddGift} />}
+          <List sx={{ m: '0px', minWidth: 0, ...nestedListSx }}>
+            {listContents}
+          </List>
+        </Box>
       ) : (
         <Box ref={gridViewRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', minHeight: 0, minWidth: 0 }}>
+          {editable && <AddActionSection label="Ajouter un cadeau" onClick={handleAddGift} />}
           <Grid container spacing={2}>
             {listContents}
           </Grid>

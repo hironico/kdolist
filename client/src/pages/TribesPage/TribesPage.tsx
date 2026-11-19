@@ -16,7 +16,6 @@ import {
 } from '@/components/Tribes';
 import ConfirmAlert from '@/components/ConfirmAlert';
 import { usePageActions } from '@/sections/FloatingActionPill';
-import { GroupAdd } from '@mui/icons-material';
 
 export function TribesPage() {
     const [myTribes, setMyTribes] = useState<Group[]>([]);
@@ -32,12 +31,9 @@ export function TribesPage() {
     const [pendingTribeId, setPendingTribeId] = useState<string | null>(null);
 
     // Register page-level actions for the global FloatingActionPill
+    // (navigation + search only: creating a tribe is done from the first row of the list).
     usePageActions(
         {
-            onAdd: () => setCreateDialogOpen(true),
-            addAriaLabel: 'nouvelle tribu',
-            addLabel: 'Ajouter',
-            addIcon: <GroupAdd />,
             onSearchChange: setSearchQuery,
             searchPlaceholder: 'Rechercher une tribu…',
         },
@@ -205,6 +201,7 @@ export function TribesPage() {
                             : myTribes
                         }
                         currentUserId={loginInfo?.id}
+                        onCreateTribe={() => setCreateDialogOpen(true)}
                         onAcceptInvite={handleAcceptInvite}
                         onRejectInvite={handleRejectInvite}
                         onLeaveTribe={handleLeaveTribe}

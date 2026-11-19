@@ -20,6 +20,13 @@ export type BottomDialogProps = {
   actions?: BottomDialogAction[];
   /** Prevents dismissing by tapping outside / dragging down (e.g. while editing or saving). */
   disableBackdropClick?: boolean;
+  /**
+   * When false the sheet itself does not scroll: `contents` fills the height
+   * left under the header and is responsible for scrolling one inner area
+   * (e.g. a list under a fixed summary). Defaults to true (the whole sheet
+   * body scrolls, as forms need).
+   */
+  scrollable?: boolean;
 };
 
 // Glass circular bar button (iOS 27 toolbar items are glass pills/circles).
@@ -54,6 +61,7 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
   contents,
   actions,
   disableBackdropClick = false,
+  scrollable = true,
 }) => {
   const handleOpenChange = (next: boolean) => {
     if (!next && !disableBackdropClick) {
@@ -66,7 +74,7 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
       open={open}
       onChange={handleOpenChange}
       detent="large"
-      className="kdo-sheet"
+      className={scrollable ? 'kdo-sheet' : 'kdo-sheet kdo-sheet--fixed'}
       aria-label={title}
     >
       <Box
@@ -74,6 +82,7 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
           position: 'sticky',
           top: 0,
           zIndex: 1,
+          flexShrink: 0,
           display: 'grid',
           gridTemplateColumns: '1fr auto 1fr',
           alignItems: 'center',
@@ -112,7 +121,15 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
         </Box>
       </Box>
 
-      <Box sx={{ overflowY: 'auto' }}>{contents}</Box>
+      <Box
+        sx={
+          scrollable
+            ? { overflowY: 'auto' }
+            : { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+        }
+      >
+        {contents}
+      </Box>
     </Sheet>
   );
 };

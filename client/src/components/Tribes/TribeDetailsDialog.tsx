@@ -140,6 +140,8 @@ const TribeDetailsDialog: React.FC<TribeDetailsDialogProps> = ({
                 open={open}
                 handleClose={onClose}
                 title={tribeDetails?.name || 'Détails de la tribu'}
+                // The sheet does not scroll: only the members list does.
+                scrollable={false}
                 contents={
                     <TribeDetails
                         tribeDetails={tribeDetails}

@@ -4,11 +4,16 @@ import TribeListItem from './TribeListItem';
 import { EmptyStateCard } from '../EmptyStateCard';
 import { Groups as GroupsIcon } from '@mui/icons-material';
 import { Group } from './types';
+import { GroupAdd } from '@mui/icons-material';
 import { FLOATING_ACTION_PILL_CLEARANCE } from '@/sections/FloatingActionPill';
+import AddActionSection from '../AddActionSection';
+import { nestedListSx } from '../styled';
 
 interface TribeListProps {
     tribes: Group[];
     currentUserId?: string;
+    /** Opens the tribe creation editor. When set, a "Créer une tribu" row is shown first. */
+    onCreateTribe?: () => void;
     onAcceptInvite?: (membershipId: string) => void;
     onRejectInvite?: (membershipId: string) => void;
     onLeaveTribe?: (groupId: string) => void;
@@ -19,7 +24,7 @@ interface TribeListProps {
 
 // iOS inset grouped sections: small uppercase header above a rounded group.
 const sectionHeaderSx = { display: 'block', mt: 3, mb: 0.5, px: 2 } as const;
-const sectionListSx = { m: '0px', overflowY: 'auto', alignSelf: 'start' } as const;
+const sectionListSx = { m: '0px', alignSelf: 'start', ...nestedListSx } as const;
 
 /**
  * TribeList component that displays tribes separated into invitations and joined tribes.
@@ -28,6 +33,7 @@ const sectionListSx = { m: '0px', overflowY: 'auto', alignSelf: 'start' } as con
 const TribeList: React.FC<TribeListProps> = ({
     tribes,
     currentUserId,
+    onCreateTribe,
     onAcceptInvite,
     onRejectInvite,
     onLeaveTribe,
@@ -50,7 +56,24 @@ const TribeList: React.FC<TribeListProps> = ({
     );
 
     return (
-        <Box width="100%" p={2} pt={0} pb={FLOATING_ACTION_PILL_CLEARANCE} sx={{ minWidth: 0 }}>
+        // This box is the only scroll area of the page (same height as the
+        // other list pages: viewport minus the 64px header), so the global
+        // page wrapper never scrolls.
+        <Box
+            width="100%"
+            height="calc(100vh - 64px)"
+            p={2}
+            pt={0}
+            pb={FLOATING_ACTION_PILL_CLEARANCE}
+            sx={{ minWidth: 0, boxSizing: 'border-box', overflowY: 'auto', overflowX: 'hidden' }}
+        >
+            {/* Creating a tribe is done from here, not from the floating pill. */}
+            {onCreateTribe && (
+                <Box sx={{ mt: '15px' }}>
+                    <AddActionSection label="Créer une tribu" icon={<GroupAdd />} onClick={onCreateTribe} />
+                </Box>
+            )}
+
             {/* Invitations Section */}
             {invitedTribes.length > 0 && (
                 <>
@@ -128,7 +151,7 @@ const TribeList: React.FC<TribeListProps> = ({
             {invitedTribes.length === 0 && joinedTribes.length === 0 && ownedTribes.length === 0 && adminTribes.length === 0 && (
                 <EmptyStateCard
                     title="Tu n'es pas dans une tribu"
-                    caption="Les membres d'une tribu voient les listes de cadeaux des autres membres. Crée une tribu avec le bouton « Ajouter » en bas et invite du monde ! Tu peux être dans autant de tribus que tu le souhaites."
+                    caption="Les membres d'une tribu voient les listes de cadeaux des autres membres. Crée une tribu avec « Créer une tribu » ci-dessus et invite du monde ! Tu peux être dans autant de tribus que tu le souhaites."
                     icon={<GroupsIcon />}
                 />
             )}

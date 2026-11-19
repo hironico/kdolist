@@ -158,3 +158,32 @@
 .kdo-segmented {
   flex-shrink: 0;
 }
+
+/* ── "Add…" row (AddActionSection) ──────────────────────────────────────
+ * Single tappable row at the beginning of a list: accent coloured glyph and
+ * label, like the "Add …" rows of iOS Settings.
+ */
+.kdo-add-section {
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.kdo-add-row {
+  color: var(--color-blue);
+}
+
+.kdo-add-row .ios27-list-row-leading {
+  color: var(--color-blue);
+}
+
+.kdo-add-row .ios27-list-row-leading .MuiSvgIcon-root {
+  font-size: 28px;
+}
+
+/* Fixed sheet (BottomDialog scrollable={false}): the sheet body does not
+ * scroll, its content fills the height and scrolls one inner area itself. */
+.kdo-sheet--fixed .ios27-sheet-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
