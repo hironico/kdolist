@@ -1,19 +1,17 @@
 import MenuIcon from '@mui/icons-material/Menu';
-import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import Toolbar from '@mui/material/Toolbar';
+import ButtonBase from '@mui/material/ButtonBase';
 import Badge from '@mui/material/Badge';
-import { FlexBox } from '@/components/styled';
+import { Toolbar as IosToolbar } from '@ios27_design_system/react';
 import useNotifications from '@/store/notifications';
 import useSidebar from '@/store/sidebar';
 import { getRandomJoke } from './utils';
 import routes from '@/routes';
 import { PathRouteProps, useLocation, useNavigate } from 'react-router-dom';
 import { PathRouteCustomProps, Routes } from '@/routes/types';
-import { ReactNode, useContext, useState } from 'react';
-import { ArrowBackIos, Notifications as NotificationsIcon } from '@mui/icons-material';
+import React, { ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import { ArrowBackIosNew, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { LoginContext } from '@/LoginContext';
 import UserAvatar from '@/components/UserAvatar/UserAvatar';
 import { UpdateDialog } from '@/components/UpdateDialog';
@@ -72,29 +70,33 @@ function Header() {
         onClick={sidebarActions.toggle}
         size="large"
         edge="start"
-        color="info"
+        color="primary"
         aria-label="menu"
-        sx={{ mr: 1 }}
-      >
+      >        
         <MenuIcon />
       </IconButton>
     );
   };
 
+  // iOS back button: chevron + previous screen title, in the accent colour.
   const renderBackNavigateIconButton = (): ReactNode => {
-    const { state } = location;
-
     return (
-      <IconButton
+      <ButtonBase
         onClick={() => goToMyLists()}
-        size="large"
-        edge="start"
-        color="info"
-        aria-label="backward"
-        sx={{ mr: 1 }}
+        aria-label="retour aux listes"
+        sx={{
+          color: 'primary.main',
+          typography: 'body1',
+          gap: 0.25,
+          px: 0.5,
+          py: 1,
+          borderRadius: 2,
+          '&:active': { opacity: 0.5 },
+        }}
       >
-        <ArrowBackIos />
-      </IconButton>
+        <ArrowBackIosNew fontSize="small" />
+        Listes
+      </ButtonBase>
     );
   };
 
@@ -116,18 +118,35 @@ function Header() {
     return home ? renderMenuIconButton() : renderBackNavigateIconButton();
   };
 
+  // Tapping the title shows a random joke (easter egg kept from the MUI header).
+  const handleToolbarClick = (event: React.MouseEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest('.ios27-toolbar-title')) {
+      showNotification();
+    }
+  };
+
+  const title = getTitle();
+
+  // Long list names are clamped to two lines in the bar (see ios27-overrides.css).
+  // Expose the full name as a native tooltip on the title element, which the
+  // library Toolbar does not let us set directly.
+  const toolbarRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    toolbarRef.current?.querySelector('.ios27-toolbar-title')?.setAttribute('title', title);
+  }, [title]);
+
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <FlexBox sx={{ alignItems: 'center' }}>
-            {renderIconButton()}
-            <Button size="large" onClick={showNotification}>
-              {getTitle()}
-            </Button>
-          </FlexBox>
-
-          <FlexBox sx={{ alignItems: 'center', gap: 1 }}>
+      {/* iOS 27 navigation bar (@ios27_design_system/react Toolbar) on the
+          uniform toolbar material, edge to edge. */}
+      <IosToolbar
+        ref={toolbarRef}
+        className="kdo-toolbar ios27-toolbar-uniform"
+        title={title}
+        onClick={handleToolbarClick}
+        leading={renderIconButton()}
+        trailing={
+          <>
             {/* Update notification bell */}
             {loginContext.updateAvailable && (
               <IconButton
@@ -141,12 +160,12 @@ function Header() {
               </IconButton>
             )}
 
-            <IconButton>
+            <IconButton aria-label="profil">
               <UserAvatar />
             </IconButton>
-          </FlexBox>
-        </Toolbar>
-      </AppBar>
+          </>
+        }
+      />
 
       {/* Update dialog */}
       <UpdateDialog

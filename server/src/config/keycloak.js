@@ -1,4 +1,4 @@
-const { Issuer, generators } = require('openid-client');
+const { Issuer, generators, custom } = require('openid-client');
 const logger = require('../logger');
 
 let keycloakClient = null;
@@ -29,12 +29,13 @@ async function initKeycloakClient() {
             response_types: ['code'],
         });
 
-        // Set clock tolerance to handle time synchronization issues
-        // This must be set on BOTH the issuer and client for proper JWT validation
-        // Set to 300 seconds (5 minutes) to handle clock skew
-        const clockToleranceSymbol = Symbol.for('openid-client.custom.clock_tolerance');
-        keycloakIssuer[clockToleranceSymbol] = 300;
-        keycloakClient[clockToleranceSymbol] = 300;
+        // Set clock tolerance to handle small time synchronization issues
+        // between this server and Keycloak (300 seconds = 5 minutes).
+        // openid-client exposes the setting as `custom.clock_tolerance`, a private
+        // Symbol(): a `Symbol.for(...)` key is NOT the same symbol and is silently
+        // ignored (validation then runs with a 0s tolerance).
+        keycloakIssuer[custom.clock_tolerance] = 300;
+        keycloakClient[custom.clock_tolerance] = 300;
 
         logger.info('Keycloak OIDC client initialized successfully with 300s clock tolerance');
         return keycloakClient;

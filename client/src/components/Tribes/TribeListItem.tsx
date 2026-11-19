@@ -42,7 +42,7 @@ const TribeListItem: React.FC<TribeListItemProps> = ({
 
     // Primary text - tribe name
     const primaryText = (
-        <Typography variant="body1" fontWeight={isInvited ? 'bold' : 'normal'}>
+        <Typography variant="body1" fontWeight={isInvited ? 600 : 400}>
             {tribe.name}
         </Typography>
     );
@@ -50,7 +50,7 @@ const TribeListItem: React.FC<TribeListItemProps> = ({
     // Secondary text - shows invitation status or admin name
     const secondaryText = (
         <Typography variant="caption" color="text.secondary">
-            {isInvited ? `Invitation de ${adminName} ` : `Admin: ${adminName} `}
+            {isInvited ? `Invitation de ${adminName}` : `Admin : ${adminName}`}
         </Typography>
     );
 
@@ -65,11 +65,13 @@ const TribeListItem: React.FC<TribeListItemProps> = ({
             icon: <CheckIcon />,
             color: 'success',
             onAction: () => onAcceptInvite?.(membership.id),
+            ariaLabel: 'Accepter',
         };
         action2 = {
             icon: <CloseIcon />,
             color: 'error',
             onAction: () => onRejectInvite?.(membership.id),
+            ariaLabel: 'Refuser',
         };
     } else {
         // For joined tribes
@@ -79,11 +81,13 @@ const TribeListItem: React.FC<TribeListItemProps> = ({
                 icon: <PersonAddIcon />,
                 color: 'primary',
                 onAction: () => onInviteUser?.(tribe.id),
+                ariaLabel: 'Inviter',
             };
             action2 = {
                 icon: <DeleteIcon />,
                 color: 'error',
                 onAction: () => onDeleteTribe?.(tribe.id),
+                ariaLabel: 'Supprimer la tribu',
             };
         } else {
             // Regular members can leave but if admin member (not owner) can invite too !
@@ -91,29 +95,32 @@ const TribeListItem: React.FC<TribeListItemProps> = ({
                 icon: <ExitToAppIcon />,
                 color: 'error',
                 onAction: () => onLeaveTribe?.(tribe.id),
+                ariaLabel: 'Quitter la tribu',
             };
 
             if (membership?.status === 'ADMIN') {
                 action2 = {
-                icon: <PersonAddIcon />,
-                color: 'primary',
-                onAction: () => onInviteUser?.(tribe.id),
-            };
+                    icon: <PersonAddIcon />,
+                    color: 'primary',
+                    onAction: () => onInviteUser?.(tribe.id),
+                    ariaLabel: 'Inviter',
+                };
             }
         }
     }
 
-    // Right content - visual indicator for invitations
+    // Right content - iOS capsule badge for pending invitations
     const rightContent = isInvited ? (
         <Box
+            component="span"
             sx={{
-                bgcolor: 'warning.light',
-                color: 'warning.contrastText',
+                bgcolor: 'error.main',
+                color: 'error.contrastText',
                 px: 1,
-                py: 0.5,
-                borderRadius: 1,
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
+                py: 0.25,
+                borderRadius: 999,
+                typography: 'caption',
+                fontWeight: 600,
             }}
         >
             Nouveau
@@ -129,6 +136,7 @@ const TribeListItem: React.FC<TribeListItemProps> = ({
             action2={action2}
             action3={action3}
             icon={<GroupIcon />}
+            iconTint={isInvited ? 'warning.main' : isAdmin ? 'primary.main' : 'success.main'}
             rightContent={rightContent}
             onClickMain={() => onViewDetails?.(tribe.id)}
         />

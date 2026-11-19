@@ -12,9 +12,8 @@ export function PrivacyPage() {
       <Meta title="Politique de confidentialité" />
       <Box
         sx={{
-          backgroundColor: 'rgba(255,255,255, 0.65)',
+          backgroundColor: 'background.paper',
           boxShadow: 'none',
-          backdropFilter: 'blur(10px)',
           height: { xs: '100%', md: '100%' },
           padding: '15px',
         }}

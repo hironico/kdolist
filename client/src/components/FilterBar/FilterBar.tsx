@@ -64,7 +64,7 @@ const FilterBar = <T extends DataItem>({
             '&:hover': {
               backgroundColor: activeFilterIds.includes(filter.id) 
                 ? undefined 
-                : 'rgba(0, 0, 0, 0.04)'
+                : 'action.hover'
             }
           }}
         />

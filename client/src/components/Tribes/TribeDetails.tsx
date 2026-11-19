@@ -6,6 +6,7 @@ import {
     List,
     Divider,
     Chip,
+    useTheme,
 } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
@@ -14,7 +15,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BoltIcon from '@mui/icons-material/Bolt';
 import SwipeableListItem from '@/components/SwipeableListItem/SwipeableListItem';
-import ActionSheet, { ActionSheetEntry } from '@/components/ActionSheet/ActionSheet';
+import ConfirmAlert from '@/components/ConfirmAlert';
 import { TribeDetailsData } from './types';
 
 interface TribeDetailsProps {
@@ -24,12 +25,38 @@ interface TribeDetailsProps {
     onChangeMembershipStatus?: (membershipId: string, newStatus: 'ADMIN' | 'MEMBER') => void;
 }
 
+/** One counter of the stats row: icon + value on one line, label below. */
+const StatCounter: React.FC<{ icon: React.ReactNode; value: number; label: string }> = ({ icon, value, label }) => (
+    <Box sx={{ textAlign: 'center', minWidth: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5, color: 'primary.main' }}>
+            {icon}
+            <Typography variant="h6" component="span" color="text.primary">
+                {value}
+            </Typography>
+        </Box>
+        <Typography variant="caption" color="text.secondary">
+            {label}
+        </Typography>
+    </Box>
+);
+
+// Membership status capsules (iOS-style tinted pills).
+const statusChipSx = (color: string) => ({
+    height: 22,
+    bgcolor: color,
+    color: '#ffffff',
+    fontWeight: 600,
+    typography: 'caption',
+    '& .MuiChip-label': { px: 1 },
+});
+
 /**
  * TribeDetails component displays comprehensive information about a tribe
  * including picture, name, member counts, admins, and members.
  */
 const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId, onDeleteInvitation, onChangeMembershipStatus }) => {
-    // State for confirmation ActionSheet
+    const theme = useTheme();
+    // State for the confirmation alert
     const [confirmActionSheetOpen, setConfirmActionSheetOpen] = useState(false);
     const [pendingAction, setPendingAction] = useState<{
         membershipId: string;
@@ -83,98 +110,70 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
     };
 
     return (
-        <Box sx={{ pb: 2 }}>
-            {/* Tribe Picture and Name */}
+        // Fills the (non scrolling) sheet: the header and the stats keep their
+        // height and the members section takes the rest, scrolling its list.
+        <Box sx={{ pb: 2, px: 2, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            {/* Tribe picture and name, like an iOS contact card header */}
             <Box
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    py: 3,
-                    bgcolor: 'primary.light',
-                    color: 'primary.contrastText',
+                    flexShrink: 0,
+                    pt: 1,
+                    pb: 3,
                 }}
             >
                 <Avatar
                     sx={{
-                        width: 80,
-                        height: 80,
+                        width: 88,
+                        height: 88,
                         bgcolor: 'primary.main',
-                        fontSize: '2rem',
-                        mb: 2,
+                        color: 'primary.contrastText',
+                        typography: 'h4',
+                        mb: 1.5,
                     }}
                 >
                     {getInitials(name)}
                 </Avatar>
-                <Typography variant="h5" fontWeight="bold">
+                <Typography variant="h5" component="p" textAlign="center" sx={{ overflowWrap: 'anywhere' }}>
                     {name}
                 </Typography>
             </Box>
 
-            {/* Stats Section */}
+            {/* Stats, as one inset grouped row of three counters */}
             <Box
                 sx={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    py: 2,
-                    px: 2,
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto 1fr auto 1fr',
+                    alignItems: 'center',
+                    flexShrink: 0,
+                    py: 1.5,
+                    bgcolor: 'background.paper',
+                    borderRadius: '26px',
                 }}
             >
-                <Box sx={{ textAlign: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0.5 }}>
-                        <AdminPanelSettingsIcon color="primary" sx={{ mr: 0.5 }} />
-                        <Typography variant="h6" fontWeight="bold">
-                            {admins.length}
-                        </Typography>
-                    </Box>
-                    <Typography variant="caption" color="text.secondary">
-                        Admin{admins.length > 1 ? 's' : ''}
-                    </Typography>
-                </Box>
-
+                <StatCounter icon={<AdminPanelSettingsIcon />} value={admins.length} label={`Admin${admins.length > 1 ? 's' : ''}`} />
                 <Divider orientation="vertical" flexItem />
-
-                <Box sx={{ textAlign: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0.5 }}>
-                        <GroupIcon color="primary" sx={{ mr: 0.5 }} />
-                        <Typography variant="h6" fontWeight="bold">
-                            {totalMembers}
-                        </Typography>
-                    </Box>
-                    <Typography variant="caption" color="text.secondary">
-                        Membre{totalMembers > 1 ? 's' : ''}
-                    </Typography>
-                </Box>
-
+                <StatCounter icon={<GroupIcon />} value={totalMembers} label={`Membre${totalMembers > 1 ? 's' : ''}`} />
                 <Divider orientation="vertical" flexItem />
-
-                <Box sx={{ textAlign: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0.5 }}>
-                        <ListAltIcon color="primary" sx={{ mr: 0.5 }} />
-                        <Typography variant="h6" fontWeight="bold">
-                            {totalLists}
-                        </Typography>
-                    </Box>
-                    <Typography variant="caption" color="text.secondary">
-                        Liste{totalLists > 1 ? 's' : ''}
-                    </Typography>
-                </Box>
+                <StatCounter icon={<ListAltIcon />} value={totalLists} label={`Liste${totalLists > 1 ? 's' : ''}`} />
             </Box>
 
-            <Divider />
-
-            {/* All Members Section - Unified List */}
-            <Box sx={{ pt: 2 }}>
-                <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1, px: 2, display: 'flex', alignItems: 'center' }}>
-                    <GroupIcon sx={{ mr: 1 }} color="primary" />
+            {/* All members, as an inset grouped list with a section header */}
+            <Box sx={{ pt: 3, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="overline" color="text.secondary" component="h3" sx={{ display: 'block', flexShrink: 0, px: 2, mb: 0.5 }}>
                     Membres ({totalMembers})
                 </Typography>
+                {/* The only scrolling area of the sheet: it shrinks to the space
+                    left under the header and the stats. */}
                 <List sx={{
                     m: '0px',
-                    mt: '10px',
-                    maxHeight: '50vh',
+                    flex: '0 1 auto',
+                    minHeight: 0,
+                    maxHeight: 'none',
+                    overflowX: 'hidden',
                     overflowY: 'auto',
-                    alignSelf: 'start'
                 }}>
                     {/* Admins First */}
                     {admins.map((admin) => (
@@ -182,14 +181,16 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             key={`admin-${admin.id}`}
                             keyId={`admin-${admin.id}`}
                             icon={<PersonIcon />}
+                            iconTint="primary.main"
                             primaryText={`${admin.firstname} ${admin.lastname}`}
                             secondaryText={`@${admin.username}`}
-                            rightContent={<Chip label="Admin" size="small" color="primary" />}
+                            rightContent={<Chip label="Admin" size="small" sx={statusChipSx(theme.palette.primary.main)} />}
                             action1={
                                 isCurrentUserAdmin && onChangeMembershipStatus && admin.id !== adminId
                                     ? {
-                                        icon: <BoltIcon sx={{ color: '#FFA500' }} />,
+                                        icon: <BoltIcon />,
                                         color: 'default' as const,
+                                        ariaLabel: 'Retirer les droits administrateur',
                                         onAction: () => handleRequestAdminChange(
                                             admin.membershipId,
                                             `${admin.firstname} ${admin.lastname}`,
@@ -207,15 +208,17 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             key={`invited-${invitation.membershipId}`}
                             keyId={`invited-${invitation.membershipId}`}
                             icon={<PersonIcon />}
+                            iconTint="info.main"
                             primaryText={`${invitation.firstname} ${invitation.lastname}`}
                             secondaryText={`@${invitation.username}`}
-                            rightContent={<Chip label="Invité" size="small" color="info" />}
+                            rightContent={<Chip label="Invité" size="small" sx={statusChipSx(theme.palette.info.main)} />}
                             action1={
                                 isCurrentUserAdmin && onDeleteInvitation
                                     ? {
                                         icon: <DeleteIcon />,
                                         color: 'error' as const,
                                         onAction: () => onDeleteInvitation(invitation.membershipId),
+                                        ariaLabel: "Supprimer l'invitation",
                                     }
                                     : undefined
                             }
@@ -228,15 +231,17 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             key={`declined-${invitation.membershipId}`}
                             keyId={`declined-${invitation.membershipId}`}
                             icon={<PersonIcon />}
+                            iconTint={theme.palette.secondary.main}
                             primaryText={`${invitation.firstname} ${invitation.lastname}`}
                             secondaryText={`@${invitation.username}`}
-                            rightContent={<Chip label="Refusé" size="small" color="error" />}
+                            rightContent={<Chip label="Refusé" size="small" sx={statusChipSx(theme.palette.error.main)} />}
                             action1={
                                 isCurrentUserAdmin && onDeleteInvitation
                                     ? {
                                         icon: <DeleteIcon />,
                                         color: 'error' as const,
                                         onAction: () => onDeleteInvitation(invitation.membershipId),
+                                        ariaLabel: "Supprimer l'invitation",
                                     }
                                     : undefined
                             }
@@ -249,14 +254,16 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             key={`member-${member.id}`}
                             keyId={`member-${member.id}`}
                             icon={<PersonIcon />}
+                            iconTint="success.main"
                             primaryText={`${member.firstname} ${member.lastname}`}
-                            secondaryText={`${member.username}`}
-                            rightContent={<Chip label="Membre" size="small" color="default" />}
+                            secondaryText={`@${member.username}`}
+                            rightContent={<Chip label="Membre" size="small" sx={statusChipSx(theme.palette.secondary.main)} />}
                             action1={
                                 isCurrentUserAdmin && onChangeMembershipStatus && member.id !== adminId
                                     ? {
-                                        icon: <BoltIcon sx={{ color: '#D3D3D3' }} />,
-                                        color: 'default' as const,
+                                        icon: <BoltIcon />,
+                                        color: 'warning' as const,
+                                        ariaLabel: 'Promouvoir administrateur',
                                         onAction: () => handleRequestAdminChange(
                                             member.membershipId,
                                             `${member.firstname} ${member.lastname}`,
@@ -270,27 +277,18 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                 </List>
             </Box>
 
-            {/* Confirmation ActionSheet */}
-            <ActionSheet
+            {/* Confirmation alert */}
+            <ConfirmAlert
                 open={confirmActionSheetOpen}
-                handleClose={handleCancelAdminChange}
-                message={
+                onCancel={handleCancelAdminChange}
+                onConfirm={handleConfirmAdminChange}
+                title={
                     pendingAction?.action === 'REMOVE_ADMIN'
                         ? `Retirer les droits d'administrateur à ${pendingAction.memberName} ?`
-                        : `Promouvoir ${pendingAction?.memberName} en tant qu'administrateur ?`
+                        : `Promouvoir ${pendingAction?.memberName ?? ''} en tant qu'administrateur ?`
                 }
-                entries={[
-                    {
-                        label: pendingAction?.action === 'REMOVE_ADMIN' ? 'Retirer les droits' : 'Promouvoir',
-                        color: pendingAction?.action === 'REMOVE_ADMIN' ? 'error' : 'primary',
-                        onAction: handleConfirmAdminChange,
-                    },
-                ]}
-                defaultEntry={{
-                    label: 'Annuler',
-                    color: 'primary',
-                    onAction: handleCancelAdminChange,
-                }}
+                confirmLabel={pendingAction?.action === 'REMOVE_ADMIN' ? 'Retirer' : 'Promouvoir'}
+                destructive={pendingAction?.action === 'REMOVE_ADMIN'}
             />
         </Box>
     );

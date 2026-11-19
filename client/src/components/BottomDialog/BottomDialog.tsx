@@ -1,16 +1,7 @@
 import React, { ReactNode } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Slide,
-  Toolbar,
-  Typography,
-} from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
-import { ArrowBackIos } from '@mui/icons-material';
+import { IconButton, Tooltip, Typography } from '@mui/material';
 import { Box } from '@mui/system';
+import { Sheet } from '@ios27_design_system/react';
 
 export type BottomDialogAction = {
   icon: ReactNode,
@@ -27,18 +18,42 @@ export type BottomDialogProps = {
   title: string;
   contents: ReactNode;
   actions?: BottomDialogAction[];
+  /** Prevents dismissing by tapping outside / dragging down (e.g. while editing or saving). */
   disableBackdropClick?: boolean;
+  /**
+   * When false the sheet itself does not scroll: `contents` fills the height
+   * left under the header and is responsible for scrolling one inner area
+   * (e.g. a list under a fixed summary). Defaults to true (the whole sheet
+   * body scrolls, as forms need).
+   */
+  scrollable?: boolean;
 };
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<unknown>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+// Glass circular bar button (iOS 27 toolbar items are glass pills/circles).
+const barButtonSx = {
+  width: 36,
+  height: 36,
+  bgcolor: 'action.selected',
+  color: 'text.primary',
+  '&:hover': { bgcolor: 'action.selected' },
+} as const;
 
+const primaryBarButtonSx = {
+  ...barButtonSx,
+  bgcolor: 'primary.main',
+  color: 'primary.contrastText',
+  '&:hover': { bgcolor: 'primary.main' },
+  '&.Mui-disabled': { bgcolor: 'action.disabledBackground', color: 'action.disabled' },
+} as const;
+
+/**
+ * iOS 27 bottom sheet (large detent) built on the `Sheet` component of
+ * @ios27_design_system/react: grabber, drag-to-dismiss, focus trap, Escape.
+ *
+ * The header follows the iOS sheet toolbar: a close button on the leading side,
+ * the title in the middle and the actions as glass circular buttons on the
+ * trailing side (the primary one filled with the accent colour).
+ */
 const BottomDialog: React.FC<BottomDialogProps> = ({
   open,
   handleClose,
@@ -46,67 +61,89 @@ const BottomDialog: React.FC<BottomDialogProps> = ({
   contents,
   actions,
   disableBackdropClick = false,
+  scrollable = true,
 }) => {
-  const handleDialogClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown') => {
-    if (disableBackdropClick && reason === 'backdropClick') {
-      return;
+  const handleOpenChange = (next: boolean) => {
+    if (!next && !disableBackdropClick) {
+      handleClose();
     }
-    handleClose();
   };
 
   return (
-    <Dialog
+    <Sheet
       open={open}
-      onClose={handleDialogClose}
-      fullWidth={true}
-      TransitionComponent={Transition}
-      sx={{
-        top: 'auto',
-        bottom: 0,
-        width: '90hw',
-        marginLeft: '-45px',
-        marginRight: '-45px',
-        marginBottom: '-35px',
-        '& .MuiDialog-paper': {
-          maxHeight: '95vh',
-        },
-      }}
+      onChange={handleOpenChange}
+      detent="large"
+      className={scrollable ? 'kdo-sheet' : 'kdo-sheet kdo-sheet--fixed'}
+      aria-label={title}
     >
-      <DialogTitle sx={{ pt: '0px', pb: '0px', pl: '10px', pr: '10px' }}>
-        <Toolbar sx={{ padding: '0px', margin: '0px' }}>
-          <IconButton color="primary" aria-label="open drawer" onClick={() => handleClose()} sx={{ padding: '0px', marginLeft: '0px' }}>
-            <ArrowBackIos />
-          </IconButton>
-          <Typography fontSize={16}>{title}</Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          {actions ? actions.map((a, index) => {
-            return <IconButton
-              key={`bottom-dlg-key-${a.label}-${index}`}
-              color="primary"
-              aria-label={a.label}
-              onClick={a.onClick}
-              disabled={a.disabled}
-              sx={{
-                ml: '10px', mr: '10px',
-                ...(a.isPrimary ? {
-                  bgcolor: 'primary.main',
-                  color: 'common.white',
-                  borderRadius: '50%',
-                  width: 36,
-                  height: 36,
-                  p: '8px',
-                  '&:hover': { bgcolor: 'primary.dark' },
-                  '&.Mui-disabled': { bgcolor: 'action.disabledBackground', color: 'action.disabled' },
-                } : { padding: '0px' })
-              }}>
-              {a.icon}
+      <Box
+        sx={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 1,
+          flexShrink: 0,
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          alignItems: 'center',
+          gap: 1,
+          px: 2,
+          pb: 1.5,
+        }}
+      >
+        <Box>
+          <Tooltip title="Fermer">
+            <IconButton aria-label="fermer" onClick={handleClose} sx={barButtonSx}>
+              <CloseGlyph />
             </IconButton>
-          }) : <></>}
-        </Toolbar>
-      </DialogTitle>
-      <DialogContent sx={{ overflowY: 'auto', px: 0 }}>{contents}</DialogContent>
-    </Dialog>
+          </Tooltip>
+        </Box>
+
+        <Typography variant="subtitle1" component="h2" noWrap sx={{ textAlign: 'center' }}>
+          {title}
+        </Typography>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+          {actions?.map((a, index) => (
+            <Tooltip key={`bottom-dlg-key-${a.label}-${index}`} title={a.label}>
+              <span>
+                <IconButton
+                  aria-label={a.label}
+                  onClick={a.onClick}
+                  disabled={a.disabled}
+                  sx={a.isPrimary ? primaryBarButtonSx : { ...barButtonSx, color: 'primary.main' }}
+                >
+                  {a.icon}
+                </IconButton>
+              </span>
+            </Tooltip>
+          ))}
+        </Box>
+      </Box>
+
+      <Box
+        sx={
+          scrollable
+            ? { overflowY: 'auto' }
+            : { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+        }
+      >
+        {contents}
+      </Box>
+    </Sheet>
   );
 };
+
+/** SF-Symbols-like "xmark" glyph, thinner than the Material close icon. */
+const CloseGlyph: React.FC = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+    <path
+      d="M1.5 1.5l11 11M12.5 1.5l-11 11"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
 
 export default BottomDialog;

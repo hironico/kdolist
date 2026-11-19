@@ -12,6 +12,12 @@ import ListItemText from '@mui/material/ListItemText';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Badge from '@mui/material/Badge';
 import Divider from '@mui/material/Divider';
+import Box from '@mui/material/Box';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+
+import useTheme from '@/store/theme';
+import { Themes } from '@/theme/types';
 
 import routes from '@/routes';
 import useSidebar from '@/store/sidebar';
@@ -30,6 +36,7 @@ interface Tribe {
 
 function Sidebar() {
   const [isSidebarOpen, sidebarActions] = useSidebar();
+  const [themeMode, themeActions] = useTheme();
   const { canInstall, requestInstallDialog } = usePWAInstall();
   const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
   const api = useAuthenticatedApi();
@@ -66,8 +73,19 @@ function Sidebar() {
       onOpen={sidebarActions.open}
       disableBackdropTransition={false}
       swipeAreaWidth={30}
+      // The invisible swipe-to-open strip is full height and sits above the
+      // header (z-index drawer - 1). Start it below the header so it does not
+      // swallow taps on the menu / back buttons.
+      SwipeAreaProps={{ style: { top: 'var(--kdo-header-height)' } }}
       data-pw="sidebar"
-      PaperProps={{ sx: { width: 250 } }}
+      PaperProps={{
+        sx: {
+          width: 280,
+          px: 1.5,
+          pt: 'calc(12px + env(safe-area-inset-top))',
+          '& .MuiList-root': { margin: 0 },
+        },
+      }}
     >
       <List disablePadding>
         {sidebarRoutes.map(({ path, title, icon: Icon }, index) => (
@@ -110,6 +128,26 @@ function Sidebar() {
             <Divider />
           </>
         )}
+
+        {/* Appearance: follow the system, or force light / dark */}
+        <ListItem disablePadding>
+          <Box sx={{ px: 1.5, py: 1.5, width: '100%' }}>
+            <ListItemText primary="Apparence" sx={{ mb: 1 }} />
+            <ToggleButtonGroup
+              exclusive
+              fullWidth
+              size="small"
+              value={themeMode}
+              onChange={(_e, value: Themes | null) => value && themeActions.setMode(value)}
+              aria-label="apparence"
+            >
+              <ToggleButton value={Themes.SYSTEM} aria-label="automatique">Auto</ToggleButton>
+              <ToggleButton value={Themes.LIGHT} aria-label="clair">Clair</ToggleButton>
+              <ToggleButton value={Themes.DARK} aria-label="sombre">Sombre</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        </ListItem>
+        <Divider />
 
         {/* GitHub link */}
         <ListItem disablePadding>

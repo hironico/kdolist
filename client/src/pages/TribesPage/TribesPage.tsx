@@ -14,9 +14,8 @@ import {
     InviteUserDialog,
     TribeDetailsDialog
 } from '@/components/Tribes';
-import ActionSheet from '@/components/ActionSheet/ActionSheet';
+import ConfirmAlert from '@/components/ConfirmAlert';
 import { usePageActions } from '@/sections/FloatingActionPill';
-import { GroupAdd } from '@mui/icons-material';
 
 export function TribesPage() {
     const [myTribes, setMyTribes] = useState<Group[]>([]);
@@ -26,18 +25,15 @@ export function TribesPage() {
     const { loginInfo } = useContext(LoginContext);
     const [, notificationsActions] = useNotifications();
 
-    // ActionSheet states
+    // Confirmation alert states
     const [leaveTribeConfirmOpen, setLeaveTribeConfirmOpen] = useState(false);
     const [deleteTribeConfirmOpen, setDeleteTribeConfirmOpen] = useState(false);
     const [pendingTribeId, setPendingTribeId] = useState<string | null>(null);
 
     // Register page-level actions for the global FloatingActionPill
+    // (navigation + search only: creating a tribe is done from the first row of the list).
     usePageActions(
         {
-            onAdd: () => setCreateDialogOpen(true),
-            addAriaLabel: 'nouvelle tribu',
-            addLabel: 'Ajouter',
-            addIcon: <GroupAdd />,
             onSearchChange: setSearchQuery,
             searchPlaceholder: 'Rechercher une tribu…',
         },
@@ -205,6 +201,7 @@ export function TribesPage() {
                             : myTribes
                         }
                         currentUserId={loginInfo?.id}
+                        onCreateTribe={() => setCreateDialogOpen(true)}
                         onAcceptInvite={handleAcceptInvite}
                         onRejectInvite={handleRejectInvite}
                         onLeaveTribe={handleLeaveTribe}
@@ -234,41 +231,25 @@ export function TribesPage() {
                     />
 
                     {/* Leave Tribe Confirmation */}
-                    <ActionSheet
+                    <ConfirmAlert
                         open={leaveTribeConfirmOpen}
-                        handleClose={() => setLeaveTribeConfirmOpen(false)}
-                        entries={[
-                            {
-                                label: 'Oui, quitter la tribu',
-                                color: 'error',
-                                onAction: confirmLeaveTribe,
-                            },
-                        ]}
-                        defaultEntry={{
-                            label: 'En fait, non',
-                            color: 'primary',
-                            onAction: () => setLeaveTribeConfirmOpen(false),
-                        }}
-                        message="Vraiment quitter cette tribu ?"
+                        onCancel={() => setLeaveTribeConfirmOpen(false)}
+                        onConfirm={confirmLeaveTribe}
+                        title="Quitter cette tribu ?"
+                        message="Tu ne verras plus les listes de ses membres."
+                        confirmLabel="Quitter"
+                        cancelLabel="En fait, non"
                     />
 
                     {/* Delete Tribe Confirmation */}
-                    <ActionSheet
+                    <ConfirmAlert
                         open={deleteTribeConfirmOpen}
-                        handleClose={() => setDeleteTribeConfirmOpen(false)}
-                        entries={[
-                            {
-                                label: 'Oui, supprimer la tribu',
-                                color: 'error',
-                                onAction: confirmDeleteTribe,
-                            },
-                        ]}
-                        defaultEntry={{
-                            label: 'Laisses tomber',
-                            color: 'primary',
-                            onAction: () => setDeleteTribeConfirmOpen(false),
-                        }}
-                        message="Vaiment supprimer cette tribu ? Tous les membres seront retirés et cette action est irréversible."
+                        onCancel={() => setDeleteTribeConfirmOpen(false)}
+                        onConfirm={confirmDeleteTribe}
+                        title="Supprimer cette tribu ?"
+                        message="Tous les membres seront retirés et cette action est irréversible."
+                        confirmLabel="Supprimer"
+                        cancelLabel="Laisse tomber"
                     />
 
                 </FullSizeTopCenteredFlexBox>

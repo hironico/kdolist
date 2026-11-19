@@ -1,5 +1,5 @@
 import { LoginContext } from '@/LoginContext';
-import { Avatar, Menu, MenuItem, Divider, ListItemIcon, ListItemText } from '@mui/material';
+import { Avatar, Menu, MenuItem, Divider, ListItemText } from '@mui/material';
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AccountCircle, Logout } from '@mui/icons-material';
@@ -133,27 +133,25 @@ const UserAvatar = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         PaperProps={{
-          elevation: 3,
+          elevation: 0,
           sx: {
-            minWidth: 180,
-            mt: 1.5,
+            minWidth: 220,
+            mt: 1,
           },
         }}
       >
+        {/* iOS context menu: label on the left, symbol on the right,
+            destructive action in red. */}
         {accessTokenProvider === 'KEYCLOAK' && (
-          <MenuItem onClick={handleProfileClick}>
-            <ListItemIcon>
-              <AccountCircle fontSize="small" />
-            </ListItemIcon>
+          <MenuItem onClick={handleProfileClick} sx={{ justifyContent: 'space-between', gap: 2 }}>
             <ListItemText>Mon compte</ListItemText>
+            <AccountCircle fontSize="small" />
           </MenuItem>
         )}
         {accessTokenProvider === 'KEYCLOAK' && <Divider />}
-        <MenuItem onClick={handleLogout}>
-          <ListItemIcon>
-            <Logout fontSize="small" />
-          </ListItemIcon>
+        <MenuItem onClick={handleLogout} sx={{ justifyContent: 'space-between', gap: 2, color: 'error.main' }}>
           <ListItemText>Déconnexion</ListItemText>
+          <Logout fontSize="small" />
         </MenuItem>
       </Menu>
     </>

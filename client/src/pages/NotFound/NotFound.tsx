@@ -1,5 +1,4 @@
 import Container from '@mui/material/Container';
-import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 
 import { CenteredFlexBox, FullSizeCenteredFlexBox } from '@/components/styled';
@@ -17,12 +16,11 @@ function NotFound() {
           frameBorder="0"
           allowFullScreen
         />
-        <CenteredFlexBox flexDirection="column">
-          <Typography sx={{ mt: 2 }} variant="h4" color="error">
-            404 Not Found
+        <CenteredFlexBox flexDirection="column" sx={{ textAlign: 'center', gap: 1, mt: 2 }}>
+          <Typography variant="h4" component="h1">
+            Page introuvable
           </Typography>
-          <Divider variant="middle" />
-          <Typography variant="h4" sx={{ color: (theme) => theme.palette.info.main }}>
+          <Typography variant="body1" color="text.secondary">
             {messages[404]}
           </Typography>
         </CenteredFlexBox>

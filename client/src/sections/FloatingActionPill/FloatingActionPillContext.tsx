@@ -2,7 +2,6 @@ import {
   createContext,
   FC,
   PropsWithChildren,
-  ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -14,22 +13,17 @@ import {
  * Set of actions/configuration that the currently visible page contributes
  * to the global FloatingActionPill component.
  *
+ * The pill is a navigation bar (Listes / Tribus) plus a search button. The
+ * context-relative "add" actions are NOT part of the pill: they live in the
+ * pages themselves (see AddActionSection).
+ *
  * A page registers its actions via the `usePageActions` hook (typically in a
  * useEffect). When the page unmounts, the actions are automatically cleared.
  */
 export type PageActions = {
-  /** Called when the user taps the "+" button. If undefined, the button is hidden. */
-  onAdd?: () => void;
-  /** Aria-label for the add button (e.g. "nouvelle liste"). */
-  addAriaLabel?: string;
-  /** Optional custom icon for the add button (defaults to <AddIcon />). */
-  addIcon?: ReactNode;
-  /** Tooltip / label shown under the add button (e.g. "Ajouter"). */
-  addLabel?: string;
-
   /**
    * Called whenever the search query changes.
-   * If undefined, the search pill icon is rendered greyed-out and not clickable.
+   * If undefined, the search button is rendered greyed-out and not clickable.
    */
   onSearchChange?: (query: string) => void;
   /** Placeholder for the search input. */
@@ -39,16 +33,11 @@ export type PageActions = {
   hidden?: boolean;
 
   /**
-   * Override the auto-detected active navigation item.
-   * By default the pill highlights "lists" on /mylists and "tribes" on /tribes.
+   * Override the auto-detected active navigation tab.
+   * By default the pill highlights "lists" on /mylists and /listcontents and
+   * "tribes" on /tribes.
    */
   activeNav?: 'lists' | 'tribes' | 'none';
-
-  /**
-   * Which navigation buttons to show. Defaults to { lists: true, tribes: true }.
-   * On the ListContents page for example, only `lists` is shown.
-   */
-  showNav?: { lists?: boolean; tribes?: boolean };
 };
 
 type FloatingActionPillContextValue = {
@@ -105,8 +94,8 @@ export const useFloatingActionPill = () => useContext(FloatingActionPillContext)
  *
  * @example
  *   usePageActions(
- *     { onAdd: handleAddGiftList, onSearchChange: setSearchQuery },
- *     [handleAddGiftList],
+ *     { onSearchChange: setSearchQuery, searchPlaceholder: 'Rechercher une liste…' },
+ *     [],
  *   );
  */
 export const usePageActions = (actions: PageActions, deps: ReadonlyArray<unknown> = []) => {

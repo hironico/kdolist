@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BottomDialog from '@/components/BottomDialog/BottomDialog';
-import ActionSheet from '@/components/ActionSheet/ActionSheet';
+import ConfirmAlert from '@/components/ConfirmAlert';
 import TribeDetails from './TribeDetails';
 import { TribeDetailsData } from './types';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
@@ -140,6 +140,8 @@ const TribeDetailsDialog: React.FC<TribeDetailsDialogProps> = ({
                 open={open}
                 handleClose={onClose}
                 title={tribeDetails?.name || 'Détails de la tribu'}
+                // The sheet does not scroll: only the members list does.
+                scrollable={false}
                 contents={
                     <TribeDetails
                         tribeDetails={tribeDetails}
@@ -151,22 +153,13 @@ const TribeDetailsDialog: React.FC<TribeDetailsDialogProps> = ({
             />
 
             {/* Delete Invitation Confirmation */}
-            <ActionSheet
+            <ConfirmAlert
                 open={deleteInvitationConfirmOpen}
-                handleClose={() => setDeleteInvitationConfirmOpen(false)}
-                entries={[
-                    {
-                        label: 'Oui, supprimer l\'invitation',
-                        color: 'error',
-                        onAction: confirmDeleteInvitation,
-                    },
-                ]}
-                defaultEntry={{
-                    label: 'Oublie ça',
-                    color: 'primary',
-                    onAction: () => setDeleteInvitationConfirmOpen(false),
-                }}
-                message="Vraiment supprimer cette invitation ?"
+                onCancel={() => setDeleteInvitationConfirmOpen(false)}
+                onConfirm={confirmDeleteInvitation}
+                title="Supprimer cette invitation ?"
+                confirmLabel="Supprimer"
+                cancelLabel="Oublie ça"
             />
         </>
     );

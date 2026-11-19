@@ -1,8 +1,9 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { List, Typography } from '@mui/material';
+import { List, Typography, useTheme } from '@mui/material';
+import { accent } from '@/theme/ios27';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import { GiftList, LoginContext } from '@/LoginContext';
-import ActionSheet, { ActionSheetEntry } from '../ActionSheet/ActionSheet';
+import ConfirmAlert from '../ConfirmAlert';
 import { apiBaseUrl } from '@/config';
 import useNotifications from '@/store/notifications';
 import SwipeableListItem, { SwipeableListItemAction } from '../SwipeableListItem/SwipeableListItem';
@@ -10,6 +11,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Diversity3, FormatListBulleted, Group } from '@mui/icons-material';
 import ListEditor from '@/components/GiftLists/ListEditorForm';
+import AddActionSection from '../AddActionSection';
+import { nestedListSx } from '../styled';
 import FilterBar, { Filter } from '../FilterBar/FilterBar';
 import { usePageActions, FLOATING_ACTION_PILL_CLEARANCE } from '@/sections/FloatingActionPill';
 import { Box } from '@mui/system';
@@ -23,7 +26,7 @@ const GiftListsList: React.FC = () => {
   const [tribeListsMap, setTribeListsMap] = useState<{ [key: string]: GiftList[] }>({});
   const [activeFilters, setActiveFilters] = useState<Filter<GiftList>[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const listRef = useRef<HTMLUListElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [giftListEditorVisible, setGiftListEditorVisible] = useState(false);
@@ -31,6 +34,7 @@ const GiftListsList: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const theme = useTheme();
   const appContext = useContext(LoginContext);
   const [, notificationsActions] = useNotifications();
 
@@ -101,11 +105,9 @@ const GiftListsList: React.FC = () => {
   }
 
   // Register page-level actions for the global FloatingActionPill
+  // (navigation + search only: adding a list is done from the first row below).
   usePageActions(
     {
-      onAdd: handleAddGiftList,
-      addAriaLabel: 'nouvelle liste',
-      addLabel: 'Ajouter',
       onSearchChange: setSearchQuery,
       searchPlaceholder: 'Rechercher une liste…',
     },
@@ -147,20 +149,6 @@ const GiftListsList: React.FC = () => {
     setGiftListEditorVisible(false);
     fetchGiftLists();
   }
-
-  const actions: ActionSheetEntry[] = [
-    {
-      label: 'Oui, effacer la liste',
-      color: 'error',
-      onAction: () => handleDeleteGiftList(),
-    },
-  ];
-
-  const defaultAction: ActionSheetEntry = {
-    label: 'Non, laisse tomber',
-    color: 'primary',
-    onAction: () => setShowConfirmDialog(false),
-  };
 
   // Build filters dynamically based on user's tribes
   const giftListsFilters: Filter<GiftList>[] = [
@@ -244,6 +232,57 @@ const GiftListsList: React.FC = () => {
     return result;
   })();
 
+  /**
+   * One gift list as an iOS grouped row: coloured icon tile (indigo for
+   * collaborative lists, accent blue otherwise), name, then a single secondary
+   * line "Prénom · date". Owners can swipe to edit / delete.
+   */
+  const renderListRow = (item: GiftList, index: number) => {
+    const modifDate = new Date(item.updatedAt.toString());
+    const owner = item.owner?.firstname;
+    const secondaryText = (
+      <Typography variant="caption" color="text.secondary">
+        {[owner, `modifiée le ${modifDate.toLocaleDateString()}`].filter(Boolean).join(' · ')}
+      </Typography>
+    );
+
+    const deleteAction: SwipeableListItemAction = {
+      icon: <DeleteIcon />,
+      color: 'error',
+      onAction: () => handleSelectAndConfirmDelete(item),
+      ariaLabel: 'Supprimer la liste',
+    };
+
+    const editListAction: SwipeableListItemAction = {
+      icon: <EditIcon />,
+      color: 'default',
+      onAction: () => handleEditGiftList(item),
+      ariaLabel: 'Modifier la liste',
+    };
+
+    const isOwner = item.ownerId === appContext.loginInfo.profile?.id;
+    const isCollaborativeMember =
+      item.isCollaborative === true &&
+      (item.groupAccesses ?? []).some(ga =>
+        userTribes.some((t: any) => t.id === ga.groupId)
+      );
+    const editable = isOwner || isCollaborativeMember;
+
+    return (
+      <SwipeableListItem
+        onClickMain={() => handleNavigateList(item, editable)}
+        action1={isOwner ? deleteAction : undefined}
+        action2={isOwner ? editListAction : undefined}
+        primaryText={item.name}
+        secondaryText={secondaryText}
+        icon={item.isCollaborative ? <Diversity3 /> : <FormatListBulleted />}
+        iconTint={item.isCollaborative ? accent('indigo', theme.palette.mode) : undefined}
+        keyId={`index-${index}`}
+        key={`index-${index}`}
+      />
+    );
+  };
+
   return (
     <Box display="grid" gridTemplateColumns="1fr" gridTemplateRows="auto 1fr" p={2} width="100%" height="calc(100vh - 64px)" position="relative" sx={{ overflowX: 'hidden' }}>
       {/* minWidth:0 is required on this grid item so the column stays at 1fr
@@ -259,127 +298,45 @@ const GiftListsList: React.FC = () => {
           caption="Les listes de cadeaux sont en train d'être récupérées. Ca ne devrait pas être long."
           icon={<FacebookLikeCircularProgress />}
         />
-      ) : userTribes.length === 0 && activeFilters.length === 0 ? (
-        // Show empty state when user has no tribes and no filters are active
-        <Box sx={{ pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
-          <EmptyStateCard
-            title="Rejoins une tribu !"
-            caption="Tu ne fais partie d'aucune tribu pour le moment. Rejoins ou crée une tribu pour voir les listes des autres membres."
-            icon={<Group />}
-          />
-          {giftLists.length > 0 && (
+      ) : (
+        <Box
+          ref={listRef}
+          sx={{ mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', minHeight: 0, minWidth: 0 }}
+        >
+          {/* Creating a list is done from here, not from the floating pill. */}
+          <AddActionSection label="Nouvelle liste" onClick={handleAddGiftList} />
+
+          {userTribes.length === 0 && activeFilters.length === 0 ? (
+            // Show empty state when user has no tribes and no filters are active
             <>
-              <Typography variant="h6" sx={{ mt: 3, mb: 2, px: 1 }}>
-                Mes Listes
-              </Typography>
-              <List sx={{ m: '0px', overflowX: 'hidden' }}>
-                {giftLists.map((item, index) => {
-                  const modifDate = new Date(item.updatedAt.toString());
-                  const secondaryText = (
-                    <>
-                      <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
-                      <br />
-                      <Typography variant="caption">{`Par: ${item.owner?.firstname}`}</Typography>
-                    </>
-                  );
-
-                  const deleteAction: SwipeableListItemAction = {
-                    icon: <DeleteIcon />,
-                    color: 'error',
-                    onAction: () => handleSelectAndConfirmDelete(item),
-                  };
-
-                  const editListAction: SwipeableListItemAction = {
-                    icon: <EditIcon />,
-                    color: 'default',
-                    onAction: () => handleEditGiftList(item),
-                  };
-
-                  const isOwner = item.ownerId === appContext.loginInfo.profile?.id;
-                  const isCollaborativeMember =
-                    item.isCollaborative === true &&
-                    (item.groupAccesses ?? []).some(ga =>
-                      userTribes.some((t: any) => t.id === ga.groupId)
-                    );
-                  const editable = isOwner || isCollaborativeMember;
-
-                  const icon = item.isCollaborative
-                    ? <Diversity3 />
-                    : <FormatListBulleted />;
-
-                  return (
-                    <SwipeableListItem
-                      onClickMain={() => handleNavigateList(item, editable)}
-                      action1={isOwner ? deleteAction : undefined}
-                      action2={isOwner ? editListAction : undefined}
-                      primaryText={item.name}
-                      secondaryText={secondaryText}
-                      icon={icon}
-                      keyId={`index-${index}`}
-                      key={`index-${index}`}
-                    />
-                  );
-                })}
-              </List>
+              <EmptyStateCard
+                title="Rejoins une tribu !"
+                caption="Tu ne fais partie d'aucune tribu pour le moment. Rejoins ou crée une tribu pour voir les listes des autres membres."
+                icon={<Group />}
+              />
+              {giftLists.length > 0 && (
+                <>
+                  <Typography variant="overline" color="text.secondary" component="h2" sx={{ display: 'block', mt: 3, px: 2 }}>
+                    Mes listes
+                  </Typography>
+                  <List sx={{ m: '0px', mt: 1, ...nestedListSx }}>
+                    {giftLists.map(renderListRow)}
+                  </List>
+                </>
+              )}
             </>
+          ) : filteredLists.length > 0 ? (
+            <List sx={{ m: '0px', ...nestedListSx }}>
+              {filteredLists.map(renderListRow)}
+            </List>
+          ) : (
+            <EmptyStateCard
+              title="C'est vide par ici ..."
+              caption="Pour ajouter une liste, utilise « Nouvelle liste » ci-dessus."
+              icon={<SentimentVeryDissatisfiedIcon />}
+            />
           )}
         </Box>
-      ) : filteredLists.length > 0 ? (
-          <List ref={listRef} sx={{ m: '0px', mt: '10px', pb: FLOATING_ACTION_PILL_CLEARANCE, overflowY: 'auto', overflowX: 'hidden', alignSelf: 'start' }}>
-          {filteredLists.map((item, index) => {
-            const modifDate = new Date(item.updatedAt.toString());
-            const secondaryText = (
-              <>
-                <Typography variant="caption">{`Modif. ${modifDate.toLocaleDateString()} : ${modifDate.toLocaleTimeString()}`}</Typography>
-                <br />
-                <Typography variant="caption">{`Par: ${item.owner?.firstname}`}</Typography>
-              </>
-            );
-
-            const deleteAction: SwipeableListItemAction = {
-              icon: <DeleteIcon />,
-              color: 'error',
-              onAction: () => handleSelectAndConfirmDelete(item),
-            };
-
-            const editListAction: SwipeableListItemAction = {
-              icon: <EditIcon />,
-              color: 'default',
-              onAction: () => handleEditGiftList(item),
-            };
-
-            const isOwner = item.ownerId === appContext.loginInfo.profile?.id;
-            const isCollaborativeMember =
-              item.isCollaborative === true &&
-              (item.groupAccesses ?? []).some(ga =>
-                userTribes.some((t: any) => t.id === ga.groupId)
-              );
-            const editable = isOwner || isCollaborativeMember;
-
-            const icon = item.isCollaborative
-              ? <Diversity3 />
-              : <FormatListBulleted />;
-
-            return (
-              <SwipeableListItem
-                onClickMain={() => handleNavigateList(item, editable)}
-                action1={isOwner ? deleteAction : undefined}
-                action2={isOwner ? editListAction : undefined}
-                primaryText={item.name}
-                secondaryText={secondaryText}
-                icon={icon}
-                keyId={`index-${index}`}
-                key={`index-${index}`}
-              />
-            );
-          })}
-        </List>
-      ) : (
-        <EmptyStateCard
-          title="C'est vide par ici ..."
-          caption="Pour ajouter une liste, appuie sur le bouton '+'."
-          icon={<SentimentVeryDissatisfiedIcon />}
-        />
       )}
 
       {/* ListEditor now owns its own BottomDialog */}
@@ -390,12 +347,13 @@ const GiftListsList: React.FC = () => {
         userTribes={userTribes}
       />
 
-      <ActionSheet
+      <ConfirmAlert
         open={showConfirmDialog}
-        handleClose={() => setShowConfirmDialog(false)}
-        entries={actions}
-        defaultEntry={defaultAction}
-        message="Attention c'est irreversible !"
+        onCancel={() => setShowConfirmDialog(false)}
+        onConfirm={handleDeleteGiftList}
+        title="Effacer cette liste ?"
+        message="Attention c'est irréversible !"
+        confirmLabel="Effacer"
       />
     </Box>
   );

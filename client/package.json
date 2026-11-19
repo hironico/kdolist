@@ -29,6 +29,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@ios27_design_system/react": "^1.0.0",
+    "@ios27_design_system/tokens": "^1.0.2",
     "@mui/icons-material": "^7.3.9",
     "@mui/material": "^7.3.9",
     "@mui/system": "^7.3.9",

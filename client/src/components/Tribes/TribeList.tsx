@@ -2,13 +2,18 @@ import React from 'react';
 import { List, Typography, Box } from '@mui/material';
 import TribeListItem from './TribeListItem';
 import { EmptyStateCard } from '../EmptyStateCard';
-import { SentimentDissatisfied } from '@mui/icons-material';
+import { Groups as GroupsIcon } from '@mui/icons-material';
 import { Group } from './types';
+import { GroupAdd } from '@mui/icons-material';
 import { FLOATING_ACTION_PILL_CLEARANCE } from '@/sections/FloatingActionPill';
+import AddActionSection from '../AddActionSection';
+import { nestedListSx } from '../styled';
 
 interface TribeListProps {
     tribes: Group[];
     currentUserId?: string;
+    /** Opens the tribe creation editor. When set, a "Créer une tribu" row is shown first. */
+    onCreateTribe?: () => void;
     onAcceptInvite?: (membershipId: string) => void;
     onRejectInvite?: (membershipId: string) => void;
     onLeaveTribe?: (groupId: string) => void;
@@ -17,6 +22,10 @@ interface TribeListProps {
     onViewDetails?: (groupId: string) => void;
 }
 
+// iOS inset grouped sections: small uppercase header above a rounded group.
+const sectionHeaderSx = { display: 'block', mt: 3, mb: 0.5, px: 2 } as const;
+const sectionListSx = { m: '0px', alignSelf: 'start', ...nestedListSx } as const;
+
 /**
  * TribeList component that displays tribes separated into invitations and joined tribes.
  * Uses SwipeableListItem for each tribe with appropriate actions.
@@ -24,6 +33,7 @@ interface TribeListProps {
 const TribeList: React.FC<TribeListProps> = ({
     tribes,
     currentUserId,
+    onCreateTribe,
     onAcceptInvite,
     onRejectInvite,
     onLeaveTribe,
@@ -46,14 +56,31 @@ const TribeList: React.FC<TribeListProps> = ({
     );
 
     return (
-        <Box width="100%" p={2} pb={FLOATING_ACTION_PILL_CLEARANCE} marginRight="15px">
+        // This box is the only scroll area of the page (same height as the
+        // other list pages: viewport minus the 64px header), so the global
+        // page wrapper never scrolls.
+        <Box
+            width="100%"
+            height="calc(100vh - 64px)"
+            p={2}
+            pt={0}
+            pb={FLOATING_ACTION_PILL_CLEARANCE}
+            sx={{ minWidth: 0, boxSizing: 'border-box', overflowY: 'auto', overflowX: 'hidden' }}
+        >
+            {/* Creating a tribe is done from here, not from the floating pill. */}
+            {onCreateTribe && (
+                <Box sx={{ mt: '15px' }}>
+                    <AddActionSection label="Créer une tribu" icon={<GroupAdd />} onClick={onCreateTribe} />
+                </Box>
+            )}
+
             {/* Invitations Section */}
             {invitedTribes.length > 0 && (
                 <>
-                    <Typography variant="h6" sx={{ mt: 2, mb: 1, px: 2 }}>
+                    <Typography variant="overline" color="text.secondary" component="h2" sx={sectionHeaderSx}>
                         Invitations reçues
                     </Typography>
-                    <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+                    <List sx={sectionListSx}>
                         {invitedTribes.map((tribe) => (
                             <TribeListItem
                                 key={`invited-${tribe.id}`}
@@ -71,10 +98,10 @@ const TribeList: React.FC<TribeListProps> = ({
             {/* admn tribes Section */}
             {ownedTribes.length > 0 && (
                 <>
-                    <Typography variant="h6" sx={{ mt: 2, mb: 1, px: 2 }}>
+                    <Typography variant="overline" color="text.secondary" component="h2" sx={sectionHeaderSx}>
                         Mes tribus
                     </Typography>
-                    <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+                    <List sx={sectionListSx}>
                         {ownedTribes.map((tribe) => (
                             <TribeListItem
                                 key={`owned-${tribe.id}`}
@@ -92,10 +119,10 @@ const TribeList: React.FC<TribeListProps> = ({
             {/* Joined Tribes Section */}
             {(joinedTribes.length > 0 || adminTribes.length > 0) && (
                 <>
-                    <Typography variant="h6" sx={{ mt: 2, mb: 1, px: 2 }}>
+                    <Typography variant="overline" color="text.secondary" component="h2" sx={sectionHeaderSx}>
                         Tribus dont je suis membre
                     </Typography>
-                    <List sx={{ m: '0px', mt: '10px', overflowY: 'auto', alignSelf: 'start' }}>
+                    <List sx={sectionListSx}>
                         {adminTribes.map((tribe) => (
                             <TribeListItem
                                 key={`joined-${tribe.id}`}
@@ -123,9 +150,9 @@ const TribeList: React.FC<TribeListProps> = ({
             {/* Empty State */}
             {invitedTribes.length === 0 && joinedTribes.length === 0 && ownedTribes.length === 0 && adminTribes.length === 0 && (
                 <EmptyStateCard
-                    title="Tu n'es pas dans une tribu."
-                    caption="Les membres d'une tribu voient les listes de cadeaux des autres membres. Crées une tribu avec le bouton '+' en bas et invite du monde ! Tu peux être dans autant de tribus que tu le souhaites."
-                    icon={<SentimentDissatisfied />}
+                    title="Tu n'es pas dans une tribu"
+                    caption="Les membres d'une tribu voient les listes de cadeaux des autres membres. Crée une tribu avec « Créer une tribu » ci-dessus et invite du monde ! Tu peux être dans autant de tribus que tu le souhaites."
+                    icon={<GroupsIcon />}
                 />
             )}
         </Box>
