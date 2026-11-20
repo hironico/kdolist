@@ -1,5 +1,5 @@
 const { DataTypes, where } = require('sequelize');
-const { GiftList, Gift, Group, GroupAccess, GroupMembership, Notification, Link, Image, sequelize } = require('../model');
+const { GiftList, Gift, Group, GroupAccess, GroupMembership, Notification, Link, Image, User, sequelize } = require('../model');
 const { Op } = require('sequelize');
 const logger = require('../logger');
 
@@ -13,8 +13,7 @@ class GiftListController {
     logger.info(`Created gift: ${JSON.stringify(gift)}`);
 
     // update the modification date of the list
-    giftList.set('updatedAt', new Date(), { raw: true });
-    await giftList.save();
+    await this.touchList(giftListId);
 
     return gift;
   }
@@ -163,16 +162,39 @@ class GiftListController {
     return giftList.Gifts;
   }
 
-  async viewGiftListContents(giftListId) {
+  /**
+   * Contents of a list. Each gift also carries `selectedBy`: the public identity
+   * (id, first name, last name, username - never the email) of the user who
+   * reserved it.
+   *
+   * To keep the surprise, the owner of the list does not receive `selectedBy`
+   * unless the list has `showTakenToOwner` enabled.
+   *
+   * @param giftListId the list to read
+   * @param userId the user asking for the contents (the authenticated user)
+   */
+  async viewGiftListContents(giftListId, userId = null) {
     const giftList = await GiftList.findByPk(giftListId, {
       include: [{
-        model: Gift, include: [{ model: Link }, { model: Image }]
+        model: Gift,
+        include: [
+          { model: Link },
+          { model: Image },
+          { model: User, as: 'selectedBy', attributes: ['id', 'firstname', 'lastname', 'username'] }
+        ]
       }]
     });
 
     if (!giftList) throw new Error('Gift List not found');
 
-    return giftList.gifts;
+    const hideReservations = userId !== null && giftList.ownerId === userId && !giftList.showTakenToOwner;
+    if (!hideReservations) return giftList.gifts;
+
+    return giftList.gifts.map(gift => {
+      const plainGift = gift.toJSON();
+      delete plainGift.selectedBy;
+      return plainGift;
+    });
   }
 
   async addOrUpdateGiftList(giftList, ownerId) {
@@ -261,16 +283,22 @@ class GiftListController {
   }
 
   /**
-   * Bump the updatedAt timestamp on a list without ownership checks.
-   * Call this after any mutation that affects list contents
-   * (gift added, updated, deleted, taken, untaken).
+   * Bump the updatedAt timestamp of a list (to "now") without ownership checks,
+   * so that the list modification date reflects the last change made to one of
+   * its gifts. Call this after any mutation that affects the list contents
+   * (gift added, updated, deleted, taken, untaken, favourite toggled, image removed...).
+   *
+   * Note: GiftList.update({ updatedAt }, ...) must NOT be used for that: when
+   * updatedAt is the only value to write, Sequelize skips the query and
+   * returns [0], so nothing is saved. Flagging the field as changed on an
+   * instance and saving only that field does issue the UPDATE.
    */
   async touchList(giftListId) {
-    // Explicitly supply updatedAt so Sequelize doesn't silently ignore it
-    await GiftList.update(
-      { updatedAt: new Date() },
-      { where: { id: giftListId }, silent: true }
-    );
+    const list = await GiftList.findByPk(giftListId);
+    if (!list) return;
+
+    list.changed('updatedAt', true);
+    await list.save({ fields: ['updatedAt'] });
   }
 
   /**

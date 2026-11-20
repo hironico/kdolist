@@ -81,10 +81,15 @@ const GiftForm: React.FC<GiftFormProps> = ({ gift, editable, open, onClose }) =>
     setIsSaving(true);
     giftToSave.giftListId = appContext.giftList.id;
 
-    console.log(`Saving gift: ${JSON.stringify(giftToSave, null, 2)}`);
+    // `selectedBy` is read-only information about who reserved the gift (sent
+    // by the server for display): it must not be sent back when saving.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { selectedBy: _selectedBy, ...giftPayload } = giftToSave;
+
+    console.log(`Saving gift: ${JSON.stringify(giftPayload, null, 2)}`);
 
     try {
-      const response = await api.post(`${apiBaseUrl}/gift/`, giftToSave);
+      const response = await api.post(`${apiBaseUrl}/gift/`, giftPayload);
 
       setIsSaving(false);
 

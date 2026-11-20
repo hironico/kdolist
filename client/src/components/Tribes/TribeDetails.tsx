@@ -183,7 +183,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             icon={<PersonIcon />}
                             iconTint="primary.main"
                             primaryText={`${admin.firstname} ${admin.lastname}`}
-                            secondaryText={`@${admin.username}`}
+                            secondaryText={admin.username}
                             rightContent={<Chip label="Admin" size="small" sx={statusChipSx(theme.palette.primary.main)} />}
                             action1={
                                 isCurrentUserAdmin && onChangeMembershipStatus && admin.id !== adminId
@@ -210,7 +210,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             icon={<PersonIcon />}
                             iconTint="info.main"
                             primaryText={`${invitation.firstname} ${invitation.lastname}`}
-                            secondaryText={`@${invitation.username}`}
+                            secondaryText={invitation.username}
                             rightContent={<Chip label="Invité" size="small" sx={statusChipSx(theme.palette.info.main)} />}
                             action1={
                                 isCurrentUserAdmin && onDeleteInvitation
@@ -233,7 +233,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             icon={<PersonIcon />}
                             iconTint={theme.palette.secondary.main}
                             primaryText={`${invitation.firstname} ${invitation.lastname}`}
-                            secondaryText={`@${invitation.username}`}
+                            secondaryText={invitation.username}
                             rightContent={<Chip label="Refusé" size="small" sx={statusChipSx(theme.palette.error.main)} />}
                             action1={
                                 isCurrentUserAdmin && onDeleteInvitation
@@ -256,7 +256,7 @@ const TribeDetails: React.FC<TribeDetailsProps> = ({ tribeDetails, currentUserId
                             icon={<PersonIcon />}
                             iconTint="success.main"
                             primaryText={`${member.firstname} ${member.lastname}`}
-                            secondaryText={`@${member.username}`}
+                            secondaryText={member.username}
                             rightContent={<Chip label="Membre" size="small" sx={statusChipSx(theme.palette.secondary.main)} />}
                             action1={
                                 isCurrentUserAdmin && onChangeMembershipStatus && member.id !== adminId

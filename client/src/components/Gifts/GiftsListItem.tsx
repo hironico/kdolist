@@ -27,6 +27,13 @@ const favoriteBounce = keyframes`
   }
 `;
 
+/** Short numeric date with dashes: dd-mm-yyyy. */
+const formatShortDate = (date: Date): string => {
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    return `${dd}-${mm}-${date.getFullYear()}`;
+};
+
 type GiftsListContentsProps = {
     oneGift: Gift;
     editable: boolean;
@@ -45,9 +52,10 @@ type GiftsListContentsProps = {
  * - Always shown for non-owners when gift is taken
  * - For owners: only shown if showTakenToOwner is true (useful for collections/series tracking)
  */
-const GiftsListItem: React.FC<GiftsListContentsProps> = ({ oneGift, editable, isOwner, showTakenToOwner, onDelete: deleteAction, onTake: takeAction, onEdit: editAction, onFavorite: favoriteAction }) => {
+const GiftsListItem: React.FC<GiftsListContentsProps> = ({ oneGift, editable, isOwner, showTakenToOwner, currentUserId, onDelete: deleteAction, onTake: takeAction, onEdit: editAction, onFavorite: favoriteAction }) => {
 
     const isTaken = oneGift.selectedById !== null;
+    const isTakenByCurrentUser = isTaken && oneGift.selectedById === currentUserId;
     const isFavorite = oneGift.isFavorite || false;
     const [shouldAnimate, setShouldAnimate] = useState(false);
 
@@ -95,10 +103,18 @@ const GiftsListItem: React.FC<GiftsListContentsProps> = ({ oneGift, editable, is
         </IconButton>
     ) : undefined;
 
-    const modifDate = new Date(oneGift.updatedAt.toString());
+    // "Modif: dd-mm-yyyy", followed by "Réservé par: <prénom>" ("moi" when the
+    // current user reserved it). The reserver is shown under the same rule as
+    // the strikethrough, so the owner only sees it when the list allows it
+    // (the server doesn't even send it otherwise).
+    const reserverName = isTakenByCurrentUser
+        ? 'moi'
+        : (oneGift.selectedBy?.firstname?.trim() || oneGift.selectedBy?.username || '');
+    const showReserver = shouldShowStrikethrough && reserverName !== '';
+
     const secondaryText = (
         <Typography variant="caption" color="text.secondary">
-            {`Modifié le ${modifDate.toLocaleDateString()} à ${modifDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+            {`Modif: ${formatShortDate(new Date(oneGift.updatedAt.toString()))}${showReserver ? ` / Réservé par: ${reserverName}` : ''}`}
         </Typography>
     );
 

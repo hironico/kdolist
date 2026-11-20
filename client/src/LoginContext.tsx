@@ -45,6 +45,16 @@ export interface Gift {
   isFavorite?: boolean;
   selectedAt?: Date | null;
   selectedById?: string | null;
+  /**
+   * Public identity of the user who reserved the gift (never the email).
+   * Not sent to the list owner unless the list shows taken gifts to the owner.
+   */
+  selectedBy?: {
+    id: string;
+    firstname?: string | null;
+    lastname?: string | null;
+    username: string;
+  } | null;
   createdAt: Date;
   updatedAt: Date;
   giftListId?: string;

@@ -129,7 +129,7 @@ giftListApi.get('/contents/:id', authenticateJWT, async (req, res) => {
     }
 
     try {
-        const listContents = await giftlistcontroller.viewGiftListContents(listId);
+        const listContents = await giftlistcontroller.viewGiftListContents(listId, req.user.id);
         logger.debug(`Found gifts: ${JSON.stringify(listContents, null, 2)}`);
         res.status(200).json(listContents);
     } catch (error) {

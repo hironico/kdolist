@@ -247,6 +247,7 @@ giftApi.post('/favorite/:id', authenticateJWT, async (req, res) => {
         }
 
         const updatedGift = await giftlistcontroller.toggleFavorite(giftId);
+        await giftlistcontroller.touchList(updatedGift.giftListId);
         res.status(200).json(updatedGift);
     } catch (error) {
         logger.error(`Cannot toggle favorite status for gift ${giftId}. Error: ${error}`);
@@ -284,6 +285,7 @@ giftApi.delete('/image/:id', authenticateJWT, async (req, res) => {
 
         // Delete the image
         await theImage.destroy();
+        await giftlistcontroller.touchList(theImage.gift.giftListId);
         logger.info(`Image ${imageId} deleted by user ${req.user.id}`);
         res.status(200).send('Image has been removed.').end();
 
